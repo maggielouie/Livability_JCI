@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the From The Blog feature.
+ */
+
+include_once 'from_the_blog.features.inc';

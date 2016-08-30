@@ -1,0 +1,402 @@
+<?php
+
+/**
+ * For metro_content_cards show more link - Menu callback, load next row (slide) by ajax.
+ */
+
+/**
+ * Implements hook_menu.
+ */
+function metro_section_menu() {
+  $items['metro_section/views/ajax'] = array(
+    'title' => 'Liv Blog',
+    'page callback' => 'metro_section_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+function metro_section_ajax() {
+  $view = views_get_view('metro_content_cards');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['nid']) && $_REQUEST['nid'] != '') {
+    $view->args[] = $_REQUEST['nid'];
+  }
+  $view->offset = $offset;
+  $view->execute('block');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $thisrow = $index+$offset+1;
+    $eo = ($thisrow % 2 == 0) ? 'even' : 'odd';
+    $rows[] = '<li class="one-third">' . $renderer->render($row) . '</li>';
+  }
+  drupal_json_output($rows);
+}
+/**
+ * Implements hook_preprocess_page().
+ */
+function metro_section_preprocess_page(&$vars, $hook) {
+  if(isset($vars['node']) && $vars['node']->type == 'metro_section') {
+    drupal_add_js(drupal_get_path('module', 'metro_section') . '/js/add_more.js');
+  }
+}
+/**
+ * Implements hook_page_alter().
+ */
+function metro_section_page_alter(&$page) {
+  //this is ugly and should be refactored if time permits
+    $node = menu_get_object('node');
+      if (isset($node->type) && $node->type == 'metro_area') {
+        $m = getMetroContext($node->nid);
+        //build page header
+        $page_title = $m->field_metro_nickname[LANGUAGE_NONE][0]['value'];
+        $page['special_header'] = '<span class="city-pin">' . l('<i class="icon-pin green no-mobile"></i>' . '<h2>' . $page_title . '<strong class="green">' . '</strong></h2>' . '<span class="county-area no-mobile">' .
+        '</span>', arg(0) . '/' . arg(1), array('html' => true)) . '
+        </span>';
+        $metroSectionMenu = array('home' => array('title' => 'Home', 'link' => 'metro/', 'icon' => 'flag'),);
+        //building left nav - hacked out of the liv_nav - may need to be replaced in future if full-fledged menus are
+        //required for county nodes.
+        $leftNav = '<div class="left-nav"><span class="drag-container"><ul class="all-categories">';
+        $homelink = url('metro');
+        $leftNav.= '<li><a href="' . $homelink . '">';
+        $leftNav.= '<i class="icon-flag"></i>';
+        $leftNav.= '<span>' . 'Home' . '</span></a>';
+        $leftNav.= '</li>';
+        $leftNav.= '</ul></span></div>';
+        $page['sidebar_second']['city_section_nav'] = array('#type' => 'markup', '#markup' => $leftNav);
+        // set breadcrumbs
+        $breadcrumbs = array();
+        $breadcrumbs[] = l(t('Home'), '<front>');
+        $breadcrumbs[] = l(t('Metro'), 'metro');
+        drupal_set_breadcrumb($breadcrumbs);
+    }
+}
+function getMetroContext($nid = NULL) {
+    global $currentMetro;
+    $ret = FALSE;
+    if ($nid !== null) {
+        $ret = metro_node_load($nid);
+    } elseif (arg(0) == 'node' && is_numeric(arg(1)) && !in_array(arg(2), array(NULL, 'edit', 'add', 'delete'))) {
+        $n = node_load(arg(1));
+        if ($n->type == 'metro_area') {
+            $ret = metro_node_load(arg(1));
+        } elseif (($n->type == 'artcle' || $n->type == 'blog_post') && isset($n->field_place[LANGUAGE_NONE])) {
+            $item = field_collection_item_load($n->field_place[LANGUAGE_NONE][0]['value']);
+            if (isset($item->field_place_ref[LANGUAGE_NONE][0])) {
+                $ret = city_node_load($item->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+            } else {
+                return FALSE;
+            }
+        } elseif ($n->type == 'gallery') {
+            $nid = $n->field_gallery_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } elseif ($n->type == 'digital_magazine') {
+            $nid = $n->field_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } else {
+            return FALSE;
+        }
+    } else {
+        $alias = drupal_get_path_alias();
+        $alias_parts = explode('/', $alias);
+        if (strlen($alias_parts[0]) == 2 && array_key_exists(strtoupper($alias_parts[0]), locality::$states)) {
+            if (array_key_exists(strtoupper($alias_parts[0]), locality::$states)) {
+                if (isset($alias_parts[1])) {
+                    $path = drupal_get_normal_path($alias_parts[0] . '/' . $alias_parts[1]);
+                } else {
+                    $path = drupal_get_normal_path($alias_parts[0]);
+                }
+                $node_parts = explode('/', $path);
+                $metro_nid = array_pop($node_parts);
+                $ret = metro_node_load($metro_nid);
+
+            }
+        }
+    }
+    $currentMetro = $ret;
+    drupal_page_is_cacheable(TRUE);
+    return $ret;
+}
+function metro_node_load($nid) {
+    $node = node_load($nid);
+    if (is_object($node) && $node !== FALSE) {
+        if ($node->type == 'metro_area') {
+            $ret = metro_load_area($node);
+        } elseif ($node->type == 'article') {
+            if (isset($node->field_place[LANGUAGE_NONE]) && array_key_exists('value', $node->field_place[LANGUAGE_NONE][0])) {
+                $fc = field_collection_field_get_entity($node->field_place[LANGUAGE_NONE][0]);
+                if (isset($fc->field_place_ref[LANGUAGE_NONE])) {
+                    $place = node_load($fc->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+                    $ret = metro_load_area($place);
+                } else {
+                    return FALSE;
+                }
+            } else {
+                return FALSE;
+            }
+        } elseif ($node->type == 'gallery') {
+            $city = node_load($node->field_gallery_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        } elseif ($node->type == 'digital_magazine') {
+            $city = node_load($node->field_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        } elseif ($node->type == 'state') {
+            $ret = $node;
+        } else {
+            return FALSE;
+        }
+        return $ret;
+    }
+}
+function metro_load_area($node) {
+    $cacheDir = drupal_get_path('module', 'census_cache') . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
+    $pid = $node->field_place_id[LANGUAGE_NONE][0]['value'];
+    $cacheMetroFilePath = $cacheDir . 'metro' . DIRECTORY_SEPARATOR . $pid . '.json';
+    $node->census = json_decode(file_get_contents($cacheMetroFilePath), TRUE);
+    $node->counties = getMetroCounties($node);
+    $node->cities = getMetroCities($node->counties);
+    $node->cities_sorted['pop'] = metroCitiesByPopulation($node->cities);
+    $node->cities_sorted['income'] = metroCitiesByIncome($node->cities);
+    $node->cities_sorted['homeval'] = metroCitiesByHomeValue($node->cities);
+    $node->nation = json_decode(file_get_contents($cacheDir.'national.json'), TRUE);
+    $node->madlib = assembleMetroMadlib($node);
+
+
+    return $node;
+}
+function getMetroCounties($node) {
+    $result_counties = array();
+    $county_field = $node->field_county[LANGUAGE_NONE];
+    foreach ($county_field as $county) {
+        $counties[] = node_load($county['target_id']);
+    }
+    return $counties;
+}
+function getMetroCities($counties) {
+    $cities = array();
+    $city_nodes = array();
+    $result_cities = array();
+    foreach ($counties as $county) {
+        $cityQuery = new EntityFieldQuery();
+        $cityQuery->entityCondition('entity_type', 'node')->entityCondition('bundle', 'city')->fieldCondition('field_county', 'target_id', $county->nid);
+        $city_nids = $cityQuery->execute();
+        if ($city_nids != NULL) {
+            $city_nids = $city_nids['node'];
+            $city_nids = array_keys($city_nids);
+            $result_cities = array_merge($city_nids, $result_cities);
+        }
+    }
+    foreach ($result_cities as $nid) {
+        $city_node = metro_city_node_load($nid);
+        $city_nodes[$nid] = $city_node;
+    }
+    $cities = $city_nodes;
+    return $cities;
+}
+
+function metro_city_node_load($nid) {
+  $node = node_load($nid);
+  $cacheDir = drupal_get_path('module','census_cache').DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+  $statenid = $node->field_state[LANGUAGE_NONE][0]['target_id'];
+  $statecode = db_query('SELECT field_fips_state_code_value FROM {field_data_field_fips_state_code} WHERE entity_id = :statenid', array('statenid' => $statenid))->fetchField();
+  if(strlen($statecode)<2){
+      $statecode = '0'.$statecode;
+  }
+  $pid = $node->field_place_id[LANGUAGE_NONE][0]['value'];
+  if(strlen($pid) <= 4){
+      $pid = '0'.$pid;
+      if(strlen($pid) < 5) {
+        $pid = '0'.$pid;
+      }
+  }
+  $cachePlaceFilePath = $cacheDir.'place'.DIRECTORY_SEPARATOR.$statecode.DIRECTORY_SEPARATOR.$pid.'.json';
+  $c = new stdClass();
+  $c->nid = $node->nid;
+  $c->name = $node->title;
+  $c->stateFips = $statecode;
+  $c->cityFips = $pid;
+  $censusdata = json_decode(file_get_contents($cachePlaceFilePath),true);
+  $c->population = (int) $censusdata['city-data']['DP05_0001E'];
+  $c->medianIncome = (int) $censusdata['city-data']['DP03_0062E'];
+  $c->homeval = (int) $censusdata['real-estate']['DP04_0088E'];
+
+  return $c;
+}
+
+function assembleMetroMadlib($node) {
+  $madlib = NULL;
+  $metro_data = $node->census['metro-data'];
+  $name = $node->field_metro_shortname[LANGUAGE_NONE][0]['value'];
+  $name_array = explode(' ', $name);
+  $name_state = end($name_array);
+  if (strlen($name_state) == 2) {
+    // Assuming here that a 2-letter word is the state
+    // @todo confirm that $name_state value is an actual state.
+    $state_name_only = array_pop($name_array);
+    $name = implode(' ', $name_array);
+  }
+  $cities = $node->cities;
+  $madlib = "<p>";
+  $madlib .= 'Moving to ' . $name . '? Let us help you find your best place to live in this metro area. ';
+  $madlib .= 'First, some basics: ' . assembleMetroCountyText($node);
+
+  $cities_pop = $node->cities_sorted['pop'];
+  $madlib .= ' The largest cities in the ' . $name . ' metro area are ' . l($cities_pop[1]->name, 'node/' . $cities_pop[1]->nid) . ', ' . l($cities_pop[2]->name, 'node/' . $cities_pop[2]->nid) . ' and of course, ' . l($cities_pop[0]->name, 'node/' . $cities_pop[0]->nid) . '.';
+  $madlib .= '<p>';
+
+  $madlib .= number_format($metro_data['DP05_0001E']) . ' people live in ' . $name . ' ' . ' within ' . number_format($metro_data['DP02_0001E']) . ' households.
+  The population of ' . $name . ' is ' .
+  pop_percentage($metro_data['DP05_0072E'], $metro_data) . '% White, ' .
+  pop_percentage($metro_data['DP05_0073E'], $metro_data) . '% Black and ' .
+  pop_percentage($metro_data['DP05_0075E'], $metro_data) . '% Asian. ' .
+  pop_percentage(($metro_data['DP05_0077E'] + $metro_data['DP05_0074E'] + $metro_data['DP05_0076E']), $metro_data) . '% identify as another race or ethnicity, or two or more races. ' .
+  pop_percentage($metro_data['DP05_0066E'], $metro_data) . '% of residents are of Hispanic or Latino origin. ' .
+  number_format($metro_data['DP02_0092E'] / $metro_data['DP02_0086E']*100) . '% of residents are foreign-born. ';
+
+  $madlib .= 'The median age is ' . $metro_data['DP05_0017E'] . ', and the largest number of residents falls into the ' . dominant_age($metro_data) . ' age range. ' .
+	number_format((($metro_data['DP05_0001E'] - $metro_data['DP05_0022E']) / $metro_data['DP05_0001E'])*100) . '% of residents are under age 18. ' .
+	number_format(($metro_data['DP05_0025E'] / $metro_data['DP05_0001E'])*100). '% are over age 65. ' .
+	number_format(($metro_data['DP05_0002E'] / $metro_data['DP05_0001E'])*100) . '% of ' . $name . "’s residents are male.";
+	$madlib .="</p>";
+	$madlib .='<p>';
+
+  $madlib .= 'Who lives in ' . $name . '? There are ' .
+  number_format(($metro_data['DP02_0004E'] - $metro_data['DP02_0005E'])) . ' married couples without children and another ' .
+  number_format($metro_data['DP02_0005E']) . ' married couples with kids under the age of 18. There are ' .
+  number_format($metro_data['DP02_0007E']) . ' single dads and ' .
+  number_format($metro_data['DP02_0009E']) . ' single mothers.  ' .
+  number_format($metro_data['DP02_0011E']) . ' residents of ' . $name . ' live alone.';
+  $madlib .='</p>';
+
+  $madlib .='<p>';
+  $madlib .= 'How affordable is ' . $name . '? The median household income in ' . $name .
+  ' is $' . number_format($metro_data['DP03_0062E']) . ' compared to $' . number_format($node->nation['county-data']['DP03_0062E']) . ' for the nation as a whole.  ' .
+  'The per capita income is $'. number_format($metro_data['DP03_0088E']) . ' compared to $' . number_format($node->nation['county-data']['DP03_0088E']) .
+  ' for the nation as a whole.';
+  $madlib .= '</p>';
+
+  $cities = $node->cities_sorted['income'];
+  $madlib .='<p>';
+  $madlib .= 'The highest incomes in the ' . $name . ' area are found in ' . l($cities['top'][0]->name, 'node/' . $cities['top'][0]->nid) . ' with a median household income of $' . number_format($cities['top'][0]->medianIncome) . ', ';
+  $madlib .= 'followed by ' . l($cities['top'][1]->name, 'node/' . $cities['top'][1]->nid) . ' and ' . l($cities['top'][2]->name, 'node/' . $cities['top'][2]->nid);
+  $madlib .= '. The lowest incomes are in ' . l($cities['bottom'][2]->name, 'node/' . $cities['bottom'][2]->nid) . ' with a median household income of $' . number_format($cities['bottom'][2]->medianIncome) . ', ';
+  $madlib .= 'followed by ' . l($cities['bottom'][1]->name, 'node/' . $cities['bottom'][1]->nid) . ' and ' . l($cities['bottom'][0]->name, 'node/' . $cities['bottom'][0]->nid) .  '. ';
+  $madlib .= '</p>';
+
+  $cities = $node->cities_sorted['homeval'];
+  $madlib .= '<p>';
+  $madlib .= 'The highest home values in the ' . $name . ' area are found in ' . l($cities['top'][0]->name, 'node/' . $cities['top'][0]->nid) . ' with a median home value of $' . number_format($cities['top'][0]->homeval) . ', ';
+  $madlib .= 'followed by ' . l($cities['top'][1]->name, 'node/' . $cities['top'][1]->nid) . ' and ' . l($cities['top'][2]->name, 'node/' . $cities['top'][2]->nid);
+  $madlib .= '. The lowest home values are in ';
+  if ($cities['bottom'][2]->homeval == '0'){
+    $madlib .= l($cities['bottom'][1]->name, 'node/' . $cities['bottom'][1]->nid) . ' with a median home value of $' . number_format($cities['bottom'][1]->homeval) . ', ';
+    $madlib .= 'followed by ' . l($cities['bottom'][0]->name, 'node/' . $cities['bottom'][0]->nid) . '. ';
+  } else {
+    $madlib .= l($cities['bottom'][2]->name, 'node/' . $cities['bottom'][2]->nid) . ' with a median home value of $' . number_format($cities['bottom'][2]->homeval) . ', ';
+    $madlib .= 'followed by ' . l($cities['bottom'][1]->name, 'node/' . $cities['bottom'][1]->nid) . ' and ' . l($cities['bottom'][0]->name, 'node/' . $cities['bottom'][0]->nid) . '. ';
+  }
+  $madlib .= '</p>';
+
+  //COLI madlib components not available yet - will need to be added at a later date
+  /*
+  Income is just part of the measure of affordability. [RANK the Counties within the MSA] According to C2ER highest cost of living in the area is in <county> with a cost of living index of [coli] -- meaning that if the national average is 100 it costs [100 - COLI]% more/less to live here. Breaking that down, here are the index values for certain key components: Groceries (COLI_Groceries), Housing (COLI_Housing), Utilities (COLI_Utilities), Transportation (COLI, Transportation) and Health care (COLI_healthcare). For a lower cost of living, look for homes in <lower-ranked county1> or <lower ranked county2>.
+*/
+  $high_income = round((($metro_data['DP03_0059E'] + $metro_data['DP03_0060E'] + $metro_data['DP03_0061E']) / $metro_data['DP03_0051E'] *100 ));
+  $low_income = round((($metro_data['DP03_0052E'] + $metro_data['DP03_0053E'] + $metro_data['DP03_0054E'] + $metro_data['DP03_0055E']) / $metro_data['DP03_0051E'] * 100));
+  $madlib .= '<p>';
+  $madlib .= $high_income . '% of households earn more than $100,000 annually.  Conversely, ' . $low_income . '% earn less than $35,000. ';
+  $madlib .= $metro_data['DP03_0123PE'] . '% of married families with children live below the poverty line.  Overall, ' . $metro_data['DP03_0129PE'] . '% of ' . $name . "'s children live below the poverty line.";
+  $madlib .= '</p></p>';
+
+  return $madlib;
+}
+
+function getCountyStateString($nid) {
+  $state = db_query('SELECT title FROM {node} WHERE nid = :nid', array('nid' => $nid))->fetchField();
+  return $state;
+}
+
+function assembleMetroCountyText($node) {
+  $counties = array();
+  foreach ($node->counties as $county) {
+    $state = getCountyStateString($county->field_state[LANGUAGE_NONE][0]['target_id']);
+    $counties[$state][] = $county;
+  }
+  $total_counties = count($node->counties);
+
+  $name = $node->field_metro_shortname[LANGUAGE_NONE][0]['value'];
+  $name_array = explode(' ', $name);
+  $name_state = end($name_array);
+  if (strlen($name_state) == 2) {
+    // Assuming here that a 2-letter word is the state
+    // @todo confirm that $name_state value is an actual state.
+    $state_name_only = array_pop($name_array);
+    $name = implode(' ', $name_array);
+  }
+
+  $text = 'The ' . $name . ' metro area comprises ';
+  if ($total_counties > 1) {
+    $i = 0;
+    foreach($counties as $state => $county) {
+      if (count($county) > 1) {
+        $county_string = 'counties';
+      } else {
+        $county_string = 'county';
+      }
+
+      if ($county == reset($counties)) {
+        $text .= count($county) . ' ' . $county_string . ' in ' . $state;
+        if ($county == end($counties)) {
+          $text .= '. ';
+        }
+      } elseif ($county == end($counties)){
+        $text .= ' and ' . count($county) . ' ' . $county_string . ' in ' .  $state . '.';
+      } else {
+        $text .= ', ' . count($county) . ' ' . $county_string . ' in ' . $state . ', ';
+      }
+    }
+
+  } else {
+    $county = array_keys($counties);
+    $text .= 'one county in ' . $county[0] . '.';
+  }
+  return $text;
+}
+
+function metroCitiesByPopulation($cities) {
+  $citiesSorted = usort($cities, function($a, $b) {
+    return ($a->population < $b->population);
+  });
+  $cities_by_pop = array_slice($cities, 0, 3);
+  return $cities_by_pop;
+}
+
+function metroCitiesByIncome($cities) {
+  $citiesSorted = usort($cities, function($a, $b) {
+    return ($a->medianIncome < $b->medianIncome);
+  });
+  $cities_by_income['top'] = array_slice($cities, 0, 3);
+  $cities_by_income['bottom'] = array_slice($cities, -3, 3);
+
+  return $cities_by_income;
+}
+
+function metroCitiesByHomeValue($cities) {
+  $citiesSorted = usort($cities, function($a, $b) {
+    return ($a->homeval < $b->homeval);
+  });
+  $cities_by_homeval['top'] = array_slice($cities, 0,3);
+  $cities_by_homeval['bottom'] = array_slice($cities, -3, 3);
+
+  return $cities_by_homeval;
+}

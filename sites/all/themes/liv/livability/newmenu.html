@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Translate3d with fixed element (working) - jsFiddle demo</title>
+  
+  <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
+  <link rel="stylesheet" type="text/css" href="/css/reset.css">
+  
+  
+  <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+  
+  <style type='text/css'>
+
+    .container {
+        width:100%;
+        left:0px;
+        /*top:0px;*/
+    }
+
+    .slide {
+        -webkit-transition:all .25s linear;
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    .container.open .slide {
+        -webkit-transform: translate3d(-280px, 0, 0)
+    }
+    .container.active {
+    }
+    html.fixed,  html.fixed body, html.fixed .container{
+        overflow:hidden;
+        display:block;
+        height:100%;
+        
+    }
+
+    #menu-button {
+        float:right;
+        line-height:20px;
+        margin:10px;
+        padding:10px;
+        background:grey;
+        color:white;
+        cursor:pointer;
+    }
+    #topbar {
+        position:fixed;
+        width:100%;
+        top:0px;
+        right:0px;
+        line-height:65px;
+        background:#ddd;
+        text-align:center;
+        z-index:1;
+        /*for some reason we need a z index now*/
+    }
+    body {
+     
+    }
+    .nav-container {
+        position:fixed;
+        top:0px;
+        right:0px;
+        width:280px;
+        height:100%;
+        color:white;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background:grey;
+        -webkit-transition:all .25s linear;
+        -webkit-transform: translate3d(280px, 0, 0);
+    }
+    .nav-container ul {
+        height:100%;
+        display:block;
+        background:green;
+        -webkit-transform: translate3d(0, 0, 0);
+        -webkit-transition:all .25s linear;
+    }
+    .nav-container ul li a{
+        height:40px;
+        line-height:40px;
+        display:block;
+        border-bottom:1px solid black;
+        width:100%;
+    }
+
+    .nav-container.open {
+        z-index:100;
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    nav {
+        height:100%;
+        display:block;
+    }
+    .nav-container ul.level-1 {
+        //-webkit-transform: translate3d(560px, 0, 0);
+        -webkit-transition:all .25s linear;
+        top:40px;
+        left:280px;
+        position:absolute;
+        display:none;
+    }
+    .go-back {
+        -webkit-transform: translate3d(280px, 0, 0);
+        -webkit-transition:all .25s linear;
+        top:0;
+        position:absolute;
+        background:blue;
+    }
+    .collapsed .go-back {
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    .nav-container ul.level-1.active {
+        -webkit-transform: translate3d(0, 0, 0);
+        position:absolute;
+        width:100%;
+        height:auto;
+        background:red;
+        display:block;
+    }
+    .nav-container.collapsed ul {
+        -webkit-transform: translate3d(-280px, 0, 0);
+    }
+</style> 
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0"> 
+
+
+<script type='text/javascript'>//<![CDATA[ 
+
+$(function () {
+    $('#menu-button').click(function () {
+        $('.container, .nav-container').toggleClass('open');
+        $('html').toggleClass('fixed');
+    });
+
+    $('nav ul li').click(function () {
+        $(this).find('.level-1').addClass("active");
+        $('.nav-container').addClass("collapsed");
+    });
+
+    $('.go-back').click(function () {
+        setTimeout(function(){
+            $('.level-1').removeClass("active");
+        }, 250);
+        $('.nav-container').removeClass("collapsed");
+    });
+});
+//]]>  
+
+</script>
+
+
+</head>
+<body>
+  <div class="nav-container">
+    <div class='go-back'> <a href='#'>BACK</a>
+
+    </div>
+    <nav class="no-mobile clearfix">
+        <ul>
+            <li><a href="#">Topics<i class="chev-down-white no-mobile"></i><i class="chev-right-white mobile-only"></i></a>
+
+                <ul class="level-1">
+                    <li><a href="#">Food and Drink</a>
+                    </li>
+                    <li><a href="#">Arts and Entertainment</a>
+                    </li>
+                    <li><a href="#">Education and Schools</a>
+                    </li>
+                    <li><a href="#">Business and Economy</a>
+                    </li>
+                    <li><a href="#">Housing and Real Estate</a>
+                    </li>
+                    <li><a href="#">Health and Wellness</a>
+                    </li>
+                    <li><a href="#">Transportation</a>
+                    </li>
+                    <li><a href="#">Community</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#">Find A City</a>
+            </li>
+            <li><a href="#">Best Places to Live<i class="chev-down-white no-mobile"></i><i class="chev-right-white mobile-only"></i></a>
+
+                <ul class="level-1">
+                    <li><a href="#">Top 100 Best Places to Live</a>
+                    </li>
+                    <li><a href="#">Top 10 Lists</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#">Relocate<i class="chev-down-white no-mobile"></i><i class="chev-right-white mobile-only"></i></a>
+
+                <ul class="level-1">
+                    <li><a href="#">Moving Estimates</a>
+                    </li>
+                    <li><a href="#">Moving Checklists</a>
+                    </li>
+                    <li><a href="#">How to Guides</a>
+                    </li>
+                    <li><a href="#">Moving Countdown</a>
+                    </li>
+                    <li><a href="#">Best Places to Live</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#">Blog<i class="chev-down-white no-mobile"></i><i class="chev-right-white mobile-only"></i></a>
+
+                <!-- <ul class="level-1" style="display:block !important"> -->
+                <ul class="level-1">
+                    <li><a href="#">City Amenities</a>
+                    </li>
+                    <li><a href="#">Community</a>
+                    </li>
+                    <li><a href="#">Demographics</a>
+                    </li>
+                    <li><a href="#">Education</a>
+                    </li>
+                    <li><a href="#">Housing</a>
+                    </li>
+                    <li><a href="#">Sustainability</a>
+                    </li>
+                    <li><a href="#">Transportation</a>
+                    </li>
+                    <li><a href="#">Urban Planning</a>
+                    </li>
+                    <li><a href="#">Blog Contributors List</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#">More<i class="chev-down-white no-mobile"></i><i class="chev-right-white mobile-only"></i></a>
+
+                <ul class="level-1">
+                    <li><a href="#">Press Room</a>
+                    </li>
+                    <li><a href="#">Promote Your City</a>
+                    </li>
+                    <li><a href="#">Advertise</a>
+                    </li>
+                    <li><a href="#">Contact</a>
+                    </li>
+                    <li><a href="#">Terms of Use</a>
+                    </li>
+                    <li><a href="#">Feedback</a>
+                    </li>
+                    <li><a href="#">Leadership Profile</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>
+<div class="container">
+    
+        <div id="topbar" class="slide" ><a id="menu-button">Menu</a>This is a topbar</div>
+        <div class="slide">
+            Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut Where’s the best golf cities in America? Our 2014 amenities survey breaks it down by city dolore lorem ipsum dolor sit amet, dolore consectetur adipisicing elit, sed do eiusmod tempor incididunt ut 
+        </div>
+</div>
+  
+</body>
+
+
+</html>
+

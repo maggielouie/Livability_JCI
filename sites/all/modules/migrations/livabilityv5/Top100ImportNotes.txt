@@ -1,0 +1,3 @@
+
+Presently, we have to save a Top 100 node manually (Title, etc.), enough to save and get the nid.
+Then on line 37 of top_100.inc, we have to set the host_entity_id to the nid of the Top 100 we want the import to populate.

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the BugHerd Settings feature.
+ */
+
+include_once 'bugherd_settings.features.inc';

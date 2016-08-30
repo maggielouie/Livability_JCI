@@ -1,0 +1,407 @@
+<?php
+/**
+ * @file
+ * Code for the Article - Slideshow feature.
+ */
+
+include_once 'article_slideshow.features.inc';
+
+function article_slideshow_form_article_slideshow_node_form_alter(&$form, &$form_state, $form_id) {
+  if (!isset($form_state['node']->nid)) {
+    $form['field_author']['und']['#default_value'] = $form_state['build_info']['args'][0]->uid;
+  }
+
+  $form['title']['#title'] = 'Title (Web Headline)';
+  $form['title']['#size'] = 120;
+  $form['title']['#description'] = '65  Maximum recommended characters - including spaces';
+
+  $form['field_short_description']['und'][0]['value']['#type'] = 'textarea';
+  $form['field_meta_description']['und'][0]['value']['#type'] = 'textarea';
+/*
+  $form['actions']['save_and_edit'] = $form['actions']['submit'];
+  $form['actions']['save_and_edit']['#submit'][0] = 'article_slideshow_form_submit';
+  $form['actions']['save_and_edit']['#value'] = 'Save and Edit';
+
+  $form['extra_save_and_edit']['submit'] = $form['actions']['save_and_edit'];
+  $form['extra_save_and_edit']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 1em; right: 5em';
+  $form['extra_save']['submit'] = $form['actions']['submit'];
+  $form['extra_save']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 1em; right: 0';
+*/
+}
+
+function article_slideshow_node_validate($node, $form, &$form_state) {
+  $form_id = $form_state['build_info']['form_id'];
+
+  if ($form_id == 'article_slideshow_node_form') {
+  	// Make sure title isn't a numeric entry,
+  	// as it would interfere with the slide show logic.
+  	if (is_numeric($form_state['values']['title'])) {
+  		form_set_error('title', 'Title field cannot be a numeric field!');
+  	}
+    if (isset($form_state['values']['field_place']['und'][0])) {
+      $primaryhostcount = 0;
+      foreach ($form_state['values']['field_place']['und'] as $place) {
+        if (is_array($place)) {
+          if ($place['field_primary_host']['und'][0]['value'] == 1) {
+            // no primay host if no primary place
+            if (!isset($place['field_place_ref']['und']) || is_null($place['field_place_ref']['und'][0]['target_id']) || empty($place['field_place_ref']['und'][0]['target_id'])) {
+              form_set_error('field_place', 'Please select a <b>Primary name</b>, or un-select <b>Primary Host</b>.');
+            }
+            $primaryhostcount++;
+          }
+        }
+      }
+      if ($primaryhostcount > 1) {
+        form_set_error('field_place', 'There may be only one <b>Primary Host</b>.');
+      }
+    }
+    if (isset($form_state['values']['field_category']['und'][0])) {
+      $primarycatcount = 0;
+      foreach ($form_state['values']['field_category']['und'] as $cat) {
+        if (is_array($cat)) {
+          if ($cat['field_primary_category']['und'][0]['value'] == 1) {
+            $primarycatcount++;
+          }
+        }
+      }
+      if ($primarycatcount > 1) {
+        form_set_error('field_category', 'There may be only one <b>Primary Category</b>.');
+      }
+    }
+  }
+}
+
+function article_slideshow_form_submit($form, &$form_state) {
+  $node = node_form_submit_build_node($form, $form_state);
+  $insert = empty($node->nid);
+  node_save($node);
+  $node_link = l(t('view'), 'node/' . $node->nid);
+  $watchdog_args = array(
+    '@type' => $node->type,
+    '%title' => $node->title,
+  );
+  $t_args = array(
+    '@type' => node_type_get_name($node),
+    '%title' => $node->title,
+  );
+
+  if ($insert) {
+    watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been created.', $t_args));
+  }
+  else {
+    watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been updated.', $t_args));
+  }
+  if ($node->nid) {
+    $form_state['values']['nid'] = $node->nid;
+    $form_state['nid'] = $node->nid;
+    $destination = '<front>';
+    if (node_access('view', $node)) { $destination = 'node/' . $node->nid; }
+    if (node_access('update', $node)) { $destination = 'node/' . $node->nid .'/edit/';}
+    $form_state['redirect'] = $destination;
+  }
+  else {
+    // In the unlikely case something went wrong on save, the node will be
+    // rebuilt and node form redisplayed the same way as in preview.
+    drupal_set_message(t('The post could not be saved.'), 'error');
+    $form_state['rebuild'] = TRUE;
+  }
+  // Clear the page and block caches.
+  cache_clear_all();
+}
+
+function article_slideshow_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'article_slideshow') {
+    $node = $context['data']['node'];
+    $alias = article_slideshow_alias_maker($node);
+  }
+}
+
+function article_slideshow_alias_maker($node) {
+  if ($node->type == 'article_slideshow') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $alias = '';
+    if (isset($node->field_place['und']) && !is_null($node->field_place['und'])) {
+      foreach($node->field_place['und'] as $p => $place) {
+        $place_entity = entity_load('field_collection_item',array($node->field_place['und'][$p]['value']));
+        if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value']) && $place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value'] == 1 && isset($place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'])) {
+          $primaryplaceid = $place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'][0]['target_id'];
+          $primeplace = node_load($primaryplaceid);
+          // Add city to alias if the prime place is a city.
+          if ($primeplace->type == 'city') {
+            $state = node_load($primeplace->field_state['und'][0]['target_id']);
+            $alias .= pathauto_cleanstring($state->field_state_code['und'][0]['value']) . '/';
+          }
+          $alias .= pathauto_cleanstring($primeplace->title) .'/';
+        }
+      }
+    }
+
+    $moving_subterm = NULL;
+
+    if (isset($node->field_category['und']) && !is_null($node->field_category['und'])) {
+      foreach($node->field_category['und'] as $cat) {
+        $primarycattid = null;
+        $category_entity = entity_load('field_collection_item',array($cat['value']));
+        if (isset($category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value']) && $category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value'] == 1 && isset($category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'])) {
+          $primarycattid = $category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'][0]['tid'];
+          $primecat = taxonomy_term_load($primarycattid);
+
+          // See if this is a sub-term of Moving.
+          $moving_subterm = db_query('SELECT * FROM {taxonomy_term_hierarchy} WHERE parent = 105 AND tid = :tid', array(
+            ':tid' => $primarycattid,
+          ))->fetchColumn();
+
+          // If this is a moving sub-term, append "moving/".
+          if ($moving_subterm) {
+            $alias .= 'moving/';
+          }
+
+          $alias .= pathauto_cleanstring($primecat->name) . '/';
+        }
+      }
+    }
+    $alias .= pathauto_cleanstring($node->title);
+
+    // Append topics to non moving  and non local articles.
+    if (!$moving_subterm && !isset($primeplace) ) {
+      $alias = 'topics/' . $alias;
+    }
+	$redirects = redirect_load_multiple(array(),array('redirect'=> 'node/'.$node->nid));
+	foreach($redirects as $rid => $redirect){
+		if($redirect->source == $alias){
+			redirect_delete($rid);
+		}
+	}
+	return $alias;
+  }
+}
+
+function article_slideshow_pager($node) {
+  $nid = $node->nid;
+
+  // dsm($node);
+  // dsm(count($node->field_list_item_art_ss['und']));
+
+  $number_of_slides = count($node->field_list_item_art_ss['und']);
+
+  if (isset($node->field_list_item_art_ss['und']) && $number_of_slides > 0) {
+  	$path = drupal_get_path_alias('node/' . $nid);
+  	$pieces = explode('/', drupal_get_path_alias());
+  	$last_piece = array_pop($pieces);
+  	$intro_slide = !is_numeric($last_piece) ? TRUE : FALSE;
+  	$last_slide = is_numeric($last_piece) && $last_piece == $number_of_slides - 1;
+  	if ($intro_slide) {
+  		$text = "Start Slideshow ";
+  		$next_slide = 0;
+  		$link = '<a href="/' . $path . '/' . $next_slide .'" class="button-green next">'.$text.'<i class="icon-arrow-right-double white"></i></a>';
+  	} else if ($last_slide) {
+  		$text = " Previous";
+  		$prev_slide = $last_piece - 1;
+  		$link = '<a href="/' . $path . '/' . $prev_slide .'" class="button-green prev">'.$text.'<i class="icon-arrow-left-double white"></i></a>';
+  	} else {
+  		if (is_numeric($last_piece)) {
+  			foreach ($node->field_list_item_art_ss['und'] as $key => $value) {
+  				// dsm($key);
+  				// dsm($value);
+  				if ($last_piece == 0) {
+  					// First slide
+	  				$text_prev = " Previous";
+	  				$text_next = " Next";
+	  				$next_slide = 1;
+			  		$link = '<a href="/' . $path . '" class="button-green prev">'.$text_prev.'<i class="icon-arrow-left-double white"></i></a>';
+			  		$link .= '<a href="/' . $path . '/' . $next_slide .'" class="button-green next">'.$text_next.'<i class="icon-arrow-right-double white"></i></a>';
+	  			} else {
+	  				$text_prev = " Previous";
+	  				$prev_slide = $last_piece - 1;
+	  				$text_next = " Next";
+	  				$next_slide = $last_piece + 1;
+			  		$link = '<a href="/' . $path . '/' . $prev_slide .'" class="button-green prev">'.$text_prev.'<i class="icon-arrow-left-double white"></i></a>';
+			  		$link .= '<a href="/' . $path . '/' . $next_slide .'" class="button-green next">'.$text_next.'<i class="icon-arrow-right-double white"></i></a>';
+	  			}
+  			}
+  		}
+  	}
+  }
+
+  return '<span class="list-nav">' . $link . '</span>';
+}
+
+function article_slideshow_number($node) {
+	$nid = $node->nid;
+	$path = drupal_get_path_alias('node/' . $nid);
+	$pieces = explode('/', drupal_get_path_alias());
+	$last_piece = array_pop($pieces);
+	$intro_slide = !is_numeric($last_piece) ? TRUE : FALSE;
+	$number_of_slides = count($node->field_list_item_art_ss['und']);
+	$number = '';
+	$show_number = FALSE;
+
+	if (is_numeric($last_piece)) {
+		if ($intro_slide) {
+			$number = $number_of_slides;
+		} else {
+			$number = $number_of_slides - $last_piece;
+		}
+	}
+
+	if (isset($node->field_show_list_numbers['und']) && $node->field_show_list_numbers['und'][0]['value'] == 1) {
+		$show_number = TRUE;
+	}
+	$number_box = $show_number ? '<span class="top-10-no">' . $number . '</span>' : '';
+	
+	if (!$intro_slide) {
+		// Loading slides now.
+		if (is_numeric($last_piece) && isset($node->field_list_item_art_ss['und']) && $number_of_slides > 0) {
+  		$item_id = $node->field_list_item_art_ss['und'][$last_piece]['value'];
+  		$entity = entity_load('field_collection_item', array($item_id));
+  		$headline = $entity[$item_id]->field_headline_ss['und'][0]['value'];
+  		$output = '<span class="city-pin">' . $number_box . '<h1>' . $headline . '</h1></span>';
+  		return $output;
+  	}
+	}
+}
+
+function article_slideshow_render_ad($id) {
+	$mobile_ad = block_load('jci_dfp', $id);
+	$o = _block_get_renderable_array(_block_render_blocks(array($mobile_ad)));
+	return drupal_render($o);
+}
+
+function article_slideshow_content($content, $node) {
+  $nid = $node->nid;
+	$path = drupal_get_path_alias('node/' . $nid);
+	$pieces = explode('/', drupal_get_path_alias());
+	$last_piece = array_pop($pieces);
+	$intro_slide = !is_numeric($last_piece) ? TRUE : FALSE;
+	$number_of_slides = count($node->field_list_item_art_ss['und']);
+
+
+	if ($intro_slide) {
+    $side_col = TRUE;
+   
+    if ($side_col) {
+      // Build highlights
+      if (isset($content['field_highlights'])) {
+        $hl = '<span class="highlights">';
+        $hl .= '<h4>' . $content['field_highlights']['#title'] . '</h4>';
+        $hl .= '<ul class="bullet">';
+        foreach($content['field_highlights']['#items'] as $i => $item) {
+          $hl .= '<li>'.$item['value'].'</li>';
+        } 
+        $hl .= '</ul></span>';
+      } else {
+        $hl = '';
+      }
+      
+      // Build quote
+      if (isset($content['group_pull_quote'])) {
+        $q = '<span class="quote"><i class="icon-quote-open green"></i>';
+        $q .= '<p>' . $content['group_pull_quote']['field_pull_quote']['#items'][0]['value'] .'</p>';
+        if (isset($content['group_pull_quote']['field_quote_attribution'])) {
+          $q .= '<span class="author">';
+          $q .= $content['group_pull_quote']['field_quote_attribution']['#items'][0]['value'];
+          if (isset($content['group_pull_quote']['field_professional_title'])) {
+            $q .= ', ' . $content['group_pull_quote']['field_professional_title']['#items'][0]['value'];
+          }
+          $q .= '</span>';
+        }
+        $q .= '</span>';
+      } else {
+        $q = '';
+      }
+      
+
+
+      $output = '
+       <span class="featured-image clearfix"> 
+          ' . render($content['field_image']) . '
+        </span>
+
+        <span class="l-275">
+          
+          <span class="no-mobile">
+            ' . article_slideshow_render_ad('jci-dfp-block-24') . '
+          </span>
+          <span class="mobile-only">
+            ' . article_slideshow_render_ad('jci-dfp-block-12') . '
+          </span>
+
+          ' . $hl . '
+
+          ' . $q . '
+        </span>
+
+        <span class="article-content r-275-full">
+          ' . render($content['body']) . '
+        </span>';
+
+      } 
+		
+
+	    return $output;
+
+	} else {
+		if (is_numeric($last_piece) && isset($node->field_list_item_art_ss['und']) && $number_of_slides > 0) {
+  		$item_id = $node->field_list_item_art_ss['und'][$last_piece]['value'];
+  		return views_embed_view('article_slideshow', 'block_6', $item_id);
+  	}
+	}
+	
+}
+
+function article_slideshow_alias($node) {
+  $node->path['alias'] = article_slideshow_alias_maker($node);
+}
+
+function article_slideshow_preprocess_html(&$vars) {
+
+	if (isset($vars['page']['content']['system_main']['nodes'])) {
+    $nodes = $vars['page']['content']['system_main']['nodes'];
+    foreach ($nodes as $nid => $node) {
+      if (is_numeric($nid)) {
+        if (in_array($node['#node']->type, array('article_slideshow'))) {
+
+					$path = drupal_get_path_alias();
+					$pieces = explode('/', drupal_get_path_alias());
+					$last_piece = array_pop($pieces);
+					$intro_slide = !is_numeric($last_piece) ? TRUE : FALSE;
+					$number_of_slides = count($node['#node']->field_list_item_art_ss['und']);
+
+					if (is_numeric($last_piece) && isset($node['#node']->field_list_item_art_ss['und']) && $number_of_slides > 0) {
+			  		$item_id = $node['#node']->field_list_item_art_ss['und'][$last_piece]['value'];
+			  		$entity = entity_load('field_collection_item', array($item_id));
+			  		$meta_description = $entity[$item_id]->field_headline['und'][0]['value'];
+			  	} else {
+			  		if (isset($node['#node']->field_meta_description['und'])) {
+	            $meta_description = $node['#node']->field_meta_description['und'][0]['value'];
+	          }
+			  	}
+
+          
+        }
+      }
+    }
+  }
+
+	if (isset($meta_description)) {
+    $metadesc = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'name' => 'description',
+        'content' => $meta_description
+      ),
+    );
+    drupal_add_html_head($metadesc, 'meta_description');
+    $ogdesc = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'property' => 'og:description',
+        'content' => $meta_description
+      ),
+    );
+    drupal_add_html_head($ogdesc, 'og_description');
+  }
+
+}

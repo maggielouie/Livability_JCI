@@ -1,0 +1,10 @@
+name = "MailChimp Integration"
+description = "Integrates newsletter signup option on forms with MailChimp list"
+core = 7.x
+package = JCI
+
+/*
+ * The majority of the functionality of this module comes directly from
+ * davyvdb's "E-mail Marketing Framework" module : https://www.drupal.org/project/emf
+ * This module has no settings, as it is a mere shadow of the EMF project.
+ */

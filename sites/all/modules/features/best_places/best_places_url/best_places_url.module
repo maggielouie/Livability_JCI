@@ -1,0 +1,53 @@
+<?php
+function best_places_url_url_inbound_alter(&$path,$oldpath,$lang){
+    module_load_include('inc','pathauto','pathauto');
+    $pieces = explode('/',$path);
+    if(count($pieces)) {
+
+        if (count($pieces) > 2 && $pieces[0] == 'best-places' && $pieces[1] == 'top-10' && $pieces[2] != null) {
+            unset($_GET['page']);
+        }
+        $urlpieces = explode('/',request_uri());
+        if(($urlpieces[1] == 'top-10' && count($urlpieces) == 6) || ($urlpieces[1] == 'best-places' && $urlpieces[2] == 'top-10' && count($urlpieces) > 6)){
+            if($urlpieces[1] == 'best-places'){
+                if(count($urlpieces) == 7) {
+                    //this means we hit /best-places/top-10/category/name/year/city
+                    $nodeUrlPieces = array_splice($urlpieces, 2, -1);
+                    $cityName = $urlpieces[2];
+                }elseif(count($urlpieces) == 8){
+                    //this means we hit /best-places/top-10/category/name/year/state/city
+                    $nodeUrlPieces = array_splice($urlpieces,2);
+                    $cityName = $nodeUrlPieces[5];
+                    unset($nodeUrlPieces[4]);
+                    unset($nodeUrlPieces[5]);
+                }
+                $nodeUrl = implode('/', $nodeUrlPieces);
+                $alias = path_load(array(':alias' => $nodeUrl));
+                $nidParts = explode('/',$alias['source']);
+                $node = node_load($nidParts[1]);
+                $urlpieces = $nodeUrlPieces;
+                //urlpieces needs to be an array of path elements ready for correct base url pattern to redirect to
+            }
+            else{
+                //this means we hit the old url pattern of /top-10/category/name/year/city before we added state
+                $node = node_load($pieces[1]);
+                $cityName = $urlpieces[5];
+                array_pop($urlpieces);
+            }
+            if($node->type == 'best_places') {
+                $list = $node->field_list_item[LANGUAGE_NONE];
+                foreach($list as $item){
+                    $fcid = $item['value'];
+                    $listItem = field_collection_item_load($fcid);
+                    $city = city_node_load($listItem->field_city[LANGUAGE_NONE][0]['target_id']);
+                    $title = pathauto_cleanstring($city->title);
+                    if($title == pathauto_cleanstring($cityName)){
+                        $newUrl = implode('/',$urlpieces);
+                        $newUrl .= '/'.pathauto_cleanstring($city->state->title).'/'.city_cleaner($city->title);
+                        drupal_goto($newUrl,array(),301);
+                    }
+                }
+            }
+        }
+    }
+}

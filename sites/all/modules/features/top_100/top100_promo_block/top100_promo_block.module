@@ -1,0 +1,28 @@
+<?php
+
+function top100_promo_block_block_info() {
+  $blocks['top100_promo'] = array(
+    'info' => t('Top 100 Promo'),
+    'status' => TRUE,
+    'region' => -1,
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function top100_promo_block_block_view($delta = '') {
+  //The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'top100_promo':
+      $block['content']['#markup'] = '<div class="top-100-banner"><a class="top-100 center-bg" href="/best-places/top-100" style="background-image: url(\'/' . drupal_get_path('module', 'top100_promo_block') .'/liv_top100_banner.png\')"></a></div>';
+      break;
+  }
+  return $block;
+}
+
+

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Liv Schools feature.
+ */
+
+include_once 'liv_schools.features.inc';

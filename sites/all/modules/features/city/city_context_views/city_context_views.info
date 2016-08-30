@@ -1,0 +1,11 @@
+name = City Context Views
+core = 7.x
+package = Livability
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = nearby_cities
+features[views_view][] = nearby_hospitals
+features_exclude[dependencies][ctools] = ctools
+mtime = 1431458459
+project path = sites/all/modules/liv

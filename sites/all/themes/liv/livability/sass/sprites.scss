@@ -1,0 +1,47 @@
+/* Sprites and Icons */
+@import "retina-sprites";
+$sprites: sprite-map("icons/*.png", $spacing: 10px);            // import 1x sprites
+$sprites2x: sprite-map("icons-2x/*.png", $spacing: 10px);   // import 2x sprites
+
+
+
+.seal-orange {
+	@include retina-sprite("seal-orange");
+}
+
+.seal-orange-small {
+	@include retina-sprite("seal-orange-small");
+}
+
+
+
+.article-grey {
+	@include retina-sprite("article-grey");
+}
+
+.check-grey {
+	@include retina-sprite("check-grey");
+}
+
+.question-grey {
+	@include retina-sprite("question-grey");
+}
+
+.plus-circle-white {
+	@include retina-sprite("plus-circle-white");
+}
+
+.check-circle-pink {
+	@include retina-sprite("check-circle-pink");
+}
+
+.coins {
+	@include retina-sprite("coins");
+}
+// .bullet-grey-square {
+// 	@include retina-sprite("bullet-grey-square");
+// }
+
+// .quotes-green-large {
+// 	@include retina-sprite("quotes-green-large");
+// }  

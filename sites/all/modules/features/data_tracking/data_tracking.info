@@ -1,0 +1,11 @@
+name = Data Tracking
+core = 7.x
+package = Livability
+dependencies[] = ctools
+dependencies[] = data
+features[ctools][] = data:data_default:1
+features[data_tables][] = data_health_countyhealth
+features[data_tables][] = data_health_hospitals
+features[data_tables][] = data_health_physicians
+features[features_api][] = api:2
+project path = sites/all/modules/liv

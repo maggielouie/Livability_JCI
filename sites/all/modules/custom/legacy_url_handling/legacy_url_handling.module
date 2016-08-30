@@ -1,0 +1,110 @@
+<?php
+
+
+function legacy_url_handling_url_inbound_alter(&$path,$originalpath,$lang) {
+    // There are some lingering redirect problems with no clean way to load proper nodes from old aliased paths.
+    // Re-implementing only those cases that are currently noted as issues as of 20150119.
+  $pieces = explode('/',$path);
+
+  if (isset($pieces[0]) && strlen($pieces[0]) > 2 && !isset($pieces[1])) {
+    // Check if this is a valid state node.
+    if ($p = legacy_url_handling_state_path(ucfirst(strtolower($pieces[0])))) {
+      $path = drupal_get_normal_path($p);
+    } elseif ($e = legacy_url_handling_state_path_exception(ucfirst(strtolower($pieces[0])))) {
+      $path = drupal_get_normal_path($e);
+    }
+  }
+  
+
+// //for patterns /city/st/* and /state/city/*
+  if (isset($pieces[2]) && (!isset($pieces[3])) && (strlen($pieces[0]) == 2 || strlen($pieces[1]) == 2)) { 
+
+    if (strlen($pieces[0]) == 2) {
+      $state = $pieces[0];
+      $city = $pieces[1];
+    } else {
+      $state = $pieces[1];
+      $city = $pieces[0];
+    }
+    $basepath_str = $state . '/' . $city;
+
+    switch ($pieces[2]) {
+      case 'neighborhoods':
+        $path = $basepath_str . '/real-estate';
+        break;
+      case 'living-here':
+        $path = $basepath_str;
+        break;
+      case 'working-here':
+        $path = $basepath_str . '/business';
+        break;
+      case 'widgets':
+        $path = $basepath_str;
+        break;
+      case 'schools':
+        $path = $basepath_str . '/schools';
+        break;
+      case 'chamber':
+        $path = $basepath_str;
+        break;
+      case 'photos-video':
+        $path = $basepath_str;
+        break;
+      case 'things-do':
+        $path = $basepath_str . '/things-to-do';
+        break;
+      case 'articles':
+        $path = $basepath_str;
+        break;
+	  case 'business':
+		$path = $basepath_str.'/business';
+		break;
+	  case 'outdoors':
+		$path = $basepath_str.'/things-to-do/sports-and-recreation';
+		break;
+
+    }
+  }   
+//redirect stray best-places-blog links to the new blog
+  elseif (isset($pieces[1]) && $pieces[0] != 'js' && $pieces[0] != 'node') {
+    if (in_array($pieces[0], array('best-places-to-live-blog', 'best-places-blog')) && $pieces[1] == 'tag') {
+      $path = 'blog';
+    } elseif (count($pieces) == 6 && strlen($pieces[4]) > 2) {
+      if ($p = legacy_url_handling_state_path(ucfirst($pieces[4]))) {
+        $pieces[4] = $p;
+        $path = implode('/', $pieces);
+      }
+    }
+  }
+}
+
+function legacy_url_handling_state_path($state) {
+  return strtolower(array_search($state,locality::$states));
+
+}
+
+function legacy_url_handling_state_path_exception($state) {
+  $state_exceptions = array(
+    'RI' => array('rhodeisland', 'rhode island', 'rhode-island'),
+    'NH' => array('newhampshire','new hampshire','new-hampshire'),
+    'NJ' => array('newjersey','new jersey','new-jersey'),
+    'NM' => array('newmexico','new mexico','new-mexico'),
+    'NY' => array('newyork','new york','new-york'),
+    'NC' => array('northcarolina','north carolina','north-carolina'),
+    'ND' => array('northdakota','north dakota','north-dakota'),
+    'SC' => array('southcarolina','south carolina','south-carolina'),
+    'SD' => array('southdakota','south dakota','south-dakota'),
+    'WV' => array('westverginia','west virginia','west-virginia'),
+    );
+  $results = _legacy_url_handling_array_isearch(strtolower($state), $state_exceptions);
+  return $results[0];
+}
+
+function _legacy_url_handling_array_isearch($state, $state_exceptions) {
+  $found = array();
+  foreach($state_exceptions as $k => $v)
+    if(strtolower(in_array($state, $v))) {
+      $found[] = $k;
+    }
+  return $found;
+}

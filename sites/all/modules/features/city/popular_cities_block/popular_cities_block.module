@@ -1,0 +1,122 @@
+<?php
+
+function popular_cities_block_block_info() {
+	$blocks['popular_cities'] = array(
+		'info' => t('Popular Cities'),
+		'status' => TRUE,
+		'region' => -1,
+	);
+	return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function popular_cities_block_block_view($delta = '') {
+	//The $delta parameter tells us which block is being requested.
+	switch ($delta) {
+		case 'popular_cities':
+			$node = menu_get_object();
+			$statenids = array();
+			if (isset($node->type)) {
+				switch ($node->type) {
+					case 'article':
+						$placenids = array();
+						if (isset($node->field_place['und'][0])) {
+							foreach($node->field_place['und'] as $p => $place) {
+								$place_entity = entity_load('field_collection_item',array($place['value']));
+								if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'])) {
+									$placenids[] = $place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'][0]['target_id'];
+								}
+							}
+						}
+						if (!empty($placenids)) {
+							foreach ($placenids as $placenid) {
+								$place = node_load($placenid);
+								if (isset($place->field_state) && isset($place->field_state['und'][0])) {
+									$statenids[] = $place->field_state['und'][0]['target_id'];
+								}
+							}
+						}
+						break;
+					case 'area':
+						if (isset($node->field_state['und'][0])) {
+							$statenids[] = $node->field_state['und'][0]['target_id'];
+						}
+						break;
+					case 'city':
+						if (isset($node->field_state['und'][0])) {
+							$statenids[] = $node->field_state['und'][0]['target_id'];
+						}
+						break;
+					case 'state':
+						$statenids[] = $node->nid;
+						break;
+				}
+			}
+			$cities = array();
+			/* if we have a state, get qualifying cities from that state */
+			if (!empty($statenids)) {
+				$i = 0;
+				$state = node_load($statenids[0]);
+				$block['subject'] = t('Popular Cities in ' . $state->title);
+				while (count($cities) < 5) {
+					if (isset($statenids[$i])) {
+						$result = db_query('SELECT nid FROM (SELECT n.nid from {node} n LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid LEFT JOIN {field_data_field_promoted_city} promoted on promoted.entity_id = n.nid WHERE n.type IN (\'city\', \'area\') AND promoted.field_promoted_city_value = 1 AND state.field_state_target_id = :statenid1 UNION SELECT n.nid from {node} n RIGHT JOIN {field_data_field_top_100_city} top100 on top100.field_top_100_city_target_id = n.nid LEFT JOIN {field_data_field_top_100_item} topitem on topitem.field_top_100_item_value = top100.entity_id LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid WHERE n.type IN (\'city\', \'area\') AND state.field_state_target_id = :statenid2) pandt ORDER BY RAND() limit 5', array(':statenid1' => $statenids[$i], ':statenid2' => $statenids[$i]));
+						$cities = array_merge($cities, $result->fetchAll());
+						$i++;
+					}
+					else {
+						break;
+					}
+				}
+
+				/* if not enough qualify with Sponsored/Top 100, add most populous */
+				if (count($cities) < 5) {
+					$i = 0;
+					while (count($cities) < 5) {
+						if (isset($statenids[$i])) {
+							$limit = 5 - count($cities);
+							if (count($cities) > 0) {
+    							$citiesarray = array();
+    							foreach($cities as $city) {
+    							  $citiesarray[] = $city->nid;
+    							}
+    							$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.type IN (\'city\', \'area\') AND state.field_state_target_id = :statenid AND n.nid NOT IN (:cities) ORDER BY n.sticky DESC, counter.totalcount DESC', 0, intval($limit), array(':statenid' => $statenids[$i], ':cities' => $citiesarray));
+    						}
+    						else {
+    							$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.type IN (\'city\', \'area\') AND state.field_state_target_id = :statenid AND n.nid ORDER BY n.sticky DESC, counter.totalcount DESC', 0, intval($limit), array(':statenid' => $statenids[$i]));
+    						}
+							$cities = array_merge($cities, $result->fetchAll());
+							$i++;
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+			
+			/* otherwise grab from any state */
+			else {
+				$result = db_query('SELECT nid FROM (SELECT n.nid from {node} n LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid LEFT JOIN {field_data_field_promoted_city} promoted on promoted.entity_id = n.nid WHERE n.type IN (\'city\', \'area\') AND promoted.field_promoted_city_value = 1 UNION SELECT n.nid from {node} n RIGHT JOIN {field_data_field_top_100_city} top100 on top100.field_top_100_city_target_id = n.nid LEFT JOIN {field_data_field_top_100_item} topitem on topitem.field_top_100_item_value = top100.entity_id LEFT JOIN {field_data_field_state} state on state.entity_id = n.nid WHERE n.type IN (\'city\', \'area\') ) pandt ORDER BY RAND() limit 5');
+				$cities = array_merge($cities, $result->fetchAll());
+				$block['subject'] = t('Popular Cities');
+			}
+			
+			$output = '<ul>';
+			$ccount = 0;
+			foreach ($cities as $city) {
+			    $citynode = node_load($city->nid);
+			    $state = node_load($citynode->field_state['und'][0]['target_id']);
+			    $linktext = '<span class="number">' . ++$ccount . '</span>' . $citynode->title . ', '. $state->field_state_code['und'][0]['value'] .'<i class="icon-arrow-right-circle white"></i>';
+				$output .= '<li>'. l($linktext, 'node/' . $city->nid, array('html' => TRUE)) . '</li>';
+			}
+			$output .= '</ul>';
+			$block['content']['#markup'] = $output;
+		break;
+	}
+	return $block;
+}

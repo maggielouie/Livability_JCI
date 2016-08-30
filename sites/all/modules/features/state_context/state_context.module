@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the State Context feature.
+ */
+
+include_once 'state_context.features.inc';

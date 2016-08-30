@@ -1,0 +1,135 @@
+<?php
+
+function popular_articles_block_block_info() {
+	$blocks['popular_articles'] = array(
+		'info' => t('Popular Articles'),
+		'status' => TRUE,
+		'region' => -1,
+	);
+	return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function popular_articles_block_block_view($delta = '') {
+	//The $delta parameter tells us which block is being requested.
+	switch ($delta) {
+		case 'popular_articles':
+		$block['subject'] = t('Popular Articles');
+			$node = menu_get_object();
+			$placenids = array();
+			$statenids = array();
+			if (isset($node->type)) {
+				switch ($node->type) {
+					case 'article':
+						if (isset($node->field_place['und'][0])) {
+							foreach($node->field_place['und'] as $p => $place) {
+								$place_entity = entity_load('field_collection_item',array($place['value']));
+								if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'])) {
+									$placenids[] = $place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'][0]['target_id'];
+								}
+							}
+						}
+						foreach ($placenids as $placenid) {
+							$place = node_load($placenid);
+							if (isset($place->field_city) && isset($place->field_city['und'][0])) {
+								$placenids[] = $place->field_city['und'][0]['target_id'];
+							}
+							if (isset($place->field_state) && isset($place->field_state['und'][0])) {
+								$statenids[] = $place->field_state['und'][0]['target_id'];
+							}
+						}
+						break;
+					case 'area':
+						$placenids[] = $node->nid;
+						if (isset($node->field_city['und'][0])) {
+							$placenids[] = $node->field_city['und'][0]['target_id'];
+						}
+						if (isset($node->field_state['und'][0])) {
+							$statenids[] = $node->field_state['und'][0]['target_id'];
+						}
+						break;
+					case 'city':
+						$placenids[] = $node->nid;
+						if (isset($node->field_state['und'][0])) {
+							$statenids[] = $node->field_state['und'][0]['target_id'];
+						}
+						break;
+					case 'state':
+						$placenids[] = $node->nid;
+						$statenids[] = $node->nid;
+						break;
+				}
+			}
+			$articles = array();
+
+			if (!empty($placenids)) {
+				$i = 0;
+				while (count($articles) < 5) {
+					$limit = 5 - count($articles);
+					if (isset($placenids[$i])) {
+						$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_place} place on place.entity_id = n.nid LEFT JOIN {field_data_field_place_ref} placeref on placeref.entity_id = place.field_place_value LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.status = 1 AND n.nid <> :currentnid AND n.type = \'article\' AND placeref.field_place_ref_target_id = :placenid AND n.status = 1 ORDER BY counter.totalcount DESC, n.nid DESC', 0, intval($limit), array(':currentnid' => $node->nid, ':placenid' => $placenids[$i]));
+						$articles = array_merge($articles, $result->fetchCol());
+						$i++;
+					}
+					else {
+						break;
+					}
+				}
+				if (count($articles) < 5 && !empty($statenids)) {
+					$i = 0;
+					$limit = 5 - count($articles);
+					while (count($articles) < 5) {
+						if (isset($placenids[$i])) {
+							$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_place} place on place.entity_id = n.nid LEFT JOIN {field_data_field_place_ref} placeref on placeref.entity_id = place.field_place_value LEFT JOIN {field_data_field_state} state on state.entity_id = placeref.entity_id LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.nid <> :currentnid AND n.type = \'article\' AND state.field_state_target_id = :statenid AND n.status = 1 ORDER BY counter.totalcount DESC, n.nid DESC', 0, intval($limit), array(':currentnid' => $node->nid, ':statenid' => $placenids[$i]));
+							$articles = array_merge($articles, $result->fetchCol());
+							$i++;
+						}
+						else {
+							break;
+						}
+					}
+				}
+				if (count($articles) < 5) {
+					$i = 0;
+					$limit = 5 - count($articles);
+					while (count($articles) < 5) {
+						if (isset($placenids[$i])) {
+							$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_place} place on place.entity_id = n.nid LEFT JOIN {field_data_field_place_ref} placeref on placeref.entity_id = place.field_place_value LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.nid <> :currentnid AND n.type = \'article\' AND placeref.field_place_ref_target_id = :placenid AND n.status = 1 ORDER BY counter.totalcount DESC', 0, intval($limit), array(':currentnid' => $node->nid, ':placenid' => $placenids[$i]));
+							$articles = array_merge($articles, $result->fetchCol());
+							$i++;
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+			if (count($articles) < 5) {
+				$limit = 5 - count($articles);
+				if (is_object($node) && isset($node->nid)) {
+					$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_place} place on place.entity_id = n.nid LEFT JOIN {field_data_field_place_ref} placeref on placeref.entity_id = place.field_place_value LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.nid <> :currentnid AND placeref.field_place_ref_target_id IS NULL AND n.type = \'article\' AND n.status = 1 ORDER BY counter.totalcount DESC, n.nid DESC', 0, intval($limit), array(':currentnid' => $node->nid));
+				}
+				else {
+					$result = db_query_range('SELECT n.nid from {node} n LEFT JOIN {field_data_field_place} place on place.entity_id = n.nid LEFT JOIN {field_data_field_place_ref} placeref on placeref.entity_id = place.field_place_value LEFT JOIN {node_counter} counter on counter.nid = n.nid WHERE n.type = \'article\' AND placeref.field_place_ref_target_id IS NULL AND n.status = 1 ORDER BY counter.totalcount DESC, n.nid DESC', 0, intval($limit));
+				}
+			  $articles = array_merge($articles, $result->fetchCol());
+			}
+
+      // Filter out non unique articles.
+      $articles = array_unique($articles);
+
+			$output = '<ul>';
+			foreach ($articles as $nid) {
+        $artview = node_view(node_load($nid), 'related');
+				$output .= '<li>'. drupal_render($artview) . '</li>';
+			}
+			$output .= '</ul>';
+			$block['content']['#markup'] = $output;
+			break;
+	}
+	return $block;
+}

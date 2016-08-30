@@ -1,0 +1,74 @@
+<?php
+/*
+function liv_core_file_presave($node) {
+  $img_path = file_create_url($node->uri);
+  $exif = exif_read_data($img_path, 0, true);
+  if($exif != NULL) {
+    $title = $exif['FILE']['FileName'];
+    $alt = $exif['IFD0']['ImageDescription'];
+    $byline = $exif['IFD0']['Artist'];
+    $project = substr($exif['FILE']['FileName'], 0, 3);
+    $node->title = $title;
+    $node->field_file_image_alt_text['und'][0]['value'] = $alt;
+    $node->field_file_image_title_text['und'][0]['value'] = $alt;
+    $node->field_byline['und'][0]['value'] = $byline;
+    $node->field_project_code['und'][0]['value'] = $project;
+  }
+}
+
+function liv_core_node_presave($node) {
+  if ($node->type == "city") {
+    $state = node_load($node->field_state['und'][0]['target_id']);
+    $county = node_load($node->field_county['und'][0]['target_id']);
+    $city_fips = $node->field_fips['und'][0]['value'];
+    if (!empty($state && $county && $city_fips)) {
+      $state_fips = $state->field_fips['und'][0]['value'];
+      $county_fips = $county->field_fips['und'][0]['value'];
+      $city_fips = $node->field_fips['und'][0]['value'];
+      $node->field_liv_master_fips['und'][0]['value'] = $state_fips."-".$county_fips."-".$city_fips;
+    }
+    if (empty($node->field_geo['und'][0]['geo_type'])) {
+      $address = $node->title."+".$state->field_usps_code['und'][0]['value'];
+      $prepAddr = str_replace(' ','+',$address);
+      $geocode=file_get_contents('http://maps.google.com/maps/api/geocode/json?address='.$prepAddr.'&sensor=false&key=AIzaSyD7g1O0vVJOx5uuhrqzTWyk3nVWyPsXNZM');
+      $output= json_decode($geocode);
+      $latitude = $output->results[0]->geometry->location->lat;
+      $longitude = $output->results[0]->geometry->location->lng;
+      $node->field_geo['und'][0]['lat'] = $latitude;
+      $node->field_geo['und'][0]['top'] = $latitude;
+      $node->field_geo['und'][0]['bottom'] = $latitude;
+      $node->field_geo['und'][0]['lon'] = $longitude;
+      $node->field_geo['und'][0]['right'] = $longitude;
+      $node->field_geo['und'][0]['left'] = $longitude;
+      $node->field_geo['und'][0]['geo_type'] = "pint";
+    }
+  }
+}
+*/
+
+function liv_core_json(){
+  //drupal_set_message($_GET['search_api_views_fulltext']);
+  $view = views_get_view_result('find_a_city','block_1',array('search_api_views_fulltext'=>$_GET['search_api_views_fulltext']));
+  $r=array();
+  //print_r($view);
+  foreach($view as $city){
+    //todo determine json array structure for autocomplete endpoint
+    $n = city_node_load($city->entity);
+    $path = drupal_get_path_alias('node/'.$n->nid);
+    $r[] = array('city'=>$n->title,'stateCode'=>strtolower($n->state->field_state_code[LANGUAGE_NONE][0]['value']),'state'=>$n->state->title,'path'=>$path,'type'=>$n->type);
+  }
+  return drupal_json_output($r);
+}
+/**
+ * Implements hook_pathauto_pattern_alter().
+ *
+function liv_core_pathauto_pattern_alter(&$pattern, array $context) {
+  // Alter any node entity path patterns we need to
+  if (isset($context['data']['node'])) {
+    $node = $context['data']['node'];
+    if ($node == "article-standard") {
+      $pattern = '[node:title]';
+    }
+  }
+}
+ */

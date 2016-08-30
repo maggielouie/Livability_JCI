@@ -1,0 +1,91 @@
+<?php
+
+function footer_menu_block_block_info() {
+  $blocks['footer_menu'] = array(
+    'info' => t('Footer Menu'),
+    'status' => TRUE,
+    'region' => -1,
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ *
+ * This hook declares configuration options for blocks provided by this module.
+ */
+function footer_menu_block_block_configure($delta = '') {
+  // The $delta parameter tells us which block is being configured.
+  // In this example, we'll allow the administrator to customize
+  // the text of the 'configurable text string' block defined in this module.
+  $form = array();
+  if ($delta == 'footer_menu') {
+    $form['menu_left'] = array (
+      '#type' => 'select',
+      '#title' => t('Left Menu'),
+      '#options' => menu_get_menus(),
+    );
+    $form['menu_left']['#options'] = array('none' => '- None -') + $form['menu_left']['#options'];
+    $form['menu_right'] = array (
+      '#type' => 'select',
+      '#title' => t('Right Menu'),
+      '#options' => menu_get_menus(),
+    );
+    $form['menu_right']['#options'] = array('none' => '- None -') + $form['menu_left']['#options'];
+   return $form;
+  }
+}
+
+function footer_menu_block_block_save($delta = '', $edit = array()) {
+  if ($delta == 'footer_menu') {
+    if ($edit['menu_left'] == 'none') {
+      variable_del('footer_menu_left');
+    }
+    else {
+      variable_set('footer_menu_left', $edit['menu_left']);
+    }
+    if ($edit['menu_right'] == 'none') {
+      variable_del('footer_menu_right');
+    }
+    else {
+      variable_set('footer_menu_right', $edit['menu_right']);
+    }
+  }
+  return;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function footer_menu_block_block_view($delta = '') {
+  //The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'footer_menu':
+      $output = '<span class="site-links">';
+      $menu_left = variable_get('footer_menu_left', '');
+      $menu_right = variable_get('footer_menu_right', '');
+      if (!empty($menu_left)) {
+        $left = menu_tree_all_data($menu_left);
+        menu_tree_add_active_path($left);
+        $leftmenu = menu_tree_output($left);
+        $leftmenu = drupal_render($leftmenu);
+        $leftmenu = str_replace('"menu"', '"left"', $leftmenu);
+        $output .= $leftmenu;
+      }
+      if (!empty($menu_right)) {
+        $right = menu_tree_all_data($menu_right);
+        menu_tree_add_active_path($right);
+        $rightmenu = menu_tree_output($right);
+        $rightmenu = drupal_render($rightmenu);
+        $rightmenu = str_replace('"menu"', '"left"', $rightmenu);
+        $output .= $rightmenu;
+      }
+      $output .= '</span>';
+      $block['content']['#markup'] = $output;
+      break;
+  }
+  return $block;
+}

@@ -1,0 +1,4 @@
+name = "Best Places Sidebar block"
+description = "Provides a block with Top100 plus 4 recent Best Places"
+core = 7.x
+package = JCI

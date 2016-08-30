@@ -1,0 +1,96 @@
+<?php
+/**
+* Livability Taboola Blocks
+*
+* Displays Taboola blocks
+*
+*/
+
+function liv_taboola_blocks_block_info() {
+  // This example comes from node.module.
+  $blocks['taboola_below_main_column'] = array(
+    'info' => t('Taboola - below-main-column'),
+  );
+  $blocks['taboola_below_article_thumbnails'] = array(
+    'info' => t('Taboola - below-article-thumbnails'),
+  );
+  $blocks['taboola_endslate'] = array(
+    'info' => t('Taboola - endslate'),
+  );
+  return $blocks;
+}
+
+function liv_taboola_blocks_block_view($delta = '') {
+  switch ($delta) {
+    case 'taboola_below_main_column':
+      $block['subject'] = t('');
+      $block['content'] = array(
+        '#markup' => '<div class="padded grey-bg" style="margin-top:20px;"><span class="taboola-title">From Around the Web</span><div id="taboola-below-main-column-mix"></div></div>
+<script type="text/javascript">
+    window._taboola = window._taboola || [];
+    _taboola.push({mode:\'thumbs-2r\', container:\'taboola-below-main-column-mix\', placement:\'below-main-column\', target_type:\'mix\'});
+</script>',
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_header.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_footer.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+          ),
+        ),
+      );
+      break;
+    case 'taboola_below_article_thumbnails':
+      $block['subject'] = t('');
+      $block['content'] = array(
+        '#markup' => '<div class="padded grey-bg" style="margin-top:20px;"><span class="taboola-title">From Around the Web</span><div id="taboola-below-article-thumbnails"></div></div>
+<script type="text/javascript">
+    window._taboola = window._taboola || [];
+    _taboola.push({mode:\'thumbs-2r\', container:\'taboola-below-article-thumbnails\', placement:\'Below Article Thumbnails\', target_type:\'mix\'});
+</script>',
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_header.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_footer.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+          ),
+        ),
+      );
+      break;
+    case 'taboola_endslate':
+      $block['subject'] = t('');
+      $block['content'] = array(
+        '#markup' => '<div class="padded grey-bg" style="margin-top:20px;"><span class="taboola-title">From Around the Web</span><div id="taboola-endslate-mix"></div></div>
+<script type="text/javascript">
+    window._taboola = window._taboola || [];
+    _taboola.push({mode:\'thumbs-3r\', container:\'taboola-endslate-mix\', placement:\'endslate\', target_type:\'mix\'});
+</script>',
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_header.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+            drupal_get_path('module', 'liv_taboola_blocks') . '/js/liv_taboola_footer.js' => array(
+              'type' => 'file',
+              'scope' => 'header',
+            ),
+          ),
+        ),
+      );
+      break;
+  }
+  return $block;
+    
+}
+
+

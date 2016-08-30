@@ -1,0 +1,94 @@
+<?php
+/**
+ * @file
+ * Code for the livability states feature.
+ */
+
+include_once 'livability_states.features.inc';
+
+// Add custom Show More Posts ajax
+
+/**
+ * Implements hook_menu().
+ */
+function livability_states_menu() {
+  $items['livability_states/views/ajax'] = array(
+    'title' => 'Liv Blog',
+    'page callback' => 'livability_states_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback, load next row (slide) by ajax.
+ */
+function livability_states_ajax() {
+  $view = views_get_view('state_content_cards');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['nid']) && $_REQUEST['nid'] != '') {
+    $view->args[] = $_REQUEST['nid'];
+  }
+  $view->offset = $offset;
+  $view->execute('block');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $thisrow = $index+$offset+1;
+    $eo = ($thisrow % 2 == 0) ? 'even' : 'odd';
+    $rows[] = '<li class="one-third">' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+
+function livability_states_preprocess_page(&$vars, $hook) {
+  if(isset($vars['node']) && $vars['node']->type == 'state') {
+    drupal_add_js(drupal_get_path('module', 'livability_states') . '/js/add_more.js');
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function livability_states_preprocess_node(&$vars) {
+  // Only apply to full page nodes.
+  if ($vars['page'] == 1) {
+    // Get all featured city images for cities in this state.
+    $result = db_query('SELECT DISTINCT(n.nid), n.title, field_featured_image_fid as fid
+      FROM {node} n
+      JOIN {field_data_field_featured_image} i ON i.entity_id = n.nid
+      JOIN {field_data_field_state} s ON s.entity_id = n.nid
+      WHERE s.field_state_target_id = :state_nid',
+      array (
+        ':state_nid' => $vars['node']->nid,
+      )
+    );
+
+    $images = array();
+
+    // Build list of images for slider.
+    while ($row = $result->fetchObject()) {
+      $image = (array) file_load($row->fid);
+      $image['title'] = $row->title . ', ' . $vars['node']->title;
+      $image['topic'] = 'Featured City';
+      $image['link'] = url('node/' . $row->nid);
+
+      $images[] = $image;
+    }
+
+    $slider = count($images) ? new liv_slider($images, 'hero', 'Explore &raquo;') : NULL;
+    $vars['featured_city_images'] = $slider;
+  }
+}

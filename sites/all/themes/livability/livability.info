@@ -1,0 +1,98 @@
+name = Livability
+description = .
+core = 7.x
+base theme = bootstrap
+version = "7.x-2.0"
+project = "livability"
+datestamp = "1384678107"
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Regions
+;;;;;;;;;;;;;;;;;;;;;
+
+regions[navigation]     = 'Navigation'
+regions[social]         = 'Social Icons'
+regions[search]         = 'Search'
+regions[share]          = 'Share'
+regions[header]         = 'Top Bar'
+regions[highlighted]    = 'Highlighted'
+regions[help]           = 'Help'
+regions[content]        = 'Content'
+regions[sidebar_1]      = 'Sidebar 1'
+regions[sidebar_2]      = 'Sidebar 2'
+regions[footer]         = 'Footer'
+regions[footer_about]   = 'Footer About'
+regions[footer_menu]    = 'Footer Menu'
+regions[footer_links]   = 'Footer Links'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
+
+; Ads
+regions[liv_ad_lb_top]         = 'Leader Board Top'
+regions[liv_ad_lb_mid]         = 'Leader Board Mid'
+regions[liv_ad_lb_bottom]      = 'Leader Board Bottom'
+regions[liv_ad_mr_top]         = 'Medium Rectangle Top'
+regions[liv_ad_mr_mid]         = 'Medium Rectangle Mid'
+regions[liv_ad_mr_bottom]      = 'Medium Rectangle Bottom'
+
+; Homepage
+regions[liv_home_hero]          = 'Homepage Hero'
+regions[liv_home_search_city]   = 'Homepage Search City'
+regions[liv_home_search_state]  = 'Homepage Search State'
+regions[liv_home_featured]      = 'Homepage Featured'
+regions[liv_home_content]       = 'Homepage Content'
+regions[liv_home_sidebar]       = 'Homepage Sidebar'
+regions[liv_home_more]          = 'Homepage More'
+
+; City
+regions[liv_city_nav]           = 'City Nav'
+regions[liv_city_body]          = 'City Body'
+regions[liv_city_featured_img]  = 'City Featued with Image'
+regions[liv_city_featured]      = 'City Featued'
+regions[liv_city_badge]         = 'City Badge Image'
+regions[liv_city_lists]         = 'City Lists'
+regions[liv_city_articles]      = 'City Articles'
+regions[liv_city_trulia]        = 'City Trulia'
+regions[liv_city_1]             = 'City Col 1'
+regions[liv_city_2]             = 'City Col 2'
+regions[liv_city_3]             = 'City Col 3'
+regions[liv_city_4]             = 'City Col 4'
+regions[liv_city_5]             = 'City Col 5'
+regions[liv_city_6]             = 'City Col 6'
+regions[liv_city_7]             = 'City Col 7'
+regions[liv_city_8]             = 'City Col 8'
+
+
+; State
+regions[liv_state_nav]           = 'State Nav'
+regions[liv_state_body]          = 'State Body'
+regions[liv_state_featured_img]  = 'State Featued with Image'
+regions[liv_state_featured]      = 'State Featued'
+regions[liv_state_lists_100]     = 'State Lists 100'
+regions[liv_state_lists_10]      = 'State Lists 10'
+regions[liv_state_articles]      = 'State Articles'
+regions[liv_state_trulia]        = 'State Trulia'
+regions[liv_state_1]             = 'State Col 1'
+regions[liv_state_2]             = 'State Col 2'
+regions[liv_state_3]             = 'State Col 3'
+regions[liv_state_4]             = 'State Col 4'
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Stylesheets
+;;;;;;;;;;;;;;;;;;;;;
+
+stylesheets[all][] = css/style.css
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Javascript
+;;;;;;;;;;;;;;;;;;;;;
+
+scripts[] = js/min/bootstrap-min.js
+scripts[] = js/min/master-min.js
+
+;;;;;;;;;;;;;;;;;;;;;
+;; CDN
+;;;;;;;;;;;;;;;;;;;;;
+
+settings[bootstrap_cdn] = '0'
+

@@ -1,0 +1,6 @@
+name = Partner Icon Block
+description = A configurable block for icons in the footer
+package = Livability
+core = 7.x
+dependencies[] = block
+

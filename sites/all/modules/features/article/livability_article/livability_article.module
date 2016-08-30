@@ -1,0 +1,365 @@
+<?php
+/**
+ * @file
+ * Code for the Livability Article feature.
+ */
+
+include_once 'livability_article.features.inc';
+
+function livability_article_form_article_node_form_alter(&$form, &$form_state, $form_id) {
+  if (!isset($form_state['node']->nid)) {
+    $form['field_author']['und']['#default_value'] = $form_state['build_info']['args'][0]->uid;
+  }
+
+  $form['title']['#title'] = 'Title (Web Headline)';
+  $form['title']['#size'] = 120;
+  $form['title']['#description'] = '65  Maximum recommended characters - including spaces';
+
+  $form['field_short_description']['und'][0]['value']['#type'] = 'textarea';
+  $form['field_meta_description']['und'][0]['value']['#type'] = 'textarea';
+/*
+  $form['actions']['save_and_edit'] = $form['actions']['submit'];
+  $form['actions']['save_and_edit']['#submit'][0] = 'livability_article_form_submit';
+  $form['actions']['save_and_edit']['#value'] = 'Save and Edit';
+
+  $form['extra_save_and_edit']['submit'] = $form['actions']['save_and_edit'];
+  $form['extra_save_and_edit']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 2.8em; right: 5em';
+  if ($form['#node']->status == 0) {
+    $form['extra_save_draft_submit']['submit'] = $form['actions']['draft'];
+    $form['extra_save_draft_submit']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 2.8em; right: 5em';
+    $form['extra_save']['submit'] = $form['actions']['submit'];
+    $form['extra_save']['submit']['#value'] = 'Publish';
+    $form['extra_save']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 2.8em; right: 0';
+  } else {
+    $form['extra_save']['submit'] = $form['actions']['submit'];
+    $form['extra_save']['submit']['#value'] = 'Save';
+    $form['extra_save']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 2.8em; right: 0';
+  }
+  */
+}
+
+function livability_article_node_validate($node, $form, &$form_state) {
+  $form_id = $form_state['build_info']['form_id'];
+
+  if ($form_id == 'article_node_form') {
+    if (isset($form_state['values']['field_place']['und'][0])) {
+      $primaryhostcount = 0;
+      foreach ($form_state['values']['field_place']['und'] as $place) {
+        if (is_array($place)) {
+          if ($place['field_primary_host']['und'][0]['value'] == 1) {
+            // no primay host if no primary place
+            if (!isset($place['field_place_ref']['und']) || is_null($place['field_place_ref']['und'][0]['target_id']) || empty($place['field_place_ref']['und'][0]['target_id'])) {
+              form_set_error('field_place', 'Please select a <b>Primary name</b>, or un-select <b>Primary Host</b>.');
+            }
+            $primaryhostcount++;
+          }
+        }
+      }
+      if ($primaryhostcount > 1) {
+        form_set_error('field_place', 'There may be only one <b>Primary Host</b>.');
+      }
+    }
+    if (isset($form_state['values']['field_category']['und'][0])) {
+      $primarycatcount = 0;
+      foreach ($form_state['values']['field_category']['und'] as $cat) {
+        if (is_array($cat)) {
+          if ($cat['field_primary_category']['und'][0]['value'] == 1) {
+            $primarycatcount++;
+          }
+        }
+      }
+      if ($primarycatcount > 1) {
+        form_set_error('field_category', 'There may be only one <b>Primary Category</b>.');
+      }
+    }
+  }
+}
+
+function livability_article_form_submit($form, &$form_state) {
+  $node = node_form_submit_build_node($form, $form_state);
+  $insert = empty($node->nid);
+  node_save($node);
+  $node_link = l(t('view'), 'node/' . $node->nid);
+  $watchdog_args = array(
+    '@type' => $node->type,
+    '%title' => $node->title,
+  );
+  $t_args = array(
+    '@type' => node_type_get_name($node),
+    '%title' => $node->title,
+  );
+
+  if ($insert) {
+    watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been created.', $t_args));
+  }
+  else {
+    watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been updated.', $t_args));
+  }
+  if ($node->nid) {
+    $form_state['values']['nid'] = $node->nid;
+    $form_state['nid'] = $node->nid;
+    $destination = '<front>';
+    if (node_access('view', $node)) { $destination = 'node/' . $node->nid; }
+    if (node_access('update', $node)) { $destination = 'node/' . $node->nid .'/edit/';}
+    $form_state['redirect'] = $destination;
+  }
+  else {
+    // In the unlikely case something went wrong on save, the node will be
+    // rebuilt and node form redisplayed the same way as in preview.
+    drupal_set_message(t('The post could not be saved.'), 'error');
+    $form_state['rebuild'] = TRUE;
+  }
+  // Clear the page and block caches.
+  cache_clear_all();
+}
+
+
+function livability_article_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'article') {
+    $node = $context['data']['node'];
+    $alias = livability_article_alias_maker($node);
+  }
+}
+
+function livability_article_alias_maker($node) {
+  if ($node->type == 'article') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $alias = '';
+    if (isset($node->field_place['und']) && !is_null($node->field_place['und'])) {
+      foreach($node->field_place['und'] as $p => $place) {
+        $place_entity = entity_load('field_collection_item',array($node->field_place['und'][$p]['value']));
+        if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value']) && $place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value'] == 1 && isset($place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'])) {
+          $primaryplaceid = $place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'][0]['target_id'];
+          $primeplace = node_load($primaryplaceid);
+          // Add city to alias if the prime place is a city.
+          if ($primeplace->type == 'city') {
+            $state = node_load($primeplace->field_state['und'][0]['target_id']);
+            $alias .= pathauto_cleanstring($state->field_state_code['und'][0]['value']) . '/';
+          }
+          $alias .= pathauto_cleanstring($primeplace->title) .'/';
+        }
+      }
+    }
+
+    $moving_subterm = NULL;
+
+    if (isset($node->field_category['und']) && !is_null($node->field_category['und'])) {
+      foreach($node->field_category['und'] as $cat) {
+        $primarycattid = null;
+        $category_entity = entity_load('field_collection_item',array($cat['value']));
+        if (isset($category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value']) && $category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value'] == 1 && isset($category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'])) {
+          $primarycattid = $category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'][0]['tid'];
+          $primecat = taxonomy_term_load($primarycattid);
+
+          // See if this is a sub-term of Moving.
+          $moving_subterm = db_query('SELECT * FROM {taxonomy_term_hierarchy} WHERE parent = 105 AND tid = :tid', array(
+            ':tid' => $primarycattid,
+          ))->fetchColumn();
+
+          // If this is a moving sub-term, append "moving/".
+          if ($moving_subterm) {
+            $alias .= 'moving/';
+          }
+
+          $alias .= pathauto_cleanstring($primecat->name) . '/';
+        }
+      }
+    }
+    $alias .= pathauto_cleanstring($node->title);
+
+    // Append topics to non moving  and non local articles.
+    if (!$moving_subterm && !isset($primeplace) ) {
+      $alias = 'topics/' . $alias;
+    }
+	$redirects = redirect_load_multiple(array(),array('redirect'=> 'node/'.$node->nid));
+	foreach($redirects as $rid => $redirect){
+		if($redirect->source == $alias){
+			redirect_delete($rid);
+		}
+	}
+	return $alias;
+  }
+}
+
+function livability_article_preprocess_page(&$vars, $hook) {
+  // breadcrumb
+  if (isset($vars['node']) && (is_object($vars['node']))) {
+    if ($vars['node']->type == 'article') {
+      $crumbs = array();
+      $crumbs[] = l(t('Livability.com'), '<front>');
+      $node = $vars['node'];
+      $pagetitle = '';
+      if (isset($node->field_place['und']) && !is_null($node->field_place['und'])) {
+        foreach($node->field_place['und'] as $p => $place) {
+          $place_entity = entity_load('field_collection_item',array($place['value']));
+          if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value']) && $place_entity[$node->field_place['und'][$p]['value']]->field_primary_host['und'][0]['value'] == 1) {
+            if (isset($place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'])) {
+				      $primaryplaceid = $place_entity[$node->field_place['und'][$p]['value']]->field_place_ref['und'][0]['target_id'];
+				      $primeplace = node_load($primaryplaceid);
+				      $countyquery = 'SELECT title FROM {node} n WHERE n.nid = :d';
+				      if (isset($primeplace->field_county['und'])) {
+				        $countyname = db_query($countyquery,  array(':d' => $primeplace->field_county['und'][0]['target_id']))->fetchAll();
+                $vars['countyurl'] = url('node/' . $primeplace->field_county[LANGUAGE_NONE][0]['target_id']);
+				      }
+				      $metroareaquery = 'SELECT title FROM {node} n WHERE n.nid = :primecity';
+              if (isset($primeplace->field_city['und'])) {
+                $metroname = db_query($metroareaquery, array(':primecity' => $primeplace->field_city['und'][0]['target_id']))->fetchALL();
+              }
+              $citystate = node_load($primeplace->field_state['und'][0]['target_id']);
+              if (!empty($citystate->field_state_code['und'][0]['value'])){
+                $state = $citystate->field_state_code['und'][0]['value'];
+                $vars['state'] = $state;
+              }
+              if(!empty($state)){
+                $crumbs[] = l($primeplace->title.', '.$state, 'node/'.$primeplace->nid);
+              }else {
+                $crumbs[] = l($primeplace->title, 'node/'.$primeplace->nid);
+              }
+              $vars['cityname'] = $primeplace->title;
+              $vars['cityurl'] = url('node/' . $primaryplaceid);
+              if (isset($metroname[0])) {
+                $vars['metroname'] = $metroname[0]->title;
+              }
+              else { $vars['metroname'] = FALSE; }
+              if (isset($countyname[0])) {
+                $vars['countyname'] = $countyname[0]->title;
+              }
+              else { $vars['countyname'] = FALSE; }
+              if (!empty($node->field_page_title)) {
+                $pagetitle = $node->field_page_title['und'][0]['value'];
+              }
+              else {
+                $pagetitle = $node->title;
+              }
+              if(!empty($state)){
+                $pagetitle .= ' | ' . $vars['cityname'] .', '. $state;
+              }else {
+                $pagetitle .= ' | ' . $vars['cityname'];
+              }
+              $site_slogan = variable_get('site_slogan');
+              drupal_set_title($pagetitle);
+            }
+          }
+        }
+      }
+
+      $primecat = '';
+
+      if (isset($node->field_category['und']) && !is_null($node->field_category['und'])) {
+        foreach($node->field_category['und'] as $cat) {
+          $category_entity = entity_load('field_collection_item',array($node->field_category['und'][0]['value']));
+          if (isset($category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value']) && $category_entity[$node->field_category['und'][0]['value']]->field_primary_category['und'][0]['value'] == 1 && isset($category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'])) {
+            $primarycattid = $category_entity[$node->field_category['und'][0]['value']]->field_category_ref['und'][0]['tid'];
+            $primecat = taxonomy_term_load($primarycattid);
+            $globcatname = $primecat->name;
+            $globcaticon = strtolower(str_replace(' ', '-', $primecat->name));
+            $vars['globcat'] = $globcatname;
+            $vars['globcaticon'] = $globcaticon;
+            $crumbs[] = l($primecat->name, 'taxonomy/term/'.$primecat->tid);
+          }
+        }
+      }
+
+      // Moving or topics articles.
+      if (preg_match('/^moving\//', drupal_get_path_alias()) || preg_match('/^topics\//', drupal_get_path_alias())) {
+        $pagetitle = '';
+        if (!empty($node->field_page_title)) {
+          $pagetitle = $node->field_page_title['und'][0]['value'];
+        }
+        else {
+          $pagetitle = $node->title;
+        }
+        if (!empty($primecat->name)) {
+          $pagetitle .= ' | ' . $primecat->name;
+        }
+        drupal_set_title($pagetitle);
+      }
+//      drupal_set_breadcrumb($crumbs);
+    }
+  }
+
+  if (arg(0) == 'topics') {
+    drupal_add_js(drupal_get_path('module', 'livability_article') . '/js/add_more.js');
+    $title = ucwords(drupal_get_title());
+    drupal_set_title($title);
+  }
+}
+
+// Add custom Show More Posts ajax
+
+/**
+ * Implements hook_menu().
+ */
+function livability_article_menu() {
+  $items['liv_topics/views/ajax'] = array(
+    'title' => 'Liv Topics',
+    'page callback' => 'liv_topics_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback, load next row (slide) by ajax.
+ */
+function liv_topics_ajax() {
+  $view = views_get_view('topics');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['cat']) && $_REQUEST['cat'] != '') {
+    $view->args[] = $_REQUEST['cat'];
+  }
+  $view->execute('page');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $rows[] = '<li class="one-third">' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+
+function livability_article_preprocess_views_view(&$vars) {
+  if (($vars['name'] == 'topics' || $vars['name'] == 'moving') && $vars['display_id'] == 'page') {
+		$vars['classes_array'][] = 'articles';
+		$vars['classes_array'][] = 'grey-bg';
+		$vars['classes_array'][] = 'shadow-inset-lr';
+	}
+}
+
+/**
+ * Liv Article Get Icon Class
+ *
+ * @param string $title
+ *  Title to be converted to icon.
+ *
+ * @return string
+ *  Icon class.
+ */
+function livability_article_get_icon($title) {
+  $machineName = strtolower(str_replace(' ', '-', $title));
+  $icon = $machineName;
+  if ($machineName == 'moving-tips') {
+    $icon = 'truck';
+  }
+  elseif ($machineName == 'how-to-guides') {
+    $icon = 'how-to-guides';
+  }
+  elseif ($machineName == 'moving-checklists') {
+    $icon = 'checklist';
+  }
+
+  return $icon;
+}

@@ -1,0 +1,36 @@
+<?php
+/**
+ * @file
+ *
+ * Update hooks for find_city module.
+ */
+
+/**
+ * Add choose-a-city redirects.
+ */
+function find_city_update_7000() {
+  // Delete u redirects which aren't working.
+  db_query('DELETE FROM {redirect} WHERE source = :source', array(
+    ':source' => 'choose-a-city/u',
+  ));
+
+  // Add redirects for every other letter.
+  foreach (range('b', 'z') as $letter) {
+    $redirect = new stdClass();
+
+    module_invoke(
+      'redirect',
+      'object_prepare',
+      $redirect,
+      array(
+        'source' => 'choose-a-city/' . $letter,
+        'source_options' => array(),
+        'redirect' => 'find-city',
+        'redirect_options' => array(),
+        'language' => LANGUAGE_NONE,
+      )
+    );
+
+    module_invoke('redirect', 'save', $redirect);
+  }
+}

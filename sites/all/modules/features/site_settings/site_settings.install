@@ -1,0 +1,21 @@
+<?php
+/**
+ * @file
+ *
+ * Site settings install file.
+ */
+
+/**
+ * Update basic page description.
+ */
+function site_settings_update_7000() {
+  db_query('UPDATE {node_type} SET description = :description WHERE type = :page', array(':page' => 'page', ':description' => 'Use basic pages for your static content.'));
+  return t('Updated basic page description.');
+}
+
+/**
+ * Enable "Track display features" feature in Google Analytics.
+ */
+function site_settings_update_7001() {
+  variable_set('googleanalytics_trackdoubleclick', 1);
+}

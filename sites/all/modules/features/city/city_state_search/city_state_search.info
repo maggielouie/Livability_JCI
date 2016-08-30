@@ -1,0 +1,16 @@
+name = City State Search Solr
+description = elastic search settings and city state search view
+core = 7.x
+package = Livability
+version = 7.x-2.0
+project = city_state_search
+dependencies[] = search_api
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[search_api_index][] = city_state_search_solr
+features[views_view][] = find_a_city
+features_exclude[dependencies][ctools] = ctools
+features_exclude[dependencies][entity] = entity
+mtime = 1436485067
+project path = sites/all/modules/liv

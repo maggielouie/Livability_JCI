@@ -1,0 +1,29 @@
+<?php
+/**
+ * @file
+ * Code for the Helper Views feature.
+ */
+
+include_once 'helper_views.features.inc';
+
+function helper_views_views_pre_render(&$view) {
+  if (($view->name == 'place_reference') && ($view->current_display == 'entityreference_1')) {
+    $result = $view->result;
+    foreach ($result as $r => &$location) {
+      switch($location->node_type) {
+        case 'area':
+          $location->node_title .= ' (Metro Area)';
+          break;
+        case 'city':
+          $location->node_title .= ' (City; ' . $location->field_field_state[0]['rendered']['#markup'] . ')';
+          break;
+        case 'county':
+          $location->node_title .= ' (County; ' . $location->field_field_state[0]['rendered']['#markup'] . ')';
+          break;
+        case 'state':
+          $location->node_title .= ' (State)';
+          break;
+      }
+    }
+  }
+}

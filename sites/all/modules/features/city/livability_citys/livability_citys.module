@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Livability Citys feature.
+ */
+
+include_once 'livability_citys.features.inc';

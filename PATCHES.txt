@@ -1,0 +1,38 @@
+Drupal Core
+-----------
+
+Node: node_access breaks any query that has node table appearing twice with a left join
+https://www.drupal.org/node/1349080
+https://www.drupal.org/files/issues/1349080-195-d7-move-access-to-join-condition.patch
+
+Contrib
+-------
+
+Menu Views: TypeError: settings.menu_views is undefined
+https://www.drupal.org/node/2279855
+https://www.drupal.org/files/issues/menu_views-js-typeerroe-settings-undefined.patch
+
+Navbar: TypeError: Drupal.navbar.height is not a function
+https://www.drupal.org/node/2172183
+https://www.drupal.org/files/issues/navbar_tableheader-2172183-8.patch
+
+Pathauto: Add drush commands for bulk alias updating/deleting
+https://www.drupal.org/node/867578
+https://www.drupal.org/files/pathauto-add-drush-support-867578-42.patch
+
+Subpathauto: Subpathauto causing admin pages to appear in default theme
+https://www.drupal.org/node/1814516
+https://www.drupal.org/files/issues/subpathauto-not_loading_admin_theme-1814516-18.patch
+
+View_unpublished: Respect View_Unpublished permissions on the Content overview page
+https://www.drupal.org/node/1192074
+https://www.drupal.org/files/issues/view_unpublished-content_admin_fix-1192074-75.patch
+
+Views: Edit link destination incorrect when using AJAX-enabled views
+https://www.drupal.org/node/1036962
+https://www.drupal.org/files/views-fix-destination-link-for-ajax-1036962-29.patch
+
+Libraries
+-------
+
+No libraries patches.

@@ -1,0 +1,525 @@
+<?php
+/**
+ * @file
+ * Module file for liv_meta.
+ */
+
+/**
+ * @defgroup liv_meta Liv Meta
+ * @ingroup livability
+ * @{
+ * inserts meta tags
+ *
+ */
+
+function liv_meta_preprocess_html(&$vars) {
+  if($GLOBALS['theme_key'] == 'liv') {
+
+    $title = drupal_get_title();
+    $alias = drupal_get_path_alias($_GET['q']);
+
+    if (drupal_is_front_page()) {
+      $vars['head_title'] = "Make Your Move to One of America's Best Places to Live | Livability";
+      $meta_description = 'Livability showcases America\'s best places to live, covering research-driven topics about communities around the country through engaging stories, photography and video.';
+    } else {
+      //$vars['head_title'] = ($vars['head_title'] ? $vars['head_title'] : drupal_get_title());
+      $vars['head_title'] = drupal_get_title();
+    }
+
+    if (isset($vars['page']['content']['system_main']['nodes'])) {
+      $nodes = $vars['page']['content']['system_main']['nodes'];
+      foreach ($nodes as $nid => $node) {
+        if (is_numeric($nid)) {
+
+          if (in_array($node['#node']->type, array('article', 'best_places', 'blog_post', 'top_100', 'top_cities_list'))) {
+            if (isset($node['#node']->field_meta_description['und'])) {
+              $meta_description = $node['#node']->field_meta_description['und'][0]['value'];
+            }
+            else {
+              if (isset($node['#node']->field_deck['und'])) {
+                $meta_description = $node['#node']->field_deck['und'][0]['value'];
+              }
+              else  {
+                if (isset($node['#node']->field_short_description['und'])) {
+                  $meta_description = $node['#node']->field_short_description['und'][0]['value'];
+                }
+                else {
+                  if (isset($node['#node']->body['und'])) {
+                    $meta_description = substr(trim(strip_tags($node['#node']->body['und'][0]['value'])), 0, 165);
+                  }
+                }
+              }
+            }
+            if (isset($node['#node']->field_image['und'])) {
+              $uri = $node['#node']->field_image['und'][0]['uri'];
+              $meta_img = file_create_url($uri);
+            }
+          }
+          if (in_array($node['#node']->type, array('city', 'area', 'state'))) {
+            $meta_description = 'Learn what makes ' . $node['#node']->title . ', ' . $node['#node']->field_state['und'][0]['entity']->field_state_code['und'][0]['value'] . ' a best place to live, including information about real estate, schools, employers, things to do and more.';
+          }
+          if ($node['#node']->type == 'city') {
+            if (isset($node['#node']->field_featured_image['und'])) {
+              $meta_img = file_create_url($node['#node']->field_featured_image['und'][0]['uri']);
+            }
+          }
+          if (in_array($node['#node']->type, array('county, metro_area'))) {
+            if (isset($node['#node']->field_banner_image['und'])) {
+              $meta_img = file_create_url($node['#node']->field_banner_image['und'][0]['uri']);
+            }
+          }
+          if ($node['#node']->type == 'metro_area') {
+            $meta_description = 'Learn more about the best places to live in the ' . $node['#node']->field_metro_shortname[LANGUAGE_NONE][0]['value'] . ' area including information on schools, business, health and real estate in the metropolitan area.';
+            $vars['head_title'] = 'Best places to live in the ' . $vars['head_title'] . ' | Livability';
+          }
+          if ($node['#node']->type == 'city' && NULL == arg(2)) {
+            $vars['head_title'] .= ' - Best Places to Live | Livability';
+          }
+          if (in_array($node['#node']->type, array('state'))) {
+            $meta_description = 'Learn more about ' . $node['#node']->title . ' and the best places to live in ' . $node['#node']->title . ' including information on schools, business, health, real estate and things to do at the state, metro, county and city level.';
+          }
+          if (in_array($node['#node']->type, array('county'))) {
+            $county_title = $node['#node']->title . ', ' . $node['#node']->state->title/*field_state_code[LANGUAGE_NONE][0]['value']*/
+            ;
+            $meta_description = 'Learn more about the best places to live in ' . $county_title . ' including information on schools, business, health, real estate and things to do at the state, metro, county and city level.';
+
+            $vars['head_title'] = $county_title . ' | Livability';
+          }
+          if ($node['#node']->type == 'digital_magazine') {
+            $c = getCityContext();
+            if ($c !== false) {
+              $state = $c->state->field_state_code[LANGUAGE_NONE][0]['value'];
+              $city = $c->title;
+              $meta_description = 'Livability ' . $city . ', ' . $state . ' magazine features engaging articles and photography highlighting why ' . $city . ', ' . $state . ' is one the best places to live. Browse the digital edition here.';
+              $vars['head_title'] = $city . ', ' . $state . ' Magazine | Livability';
+            }
+            if (isset($node['#node']->field_image['und'])) {
+              $meta_img = file_create_url($node['#node']->field_image['und'][0]['uri']);
+            }
+          }
+          if ($node['#node']->type == 'gallery') {
+            $galcity = node_load($node['#node']->field_gallery_city['und'][0]['target_id']);
+            $meta_description = 'See high-quality, professional photos, images and video of ' . $galcity->title . ', ' . $galcity->state->title . ' in our Livability photo gallery. Explore the city through amazing photography.';
+            $meta_img = file_create_url($node['#node']->field_image['und'][0]['uri']);
+          }
+          if ($node['#node']->type == 'about_page') {
+            $meta_description = 'Livability explores what makes small-to-medium sized cities best places to live, including Top 10 lists and our annual Top 100 Best Places to Live rankings.';
+          }
+          if ($node['#node']->type == 'webform') {
+            switch ($node['#node']->title) {
+              case 'Contact Us':
+                $meta_description = $meta_description = 'Have something on your mind? Perhaps a question we can answer for you? We\'d love to hear from you! Contact the team at Livability with your feedback.';
+                break;
+            }
+          }
+          /*
+          // Top 100 page.
+          if ($node['#node']->type == 'top_100') {
+            $top_100_meta_desc = array(
+              2014 => 'See our 2014 ranking of the top 100 best places to live and work in the United States. Cities were ranked using the best public and private data sources.',
+              2015 => 'See our 2015 data-based ranking of the top 100 best small to mid-sized cities in the U.S. and what makes them the best places to live and work.',
+            );
+
+            if (isset($node['#node']->field_year['und'][0]['value'])) {
+              $year = substr($node['#node']->field_year['und'][0]['value'], 0, 4);
+              $meta_description = $top_100_meta_desc[$year];
+            }
+          } */
+
+          // Best Places node page.
+          if ($node['#node']->type == 'best_places') {
+            if (preg_match('/(\d+)$/', $alias, $matches)) {
+              $vars['head_title'] = $matches[1] . ' ' . $node['#node']->title . ' | Livability';
+            }
+          }
+
+          // Shopping pages.
+          if ($node['#node']->type == 'city' && preg_match('/shopping$/', $alias)) {
+            $c = getCityContext();
+            if ($c !== false) {
+              $state = $c->state->field_state_code[LANGUAGE_NONE][0]['value'];
+              $city = $c->title;
+              $meta_description = 'Read about the shopping options in ' . $city . ', ' . $state . ', including information on area malls, antique districts, downtown shopping, specialty stores and more.';
+            }
+          }
+        }
+      }
+    } elseif (arg(0) == 'metro' && NULL == arg(1)) {
+      $meta_description = 'Metro areas are some of the best places to to live in America. See the full list of United States  metropolitan areas here.';
+      $vars['head_title'] = 'Metro Areas | Livability';
+    } else {
+      if (function_exists('getCityContext')) {
+        $c = getCityContext();
+        if ($c !== false) {
+          switch (arg(2)) {
+            case 'things-to-do' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'arts-and-entertainment':
+                    $nearby = views_get_view('nearby_cities');
+                    $nearby->execute('block');
+                    $rowCount = 1;
+                    $nearcity = array();
+                    foreach ($nearby->result as $row) {
+                      if ($rowCount < 3) {
+                        $nearbyc = city_node_load($row->nid);
+                        $nearcity[] = $nearbyc->title . ', ' . $nearbyc->state->field_state_code['und'][0]['value'];
+                        $rowCount++;
+                      }
+                    }
+                    $meta_description = $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' offers a number of options for arts and entertainment';
+                    if (!empty($nearcity)) {
+                      $meta_description .= ', including a variety of things to do in the nearby cities of ' . $nearcity[0];
+                      if (isset($nearcity[1])) {
+                        $meta_description .= ' and ' . $nearcity[1];
+                      }
+                    }
+                    $meta_description .= '.';
+                    break;
+                  case 'attractions':
+                    $meta_description = 'Learn more about entertainment and attractions in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including events, festivals, museums, theater, arts and culture, heritage and more.';
+                    break;
+                  case 'events':
+                    $meta_description = 'Each year, there are a number special events in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' and in the surrounding area. Seasonal activities, festivals, carnivals are just a few of the events ' . $c->title . ' residents look forward to.';
+                    break;
+                  case 'food-and-drink':
+                    $meta_description = 'Discover the best places to eat and drink in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ', including local and regional cuisine at the best restaurants and farmers markets in the area.';
+                    break;
+                  case 'shopping':
+                    $nearby = views_get_view('nearby_cities');
+                    $nearby->execute('block');
+                    $rowCount = 1;
+                    $nearcity = array();
+                    foreach ($nearby->result as $row) {
+                      if ($rowCount < 3) {
+                        $nearbyc = city_node_load($row->nid);
+                        $nearcity[] = $nearbyc->title . ', ' . $nearbyc->state->field_state_code['und'][0]['value'];
+                        $rowCount++;
+                      }
+                    }
+                    $meta_description = $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' offers a number of options for shopping';
+                    if (!empty($nearcity)) {
+                      $meta_description .= ' both within the city limits and in the surrounding communities of ' . $nearcity[0];
+                      if (isset($nearcity[1])) {
+                        $meta_description .= ' and ' . $nearcity[1];
+                      }
+                    }
+                    $meta_description .= '.';
+                    break;
+                  case 'sports-and-recreation':
+                    $meta_description = 'Livability explores how to stay active in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ', with information about parks and indoor/outdoor sports and recreation for all ages.';
+                    break;
+                }
+              } else {
+                $meta_description = 'Livability explores the best things to do in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . '! Learn more about entertainment, parks, sports, restaurants and shopping.';
+              }
+              break;
+            case 'schools' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'public-schools';
+                    $meta_description = 'Details about the public schools in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including district information, ratings and test scores for elementary, middle and high schools in ' . $c->title . '. Provided in partnership with GreatSchools.';
+                    break;
+                  case 'private-schools';
+                    $meta_description = 'Details about the privates schools in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including all elementary, middle and high schools in ' . $c->title . ', both secular and non-secular. Provided in partnership with GreatSchools.';
+                    break;
+                  case 'colleges';
+                    $meta_description = 'Details about the colleges in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' and those in the surrounding area';
+                    break;
+
+                }
+              } else {
+                $meta_description = 'Details about the schools in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including district information, ratings and test scores for both public and private schools in ' . $c->title . '. Provided in partnership with GreatSchools.';
+              }
+              break;
+            case 'real-estate' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'housing':
+                    // $meta_description = $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' housing detail and statistics including average monthly mortgage, average monthly rent, average home values, and more.';
+                    $meta_description = 'Based on the Cost of Housing Index, housing Home ownership in ' . $c->title . ' is more/less affordable than the national average with an average monthly mortgage cost of [mortgage] and an average monthly rent of [rent.]. Approximately [owner-occupied rate] % of housing units are owner-occupied. The vacancy rate for homes is [vacancy rate].About [affordable-owners]% of owners and [affordable-renters]% of renters pay less than 30% of their incomes toward housing expenses, a measure of affordability.';
+                    break;
+                  case 'home-values':
+                    // @todo Replace [Metro Area Name] string with the correct dynamic text.
+                    $meta_description = $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' home values and how they related to both the [Metro Area Name] metro area and the rest of the State of ' . $c->state->title . '. Presented in partnership with Trulia.';
+                    break;
+                }
+              } else {
+                $meta_description = 'Real Estate data and trends for ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . '. Home Prices in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' and Trulia new home and apartment rental listings for relocation and city comparisons.';
+              }
+              break;
+            case 'business' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'major-industries' :
+                    $meta_description = 'Find information about major business industries in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including the top industries and the number of business establishments.';
+                    break;
+                  case 'employment' :
+                    $meta_description = 'Find information about employment in the ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' area, including employment rates, top employers, and top industries for job hunters.';
+                    break;
+                }
+              } else {
+                $meta_description = 'Learn more about business and employment in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' including top employers, business industries and recent employment data.';
+              }
+              break;
+            case 'health' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'healthy-lifestyle' :
+                    $meta_description = 'See how ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' residents stack up against other areas in ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' with the latest data on common health risks and healthy lifestyles.';
+                    break;
+                  case 'hospitals' :
+                    $meta_description = 'Livability provides comprehensive health information and a complete listing of acute care, veterans and children\'s hospitals in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . '.';
+                    break;
+                  case 'doctors' :
+                    $meta_description = 'Livability provides a complete listing of doctors, medical specialties, and the ratio of doctors per population in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . '.';
+                    break;
+                }
+              } else {
+                $meta_description = 'Find information on healthcare in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ', including affordability and resident health data, and a complete listing of doctors and hospitals.';
+              }
+              break;
+            case 'transportation' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case 'commute-times':
+                    $meta_description = 'Commute times in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' vary based on residents mode of commute and how far they are driving, but the average commute time is ' . $c->field_avg_commute[LANGUAGE_NONE][0]['value'] . ' minutes.';
+                    break;
+                }
+              } else {
+                $meta_description = 'Transportation options in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value'] . ' vary by preference of residents, however, a number of options are available in addition to traditional cars, trucks and vans.';
+              }
+              break;
+            case 'demographics' :
+              if (NULL !== arg(3)) {
+                switch (arg(3)) {
+                  case '':
+                    break;
+                }
+              } else {
+
+              }
+              break;
+          }
+
+          // Private school pages.
+          if (arg(3) == 'private-schools') {
+            $state = $c->state->field_state_code[LANGUAGE_NONE][0]['value'];
+            $city = $c->title;
+            $meta_description = 'Details about private schools in ' . $city . ', ' . $state . ' including all elementary, middle and high schools in ' . $city . ', both secular and non-secular. Provided in partnership with GreatSchools.';
+          }
+        }
+      }
+
+      if (arg(0) == 'best-places' && !arg(1)) {
+        $vars['head_title'] = 'Best Places To Live | Livability';
+        $meta_description = 'See our annual rankings of the top 100 best small to mid-sized cities in the United States and what makes them the best places to live and work.';
+      }
+      if (arg(0) == 'top-10' && !arg(1)) {
+        $meta_description = 'Explore our Top 10 lists! Our editors ranked an array of top 10 best places, including small towns, college towns, downtowns, foodie cities and more.';
+        $vars['head_title'] = 'Top 10 Lists | Livability';
+      }
+      if (arg(0) == 'top-10' && arg(1) != NULL && arg(2) == NULL) {
+        $term = taxonomy_get_term_by_name(str_replace('-', ' ', arg(1)));
+        if (!empty($term)) {
+          $term = current($term);
+          $vars['head_title'] = $term->name . ' - Best Places Top 10 Lists | Livability';
+          $meta_description = 'Livability\'s editors used the best public and private data to rank the top 10 best places for all things ' . $term->name . '. See which cities made the lists.';
+        }
+
+      }
+      // Best Places List.
+      if (arg(0) == 'top-10' && arg(5) != NULL) {
+        if (arg(3)) {
+          $vars['head_title'] = drupal_get_title() . ' | ' . arg(3);
+        }
+
+        // Get List title.
+        if (arg(2) && arg(3)) {
+          // Lookup alias.
+          $source = db_query("SELECT source FROM
+            {url_alias} WHERE alias = :alias", array(
+              ':alias' => arg(0) . '/' . arg(1) . '/' . arg(2) . '/' . arg(3),
+          ))->fetchColumn();
+
+          $title = '';
+
+          // Determine node title.
+          if ($source) {
+            $nid = str_replace('node/', '', $source);
+            $title = db_query('SELECT title FROM {node} WHERE nid = :nid', array(
+                ':nid' => $nid,
+            ))->fetchColumn();
+          }
+
+          // Append to head title.
+          if (!empty($title)) {
+            $vars['head_title'] .= ' ' . $title . ' | Livability';
+          }
+        }
+      } /*
+      $top_100_meta_desc = array(
+        2014 => 'See our 2014 ranking of the top 100 best places to live and work in the United States. Cities were ranked using the best public and private data sources.',
+        2015 => 'See our 2015 data-based ranking of the top 100 best small to mid-sized cities in the U.S. and what makes them the best places to live and work.',
+      );
+      if ((arg(0) == 'best-places' && arg(1) == 'top-100-best-places-to-live')) {
+        if (arg(3) == 'ranking-data') {
+          $meta_description = $top_100_meta_desc[arg(2)];
+        }
+      } */
+      if (arg(0) == 'topics') {
+        if (NULL !== arg(1)) {
+          switch (arg(1)) {
+            case 'arts-and-entertainment':
+            case 'arts-entertainment':
+              $meta_description = 'Livability writes about the latest trends in arts and entertainment in America\'s Best Places to live. Learn which cities are having the most fun!';
+              break;
+            case 'business-and-economy':
+            case 'business-economy':
+              $meta_description = 'Livability discovers the latest business trends in America\'s Best Places to Live. Learn more about the business climate your city.';
+              break;
+            case 'community':
+              $meta_description = 'Livability examines how communities come together and growing trends in the best places to live. Find out what your community is doing to make a difference.';
+              break;
+            case 'education-and-schools':
+            case 'education-schools':
+              $meta_description = 'Livability writes about the latest trends in education in America\'s Best Places to Live. Find out how education is making a difference in your city.';
+              break;
+            case 'food-and-drink':
+            case 'food-drink':
+              $meta_description = 'Livability writes about the latest food and drink trends in America\'s Best Places to Live. Learn which cities are on the leading edge in the culinary arts.';
+              break;
+            case 'health-and-wellness':
+            case 'health-wellness':
+              $meta_description = 'Livability writes about the latest trends in health and wellness in America\'s Best Places to Live. Find out how to live healthier in your city.';
+              break;
+            case 'housing-and-real-estate':
+            case 'housing-real-estate':
+              $meta_description = 'Livability identifies the latest trends in housing and real estate in America\'s Best Places to Live. Find out more about living well in your city.';
+              break;
+            case 'transportation':
+              $meta_description = 'Livability highlights the latest transportation trends in America\'s Best Places to Live. Learn more about getting around your city.';
+              break;
+            default:
+              $meta_description = "Explore articles about " . str_replace('/-/', ' ', arg(1));
+              break;
+          }
+        } else {
+          $title = 'Best Places Topics';
+          $meta_description = "Livability features articles about quality-of-life trends in the best places to live in the country and on topics such as arts, health, business and more.";
+        }
+
+      }
+      if (arg(0) == 'blog') {
+        if (NULL !== arg(1)) {
+          $category = str_replace('/-/', ' ', arg(1));
+          $meta_description = "Livability editors and contributors discuss " . $category . " and topics and trends related to " . $category . " and how they impact the quality of life of a place.";
+          drupal_set_title(ucwords($category));
+          $vars['head_title_array']['title'] = drupal_get_title() . ' - Livability Blog';
+          $vars['head_title'] = implode(' | ', $vars['head_title_array']);
+
+        } else {
+          $meta_description = "Livability's Best Places Blog features insights and trends in urban planning, education, sustainability, transportation, city mayor interviews and more.";
+        }
+      }
+      if (arg(0) == 'find-city') {
+        $meta_description = "Search for any city in the United States to find information on your best place to live including, real estate, health, schools, business and more.";
+      }
+      // Moving section.
+      if (arg(0) == 'moving') {
+        // Moving subpage.
+        if (NULL !== arg(1)) {
+          switch (arg(1)) {
+            case 'moving-tips':
+              $meta_description = "Livability's moving tips include articles on everything from packing and moving to pets, to finding a realtor and settling in to your best place to live.";
+              $vars['head_title'] = 'Moving Tips | Livability';
+              break;
+            case 'how-to-guides':
+              $meta_description = "Livability's collection of How To guides provide organized solutions on how to pack your garage, electronics and even your college kid like a pro.";
+              $vars['head_title'] = 'Moving How To Guides | Livability';
+              break;
+            case 'moving-checklists':
+              $meta_description = "Stay organized with Livability's collection of downloadable moving checklists, including the Ultimate Moving Checklist and more. ";
+              $vars['head_title'] = 'Moving Checklists | Livability';
+              break;
+          }
+        } // Moving homepage.
+        else {
+          $meta_description = "Moving to your best place to live just got easier. Use Livability's moving tips, how to guides and moving checklists  to make your move.";
+          $vars['head_title'] = 'Moving Tips, How To Guides, Articles and Checklists | Livability';
+        }
+      }
+    }
+
+    /**
+     * Media room page.
+     */
+    if ($_SERVER['REQUEST_URI'] == '/media-room') {
+      $meta_description = "Livability.com editors are available for interviews on a variety of topics related to livability. Contact us for more information and to download logos.";
+    }
+
+    if (isset($meta_description)) {
+      $metadesc = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+              'name' => 'description',
+              'content' => $meta_description
+          ),
+      );
+      drupal_add_html_head($metadesc, 'meta_description');
+      $ogdesc = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+              'property' => 'og:description',
+              'content' => $meta_description
+          ),
+      );
+      drupal_add_html_head($ogdesc, 'og_description');
+    }
+    /*
+    if (!isset($meta_img)) {
+      $path = drupal_get_path('theme', 'liv');
+      $filename = '/images/logos/fb_og_200x200.png';
+
+      $meta_img = file_create_url($path . $filename) ;
+    }
+    $metaimg = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'property' => 'og:image',
+        'content' => $meta_img
+      ),
+    );
+    drupal_add_html_head($metaimg, 'og_image');
+
+    $type = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'property' => 'og:type',
+        'content' => 'article'
+      ),
+    );
+    drupal_add_html_head($type, 'og_type');
+    $path = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'property' => 'og:url',
+        'content' => 'http://www.livability.com' . check_plain($_SERVER['REQUEST_URI'])
+      ),
+    );
+    drupal_add_html_head($path, 'og_path');
+    $ogtitle = array (
+      '#tag' => 'meta',
+      '#attributes' => array (
+        'property' => 'og:title',
+        'content' => $title
+      ),
+    );
+    drupal_add_html_head($ogtitle, 'og_title');
+    */
+  }
+}
+
+/**
+ * @} End of "liv_meta".
+ */

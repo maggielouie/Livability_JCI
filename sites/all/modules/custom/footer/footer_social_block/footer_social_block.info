@@ -1,0 +1,6 @@
+name = Footer Social Block
+description = A block to display small social icons in the footer.
+package = Livability
+core = 7.x
+dependencies[] = block
+

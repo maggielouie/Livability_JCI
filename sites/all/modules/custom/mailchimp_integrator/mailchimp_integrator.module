@@ -1,0 +1,78 @@
+<?php
+/**
+* MailChimp Integrator
+*
+*/
+
+function mailchimp_integrator_form_alter(&$form, &$form_state, $form_id){
+  if (strpos($form_id, 'webform_') !== false) {
+     $form['#submit'][] = 'mailchimp_integrator_webform_submit';
+  }
+}
+
+function mailchimp_integrator_webform_submit($form, &$form_state) {
+  if (null != $form_state['input']['submitted']['signup_for_email_alerts']['email']) {
+    $email = $form_state['input']['submitted']['e_mail'];
+    @require_once(drupal_get_path('module', 'mailchimp_integrator') . '/MCAPI.class.php');
+    //$lid = '4bd4aa7fa3'; // in-house test
+    $lid = '8fe7a0df58'; // Liv Subscriptions
+    mailchimp_integrator_api_subscribe($email, null, $lid);
+  }
+}
+
+/**
+ * Subscribe a user to a list.
+ *
+ * @param $email
+ *   String; E-mail address to subscribe
+ * @param $fields
+ *   Array; Array of custom field values. Key is field. Value is value for the field.
+ * @param $lid
+ *   String; List ID of the list to subscribe to.
+ * @return
+ *   Boolean; TRUE if user is subscribed. FALSE if not.
+ */
+function mailchimp_integrator_api_subscribe($email, $fields, $lid) {
+  // mailchimp subscribe can't handle blank merge_var arrays
+  if (empty($fields)) {
+    $fields = array('');
+  }
+
+  // do api call
+  $result = _mailchimp_integrator_api_call('listSubscribe', array($lid, $email, $fields, 'html', FALSE, TRUE));
+  if (!$result) return FALSE;
+  watchdog('MailChimp Integration', $email.' subscribed to the email list.');
+  return TRUE;
+}
+
+/**
+ * Do API call.
+ *
+ * @param $method
+ *   String; The API method to call.
+ * @param $params
+ *   Array; Parameters for the API call.
+ * @return
+ *   Array; API result array.
+ */
+function _mailchimp_integrator_api_call($method, $params = array()) {
+   // fetching api key
+  $api_key = '7e23626903aa5ee6df4b274cfe276653-us8';
+
+  // do api call
+  $mc = new MCAPI($api_key);
+  $mc->setTimeout(15);
+  $result = call_user_func_array(array($mc, $method), $params);
+
+  // if api result code is not 'ok', return false and write log
+  if ($mc->errorCode) {
+    watchdog('mailchimp integrator', 'Code - ' . $mc->errorCode . ', Message - ' . $mc->errorMessage, array(), WATCHDOG_ERROR);
+    /* 
+    $lists = call_user_func_array(array($mc, 'lists'), array());
+    watchdog('mailchimp integrator', 'Valid lists:<pre>'. print_r($lists, TRUE).'</pre>');
+    */ 
+    return FALSE;
+  }
+
+  return $result;
+}

@@ -1,0 +1,5 @@
+name = "Census Cache"
+description = "A framework to cache census data points for all places"
+package = "Livability"
+core = 7.x
+files[] = censusapi.php

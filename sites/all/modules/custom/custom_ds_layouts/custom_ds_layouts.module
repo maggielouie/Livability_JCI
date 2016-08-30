@@ -1,0 +1,34 @@
+<?php
+
+function custom_ds_layouts_ds_layout_info() {
+  $path = drupal_get_path('module', 'custom_ds_layouts');
+
+  $layouts = array(
+    'two_column__6633' => array(
+      'label' => t('Two column - 66/33'),
+      'path' => $path . '/layouts/two_column__6633',
+      'regions' => array(
+        'left' => t('Left'),
+        'right' => t('Right'),
+      ),
+      'css' => TRUE,
+      // optional, form only applies to node form at this point.
+      'form' => TRUE,
+    ),
+    'two_column__6633__stacked' => array(
+      'label' => t('Two column stacked - 66/33'),
+      'path' => $path . '/layouts/two_column__6633__stacked',
+      'regions' => array(
+        'left' => t('Left'),
+        'right' => t('Right'),
+        'full_width' => t('Full Width'),
+      ),
+      'css' => TRUE,
+      // optional, form only applies to node form at this point.
+      'form' => TRUE,
+    ),
+  );
+
+  return $layouts;
+
+}

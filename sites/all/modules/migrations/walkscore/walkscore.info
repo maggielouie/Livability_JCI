@@ -1,0 +1,7 @@
+name = "Walk score migration"
+package = "Livability"
+core = 7.x
+dependencies[] = migrate
+
+files[] = walkscore-csv.inc
+files[] = walkscore.inc

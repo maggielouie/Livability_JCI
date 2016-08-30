@@ -1,0 +1,10 @@
+name = "Great Schools Data"
+description = "Processes great schools data feeds and migrates it into drupal."
+package = "Livability"
+core = 7.x
+dependencies[] = migrate
+
+files[] = state.inc
+files[] = districts.inc
+files[] = schools.inc
+;files[] = scores.inc

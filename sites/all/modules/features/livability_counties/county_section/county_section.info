@@ -1,0 +1,4 @@
+name = Liv County Sections
+description = "County subsection pages, data queries, and conditional html output"
+core = 7.x
+package = Livability

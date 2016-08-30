@@ -1,0 +1,99 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Update best places page.
+ */
+function best_places_url_update_7001() {
+  // Delete old redirects
+  db_query('DELETE FROM {redirect} WHERE source = :source', array(
+    ':source' => 'best-places',
+  ));
+  db_query('DELETE FROM {redirect} WHERE source = :source', array(
+    ':source' => 'top-10',
+  ));
+
+  // Create redirect to new best-places url.
+  $redirect = new stdClass();
+
+  module_invoke(
+    'redirect',
+    'object_prepare',
+    $redirect,
+    array(
+      'source' => 'best-places/top-10',
+      'source_options' => array(),
+      'redirect' => 'best-places',
+      'redirect_options' => array(),
+      'language' => LANGUAGE_NONE,
+    )
+  );
+
+  module_invoke('redirect', 'save', $redirect);
+
+  // Revert best places view.
+  features_revert(array('best_places' => array('views_view')));
+
+  // Delete old Best Places link.
+  menu_link_delete(287);
+}
+
+/**
+ * Revert views, variables that have changed.
+ */
+function best_places_url_update_7002() {
+  // Revert top 100 view.
+  features_revert(array('top_100' => array('views_view')));
+
+  // Revert liv nav.
+  features_revert(array('liv_nav' => array('variable')));
+
+  // Revert site settings.
+  features_revert(array('site_settings' => array('variable')));
+
+  // Update top 100 node aliases, redirects.
+  db_query('UPDATE {url_alias} SET alias = :alias WHERE source = :source', array(
+    ':source' => 'node/59069',
+    ':alias' => 'best-places/top-100-best-places-to-live/2015',
+  ));
+
+  db_query('UPDATE {url_alias} SET alias = :alias WHERE source = :source', array(
+    ':source' => 'node/43655',
+    ':alias' => 'best-places/top-100-best-places-to-live/2014',
+  ));
+
+  // Create redirect to new top 100 page paths.
+  foreach (array(2014, 2015) as $year) {
+    $redirect = new stdClass();
+
+    module_invoke(
+      'redirect',
+      'object_prepare',
+      $redirect,
+      array(
+        'source' => 'best-places/top-100/' . $year,
+        'source_options' => array(),
+        'redirect' => 'best-places/top-100-best-places-to-live/' . $year,
+        'redirect_options' => array(),
+        'language' => LANGUAGE_NONE,
+      )
+    );
+
+    module_invoke('redirect', 'save', $redirect);
+  }
+}
+
+
+/**
+ * Update best places urls.
+ */
+function best_places_url_update_7003() {
+  $result = db_query('SELECT nid FROM {node} WHERE type = :type', array(':type' => 'best_places'));
+
+  while ($nid = $result->fetchColumn()) {
+    $node = node_load($nid);
+    node_save($node);
+  }
+}

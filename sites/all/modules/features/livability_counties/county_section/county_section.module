@@ -1,0 +1,433 @@
+<?php
+
+/**
+ * For county_content_cards show more link - Menu callback, load next row (slide) by ajax.
+ */
+
+/**
+ * Implements hook_menu.
+ */
+function county_section_menu() {
+  $items['county_section/views/ajax'] = array(
+    'title' => 'Liv Blog',
+    'page callback' => 'county_section_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function county_section_ajax() {
+  $view = views_get_view('county_content_cards');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['nid']) && $_REQUEST['nid'] != '') {
+    $view->args[] = $_REQUEST['nid'];
+  }
+  $view->offset = $offset;
+  $view->execute('block');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $thisrow = $index+$offset+1;
+    $eo = ($thisrow % 2 == 0) ? 'even' : 'odd';
+    $rows[] = '<li class="one-third">' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+/**
+* Implements hook_preprocess_page
+*/
+function county_section_preprocess_page(&$vars, $hook) {
+  if(isset($vars['node']) && $vars['node']->type == 'county') {
+    drupal_add_js(drupal_get_path('module', 'county_section') . '/js/add_more.js');
+  }
+}
+
+/**
+* Implements hook_page_alter
+*/
+function county_section_page_alter(&$page) {
+    $node = menu_get_object('node');
+    if (isset($node->type) && $node->type == 'county') {
+      $c = getCountyContext($node->nid);
+      $state_abbr = $c->field_state[LANGUAGE_NONE][0]['entity']->field_state_code[LANGUAGE_NONE][0]['value'];
+      $county_tag = $c->county_designator;
+      $c->title = $c->title;
+      //build page header
+      $page['special_header'] ='<span class="city-pin">'.
+      l('<i class="icon-pin green no-mobile"></i>'.
+          '<h2>'.$c->title .', '.
+          '<strong class="green">'.
+          $state_abbr.
+          '</strong></h2>'.
+          '<span class="county-area no-mobile">'.
+          $c->county->name. //, Prescott Metro Area'.'
+          '</span>',arg(0).'/'.arg(1),array('html' => true)).'
+      </span>';
+
+      $countySectionMenu = array(
+      'home' => array('title'=> 'Home',
+          'link' => 'node/' . $c->state->nid,
+          'icon'=>'flag'),
+      );
+      //building left nav - hacked out of the liv_nav - may need to be replaced in future if full-fledged menus are
+      //required for county nodes.
+
+      $leftNav = '<div class="left-nav"><span class="drag-container"><ul class="all-categories">';
+      $homelink = url('node/' . $c->nid);
+
+      $leftNav .= '<li><a href="'. $homelink . '">';
+      $leftNav .= '<i class="icon-flag"></i>';
+      $leftNav .= '<span>'.'Home'.'</span></a>';
+      $leftNav .= '</li>';
+      $leftNav .= '</ul></span></div>';
+
+      $page['sidebar_second']['city_section_nav'] = array('#type' => 'markup', '#markup' => $leftNav);
+
+      // set breadcrumbs
+      $breadcrumbs = array();
+      $breadcrumbs[] = l(t('Home'), '<front>');
+      $breadcrumbs[] = l($c->state->title, 'node/'.$c->state->nid);
+      drupal_set_breadcrumb($breadcrumbs);
+    }
+}
+
+function getCountyContext($nid = null){
+    global $currentCounty;
+    $ret = false;
+    /*by id*/
+    if($nid !== null){
+        $ret = county_node_load($nid);
+    }
+    elseif (arg(0) == 'node' && is_numeric(arg(1)) && !in_array(arg(2), array(null, 'edit', 'add', 'delete'))) {
+        $n=node_load(arg(1));
+        if ($n->type == 'county') {
+            $ret = city_node_load(arg(1));
+        } elseif (($n->type == 'article' || $n->type=='blog_post') && isset($n->field_place[LANGUAGE_NONE])) {
+            //todo verify this where an article or blog_post has city context use it
+            $item = field_collection_item_load($n->field_place[LANGUAGE_NONE][0]['value']);
+            if(isset($item->field_place_ref[LANGUAGE_NONE][0])){
+                $ret = city_node_load($item->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+            } else {
+                return false;
+            }
+        } elseif($n->type == 'gallery') {
+            $nid = $n->field_gallery_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } elseif($n->type == 'digital_magazine') {
+            $nid = $n->field_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } else {
+            return false;
+        }
+    } else {
+
+        $alias = drupal_get_path_alias();
+        $aliasParts = explode('/',$alias);
+        if(strlen($aliasParts[0]) == 2 && array_key_exists(strtoupper($aliasParts[0]),locality::$states)){
+            //todo safely handle no matches
+            if(array_key_exists(strtoupper($aliasParts[0]),locality::$states)){
+                if (isset($aliasParts[1])) {
+                    $path = drupal_get_normal_path($aliasParts[0].'/'.$aliasParts[1]);
+                }
+                else {
+                    $path = drupal_get_normal_path($aliasParts[0]);
+                }
+                $nodeParts = explode('/',$path);
+                $countynid = array_pop($nodeParts);
+                $ret = county_node_load($countynid);
+            }
+        }
+    }
+    $currentCounty = $ret;
+    drupal_page_is_cacheable(TRUE);
+    return $ret;
+}
+function county_node_load($nid){
+    $node = node_load($nid);
+    if(is_object($node) && $node !== false){
+        //we have a node!
+        if($node->type == 'county'){
+            $ret = county_load_area($node);
+
+        }elseif($node->type == 'article'){
+            //todo need to pay attention to the checkbox field for primary place, dont' just pick first one
+            if(isset($node->field_place[LANGUAGE_NONE]) && array_key_exists('value',$node->field_place[LANGUAGE_NONE][0])){
+                $fc = field_collection_field_get_entity($node->field_place[LANGUAGE_NONE][0]);
+                if(isset($fc->field_place_ref[LANGUAGE_NONE])) {
+                    $place = node_load($fc->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+                    $ret = city_load_area($place);
+                }
+                else {
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }elseif($node->type == 'gallery'){
+            $city = node_load($node->field_gallery_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        }elseif($node->type == 'digital_magazine'){
+            $city = node_load($node->field_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        }elseif($node->type == 'state'){
+            $ret = $node;
+        }else{
+            //drupal_set_message('no city context available');
+            return false;
+        }
+        return $ret;
+    }
+}
+
+function county_load_area($node){
+    $node->state = node_load($node->field_state[LANGUAGE_NONE][0]['target_id']);
+    $state = $node->state->field_state_code[LANGUAGE_NONE][0]['value'];
+    $cacheDir = drupal_get_path('module','census_cache').DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+    $statecode = build_state_code($node->state->field_fips[LANGUAGE_NONE][0]['value']);
+    $cities = getCities($node->nid);
+    $cities_by_pop = sort_cities_by_pop($cities);
+    $citys_alpha = sort_cities_by_alpha($cities);
+
+    $cacheStateFilePath = $cacheDir.'state'.DIRECTORY_SEPARATOR.$statecode.'.json';
+    $pid = $node->field_fips[LANGUAGE_NONE][0]['value'];
+    //this pid needs to be 3 chars long
+    $pid = build_county_code($pid);
+    $cachePlaceFilePath = $cacheDir.'county'.DIRECTORY_SEPARATOR.$statecode.DIRECTORY_SEPARATOR.$pid.'.json';
+
+    $node->census = json_decode(file_get_contents($cachePlaceFilePath),true);
+    $node->state->census = json_decode(file_get_contents($cacheStateFilePath),true);
+    $node->nation = json_decode(file_get_contents($cacheDir.'national.json'),true);
+    $node->cities = $cities;
+    //sites/all/modules/custom/census_cache/cache/47/27740.json <---franlin data
+    if ($state == 'AK') {
+        $node->county_designator = 'Borough';
+    } elseif ($state == 'LA') {
+        $node->county_designator = 'Parish';
+    } else {
+        $node->county_designator = 'County';
+    }
+    $node->madlib = assembleMadlibText($node);
+    return $node;
+}
+
+function assembleMadlibText($node) {
+	$cities = $node->cities;
+	$cities_by_pop = sort_cities_by_pop($cities);
+	$county_data = $node->census['county-data'];
+	$county_name = $node->title;
+	//$text = '<p class="truncate-mobile-350">';
+	//$text = '<p>';
+	$text .= $county_name . ' is located in ' . $node->field_state[LANGUAGE_NONE][0]['entity']->title . '. ';
+
+	$text .= get_biggest_cities($node);
+  $text .= get_ny_exception_rule($county_name);
+	$text .= '<p>Here are some facts and data about ' . $county_name . ' to help as you decide where to move. Is your best place to live in ' . $county_name . '?</p>';
+	$text .= '<p>';
+
+	$text .= number_format($county_data['DP05_0001E']) . ' people live in ' . $county_name . ' ' . ' within ' . number_format($county_data['DP02_0001E']) . ' households.
+	The population of ' . $county_name . ' is ' .
+	pop_percentage($county_data['DP05_0072E'], $county_data) . '% White, ' .
+	pop_percentage($county_data['DP05_0073E'], $county_data) . '% Black and ' .
+	pop_percentage($county_data['DP05_0075E'], $county_data) . '% Asian. ' .
+	pop_percentage(($county_data['DP05_0077E'] + $county_data['DP05_0074E'] + $county_data['DP05_0076E']), $county_data) . '% identify as another race or ethnicity, or two or more races. ' .
+	pop_percentage($county_data['DP05_0066E'], $county_data) . '% of residents are of Hispanic or Latino origin. ' .
+	number_format($county_data['DP02_0092E'] / $county_data['DP02_0086E']*100) . '% of residents are foreign-born. ';
+
+	$text .= 'The median age is ' . $county_data['DP05_0017E'] . ', and the largest number of residents falls into the ' . dominant_age($county_data) . ' age range. ' .
+	number_format((($county_data['DP05_0001E'] - $county_data['DP05_0022E']) / $county_data['DP05_0001E'])*100) . '% of residents are under age 18. ' .
+	number_format(($county_data['DP05_0025E'] / $county_data['DP05_0001E'])*100). '% are over age 65. ' .
+	number_format(($county_data['DP05_0002E'] / $county_data['DP05_0001E'])*100) . '% of ' . $county_name . "’s residents are male.";
+	$text .="</p>";
+	$text .='<p>';
+
+	$text .= 'Who lives in ' . $county_name . '? There are ' .
+	number_format(($county_data['DP02_0004E'] - $county_data['DP02_0005E'])) . ' married couples without children and another ' .
+	number_format($county_data['DP02_0005E']) . ' married couples with kids under the age of 18. There are ' .
+	number_format($county_data['DP02_0007E']) . ' single dads and ' .
+	number_format($county_data['DP02_0009E']) . ' single mothers.  ' .
+	number_format($county_data['DP02_0011E']) . ' residents of ' . $county_name . ' live alone.';
+	$text .='</p>';
+
+
+	$text .= 'How affordable is ' . $county_name . '? The median household income in ' . $county_name .
+	' is $' . number_format($county_data['DP03_0062E']) . ' compared to $' . number_format($node->nation['county-data']['DP03_0062E']) . ' for the nation as a whole.  ' .
+	'The per capita income is $'. number_format($county_data['DP03_0088E']) . ' compared to $' . number_format($node->nation['county-data']['DP03_0088E']) .
+	' for the nation as a whole.';
+	$text .= '</p>';
+	/** Need clarification of the data points within this section
+	$text .= ' Income is just part of the measure of affordability. According to C2ER The cost of living index in ' . $county_name .
+	' is <COLI> -- meaning that if the national average is 100 it costs [100 - COLI]% more/less to live here. ';
+
+	$text .= 'Breaking that down, here are the index values for certain key components: Groceries (COLI_Groceries), Housing (COLI_Housing), Utilities (COLI_Utilities), Transportation (COLI, Transportation) and Health care (COLI_healthcare). ' .
+	number_format(($county_data['DP03_0059E'] + $$conunty_data['DP03_0060E'] + $county_data['DP03_0061E']) / $county_data['DP03_0051E']) .
+	' percent of households earn more than $100,000 annually. Conversely, ' .
+	number_format(($county_data['DP03_0052E'] + $county_data['DP03_0053E'] + $county_data['DP03_0054E'] + $county_data['DP03_0055E']) / $county_data['DP03_0051E']) .
+	' percent earn less than $35,000. '. $county_data['DP03_0123PE'] . '% of married families with children live below the poverty line. ' .
+	' Overall, ' . number_format($county_data['DP03_0129PE']) . ' % of ' . $county_name . 's children live below the poverty line.';
+
+
+	[county] ranks [outcome rank from RJWF][ordinal suffix] for health outcomes, [factors rank from RJWF][ordinal suffix] for health factors and [behaivors rank from RJWF][ordinal suffix] for healthy behaviors in the [state], according to the County Health Rankings and Roadmaps.
+
+	Can you get a job in <county?> The unemployment rate in <county> is <cSource BLS LAUS> which compares to the national rate of <national_unemployment>.
+	**/
+
+	$text .= '</p>';
+	return $text;
+}
+function pop_percentage ($field1, $county_data) {
+    $divisor = $county_data['DP05_0065E'];
+    return number_format((($field1 / $divisor)*100));
+}
+
+function dominant_age($county_data) {
+    $agepoints = array(
+        'Under 5' => $county_data['DP05_0004E'],
+        '5 to 9' => $county_data['DP05_0005E'],
+        '10 to 14' => $county_data['DP05_0006E'],
+        '15 to 19' => $county_data['DP05_0007E'],
+        '20 to 24' => $county_data['DP05_0008E'],
+        '25 to 34' => $county_data['DP05_0009E'],
+        '35 to 44' => $county_data['DP05_00010E'],
+        '45 to 54' => $county_data['DP05_00011E'],
+        '55 to 59' => $county_data['DP05_00012E'],
+        '60 to 64' => $county_data['DP05_00013E'],
+        '65 to 74' => $county_data['DP05_00014E'],
+        '75 to 84' => $county_data['DP05_00015E'],
+        '85 and over' => $county_data['DP05_00016E'],
+        );
+
+    asort($agepoints);
+    $dominant_age = array_slice($agepoints, -1, 1, true);
+    $dominant_age = key($dominant_age);
+
+    return $dominant_age;
+}
+
+function getCities($nid) {
+    $result_cities = array();
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'city')
+    ->fieldCondition('field_county', 'target_id', $nid);
+    $cities = $query->execute();
+    $cities = array_keys($cities['node']);
+
+    foreach ($cities as $city) {
+        $city_node = city_node_load($city);
+        $result_cities[] = $city_node;
+    }
+    return $result_cities;
+}
+
+function sort_cities_by_pop($cities) {
+    usort($cities, function($a, $b) {
+        return $b->field_population[LANGUAGE_NONE][0]['value'] - $a->field_population[LANGUAGE_NONE][0]['value'];
+    });
+
+    return $cities;
+}
+
+function get_biggest_cities($node) {
+    $cities = $node->cities;
+    $cities = sort_cities_by_pop($cities);
+
+    $top_cities = array_slice($cities, 0, 3);
+
+    $cities_string = '';
+    switch (count($cities)) {
+      case 1:
+        $cities_string = 'The largest city in ' . $node->title . ' is ' . l($top_cities[0]->title, 'node/' . $top_cities[0]->nid) . '. ';
+        break;
+      case 2:
+        $cities_string = 'The largest cities in ' . $node->title . ' are ' .
+        l($top_cities[0]->title, 'node/' . $top_cities[0]->nid) . ' and ' . l($top_cities[1]->title, 'node/' . $top_cities[1]->nid) . '. ';
+        break;
+      case 3:
+        $cities_string = 'The largest cities in ' . $node->title . ' are ' .
+        l($top_cities[0]->title, 'node/' . $top_cities[0]->nid) . ', ' . l($top_cities[1]->title, 'node/' . $top_cities[1]->nid) . ' and ' . l($top_cities[2]->title, 'node/' . $top_cities[2]->nid). '. ';
+        break;
+      
+    }
+
+    return $cities_string;
+}
+
+function get_ny_exception_rule($county_name) {
+
+  $countyq = 'SELECT n.title, n.nid from {node} n ';
+  $countyq .= 'LEFT JOIN {field_data_field_state} state ON state.entity_id = n.nid ';
+  $countyq .= 'LEFT JOIN {field_data_field_state_code} code ON code.entity_id = state.field_state_target_id ';
+  $countyq .= 'WHERE n.type = \'county\' ';
+  $countyq .= 'AND n.title IN (\'Kings\', \'Queens\', \'Bronx\', \'Richmond\', \'New York\') ';
+  $countyq .= 'AND code.field_state_code_value = \'NY\' ';
+  $counties = db_query($countyq);
+
+  $county_links = array();
+  foreach($counties as $county) {
+    $county_links[] = l($county->title, 'node/' . $county->nid);
+  }
+
+  $exception_string = '';
+
+  $shared_string = 'New York City is comprised of five counties: ' . $county_links[0] . ', ' . $county_links[1] . ', ' . $county_links[2] . ', ' . $county_links[3] . ' and ' . $county_links[4] . ' County.';
+  
+  switch ($county_name) {
+    case 'Kings County':
+      $exception_string = '<p>The New York City borough of Brooklyn shares the same boundaries as Kings County. ' . $shared_string . '</p>';
+      break;
+    case 'Queens County':
+      $exception_string = '<p>The New York City borough of Queens shares the same boundaries as Queens County. ' . $shared_string . '</p>';
+      break;
+    case 'Bronx County':
+      $exception_string = '<p>The New York City borough of The Bronx shares the same boundaries as Bronx County. ' . $shared_string . '</p>';
+      break;
+    case 'Richmond County':
+      $exception_string = '<p>The New York City borough of Staten Island shares the same boundaries as Richmond County. ' . $shared_string . '</p>';
+      break;
+    case 'New York County':
+      $exception_string = '<p>The New York City borough of Manhattan shares the same boundaries as New York County. ' . $shared_string . '</p>';
+      break;
+    
+  }
+
+  return $exception_string;
+}
+
+function sort_cities_by_alpha($cities) {
+    usort($cities, function($a, $b) {
+        return $a->title < $b->title ? -1 : 1;
+    });
+
+    return $cities;
+}
+
+function build_state_code($code) {
+    if (strlen($code) < 2) {
+        $code = '0' . $code;
+    }
+
+    return $code;
+}
+
+function build_county_code($code) {
+    if(strlen($code) <= 2){
+        $code = '0'.$code;
+        if (strlen($code) < 3) {
+            $code = '0'.$code;
+        }
+    }
+
+    return $code;
+}

@@ -1,0 +1,196 @@
+<div class="states shadow-inset-tb ">
+	<h1>Find Best Place to Live <span>by State</span></h1>
+	<ul>
+		<li><a href="#"><i class="stateface-al"></i>Alabama</a></li>
+		<li><a href="#"><i class="stateface-ak"></i>Alaska</a></li>
+		<li><a href="#"><i class="stateface-az"></i>Arizona</a></li>
+		<li><a href="#"><i class="stateface-ar"></i>Arkansas</a></li>
+		<li><a href="#"><i class="stateface-ca"></i>California</a></li>
+		<li><a href="#"><i class="stateface-co"></i>Colorado</a></li>
+		<li><a href="#"><i class="stateface-ct"></i>Connecticut</a></li>
+		<li><a href="#"><i class="stateface-de"></i>Delaware</a></li>
+		<li><a href="#"><i class="stateface-fl"></i>Florida</a></li>
+		<li><a href="#"><i class="stateface-ga"></i>Georgia</a></li>
+
+		<li><a href="#"><i class="stateface-hi"></i>Hawaii</a></li>
+		<li><a href="#"><i class="stateface-id"></i>Idaho</a></li>
+		<li><a href="#"><i class="stateface-il"></i>Illinois</a></li>
+		<li><a href="#"><i class="stateface-in"></i>Indiana</a></li>
+		<li><a href="#"><i class="stateface-ia"></i>Iowa</a></li>
+		<li><a href="#"><i class="stateface-ks"></i>Kansas</a></li>
+		<li><a href="#"><i class="stateface-ky"></i>Kentucky</a></li>
+		<li><a href="#"><i class="stateface-la"></i>Louisiana</a></li>
+		<li><a href="#"><i class="stateface-me"></i>Maine</a></li>
+		<li><a href="#"><i class="stateface-md"></i>Maryland</a></li>
+
+		<li><a href="#"><i class="stateface-ma"></i>Massachusetts</a></li>
+		<li><a href="#"><i class="stateface-mi"></i>Michigan</a></li>
+		<li><a href="#"><i class="stateface-mn"></i>Minnesota</a></li>
+		<li><a href="#"><i class="stateface-ms"></i>Mississippi</a></li>
+		<li><a href="#"><i class="stateface-mo"></i>Missouri</a></li>
+		<li><a href="#"><i class="stateface-mt"></i>Montana</a></li>
+		<li><a href="#"><i class="stateface-ne"></i>Nebraska</a></li>
+		<li><a href="#"><i class="stateface-nv"></i>Nevada</a></li>
+		<li><a href="#"><i class="stateface-nh"></i>New Hampshire</a></li>
+		<li><a href="#"><i class="stateface-nj"></i>New Jersey</a></li>
+		
+		<li><a href="#"><i class="stateface-nm"></i>New Mexico</a></li>
+		<li><a href="#"><i class="stateface-ny"></i>New York</a></li>
+		<li><a href="#"><i class="stateface-nc"></i>North Carolina</a></li>
+		<li><a href="#"><i class="stateface-nd"></i>North Dakota</a></li>
+		<li><a href="#"><i class="stateface-oh"></i>Ohio</a></li>
+		<li><a href="#"><i class="stateface-ok"></i>Oklahoma</a></li>
+		<li><a href="#"><i class="stateface-or"></i>Oregon</a></li>
+		<li><a href="#"><i class="stateface-pa"></i>Pennsylvania</a></li>
+		<li><a href="#"><i class="stateface-ri"></i>Rhode Island</a></li>
+		<li><a href="#"><i class="stateface-sc"></i>South Carolina</a></li>
+		
+		<li><a href="#"><i class="stateface-sd"></i>South Dakota</a></li>
+		<li><a href="#"><i class="stateface-tn"></i>Tennessee</a></li>
+		<li><a href="#"><i class="stateface-tx"></i>Texas</a></li>
+		<li><a href="#"><i class="stateface-ut"></i>Utah</a></li>
+		<li><a href="#"><i class="stateface-vt"></i>Vermont</a></li>
+		<li><a href="#"><i class="stateface-va"></i>Virginia</a></li>
+		<li><a href="#"><i class="stateface-wa"></i>Washington</a></li>
+		<li><a href="#"><i class="stateface-wv"></i>West Virginia</a></li>
+		<li><a href="#"><i class="stateface-wi"></i>Wisconsin</a></li>
+		<li><a href="#"><i class="stateface-wy"></i>Wyoming</a></li>
+	</ul>
+	
+
+	<script src="/js/mapdata.js"></script>
+	<script src="/js/usmap.js"></script>
+	<div id="map"></div>
+	<script>
+		$('#map').on("mouseenter", "path", function (e) {
+	        $(this).next('text').css({
+	            fill: '#ffffff'
+	        })
+	    })
+	    $('#map').on("mouseleave", "path", function (e) {
+	        $(this).next('text').css({
+	            fill: '#838383'
+	        })
+	    })
+    </script>
+
+	<span class="no-mobile"><!--#include virtual="/views/ads/ad728.html"--></span>
+</div>
+<div class="most-popular shadow-inset-b">
+	<div class="hero">
+		<h2>Most Popular Cities</h2>
+	</div>
+	<ul class="top-three">
+		<li>
+			<a href="#">
+				<span class="no">1</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">2</span>
+				<span class="city">Denver</span>
+				<span class="state">Colorado</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">3</span>
+				<span class="city">Tampa</span>
+				<span class="state">Florida</span>
+			</a>
+		</li>
+	</ul>
+	<ul>
+		<li>
+			<a href="#">
+				<span class="no">4</span>
+				<span class="city">New York City</span>
+				<span class="state">New York</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">5</span>
+				<span class="city">Key West</span>
+				<span class="state">Florida</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">6</span>
+				<span class="city">Fort Collins</span>
+				<span class="state">Colorado</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">7</span>
+				<span class="city">Phoenix</span>
+				<span class="state">Arizona</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">8</span>
+				<span class="city">Chicago</span>
+				<span class="state">Illinois</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">9</span>
+				<span class="city">San Francisco</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">10</span>
+				<span class="city">Seattle</span>
+				<span class="state">Washington</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">11</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">12</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<span class="no">13</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+			<li>
+			<a href="#">
+				<span class="no">14</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+			<li>
+			<a href="#">
+				<span class="no">15</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+	</ul>
+</div>
+
+
+
+

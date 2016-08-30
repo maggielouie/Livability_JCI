@@ -1,0 +1,174 @@
+<?php
+/**
+ * @file
+ * Module file for combo_ad_blocks.
+ */
+
+/**
+ * @defgroup combo_ad_blocks Combo Ad Blocks
+ * @ingroup livability
+ * @{
+ * Creates a blocks with desktop/mobile ads to facilitate placement
+ *
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function combo_ad_blocks_block_info() {
+  $blocks['leaderboard_top'] = array(
+    'info' => t('Leaderboard Top Combo'),
+  );
+  $blocks['leaderboard_middle'] = array(
+    'info' => t('Leaderboard Middle Combo'),
+  );
+  $blocks['leaderboard_bottom'] = array(
+    'info' => t('Leaderboard Bottom Combo'),
+  );
+  $blocks['leaderboard_adsense'] = array(
+    'info' => t('Leaderboard Adsense Combo'),
+  );
+  $blocks['leaderboard_dm'] = array(
+    'info' => t('Leaderboard Digital Magazine Combo'),
+  );
+  $blocks['pushdown'] = array(
+		'info' => t('Pushdown'),
+  );
+  $blocks['pushdown_top100_and_topcities'] = array(
+		'info' => t('Pushdown for Top100 and Top Cities List'),
+  );
+  $blocks['filmstrip'] = array(
+		'info' => t('FilmStrip'),
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function combo_ad_blocks_block_view($delta = '') {
+	$userAgent = $_SERVER['HTTP_USER_AGENT'];
+	$devicesTypes = array(
+			"computer" => array("msie 10", "msie 9", "msie 8", "windows.*firefox", "windows.*chrome", "x11.*chrome", "x11.*firefox", "macintosh.*chrome", "macintosh.*firefox", "opera"),
+			"tablet"   => array("tablet", "android", "ipad", "tablet.*firefox"),
+			"mobile"   => array("mobile ", "android.*mobile", "iphone", "ipod", "opera mobi", "opera mini"),
+			"bot"      => array("googlebot", "mediapartners-google", "adsbot-google", "duckduckbot", "msnbot", "bingbot", "ask", "facebook", "yahoo", "addthis")
+	);
+	foreach($devicesTypes as $deviceType => $devices) {
+		foreach($devices as $device) {
+			if(preg_match("/" . $device . "/i", $userAgent)) {
+				$deviceName = $deviceType;
+			}
+		}
+	}
+	if ($deviceName == 'mobile') {
+		$mobile = 'YES';
+	}
+  switch ($delta) {
+    case 'leaderboard_top':
+		$desktopad = block_load('jci_dfp', 'jci-dfp-block-1');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-6');
+		$block2 = _block_get_renderable_array(_block_render_blocks(array($mobilead)));
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . "</div>\r";
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . "</div>\r";
+		}
+		$block['content'] = array('#markup' => $output);
+      break;
+    case 'leaderboard_middle':
+		$desktopad = block_load('jci_dfp', 'jci-dfp-block-2');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-7');
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . "</div>\r";
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . "</div>\r";
+		}
+		$block['content'] = array('#markup' => $output);
+      break;
+    case 'leaderboard_bottom':
+		$desktopad = block_load('jci_dfp', 'jci-dfp-block-3');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-8');
+		$block2 = _block_get_renderable_array(_block_render_blocks(array($mobilead)));
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . "</div>\r";
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . "</div>\r";
+		}
+		$block['content'] = array('#markup' => $output);
+      break;
+    case 'leaderboard_adsense':
+		$desktopad = block_load('jci_dfp', 'jci-dfp-block-4');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-9');
+		$block2 = _block_get_renderable_array(_block_render_blocks(array($mobilead)));
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . "</div>\r";
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . "</div>\r";
+		}
+		$block['content'] = array('#markup' => $output);
+      break;
+    case 'leaderboard_dm':
+		$desktopad = block_load('jci_dfp', 'jci-dfp-block-5');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-10');
+		$block2 = _block_get_renderable_array(_block_render_blocks(array($mobilead)));
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . "</div>\r";
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . "</div>\r";
+		}
+		$block['content'] = array('#markup' => $output);
+      break;
+	case 'pushdown':
+    $desktopad = block_load('jci_dfp', 'jci-dfp-block-29');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+	  	$block['content'] = array('#markup' => '<div class="center-txt">' . drupal_render($block1) . '</div>');
+	  break;
+	case 'pushdown_top100_and_topcities':
+		$query_parameters = drupal_get_query_parameters();
+		$path = current_path();
+		$path_alias = drupal_lookup_path('alias',$path);
+		$path_alias_pieces = explode('/', $path_alias);
+    if (($query_parameters && isset($query_parameters['page'])) || count($path_alias_pieces) == 1){ 
+    // if within pager OR if on a sub page, ie: Ranking Data, Methodology, etc.
+    	$top_lb_ad = block_load('combo_ad_blocks', 'leaderboard_top');
+      $top_lb_ad_output = _block_get_renderable_array(_block_render_blocks(array($top_lb_ad)));
+      $block['content'] = array('#markup' => drupal_render($top_lb_ad_output));
+    } else {
+    $desktopad = block_load('jci_dfp', 'jci-dfp-block-29');
+		$block1 = _block_get_renderable_array(_block_render_blocks(array($desktopad)));
+		$mobilead = block_load('jci_dfp', 'jci-dfp-block-6');
+		$block2 = _block_get_renderable_array(_block_render_blocks(array($mobilead)));
+		if ($mobile == 'YES') {
+			$output = '<div class="mobile-only center-txt">' . drupal_render($block2) . '</div>';
+		}else{
+			$output = '<div class="no-mobile center-txt">' . drupal_render($block1) . '</div>';
+		}
+    	//$non_mobile_ad = '<div class="no-mobile center-txt">'.renderSlot('liv_PushDown_Expanded_970x415').'</div>';
+    	//$mobile_ad = '<div class="mobile-only center-txt">'.renderSlot('LIV_Mobile_LB_Top_320x50').'</div>';
+    	$block['content'] = array('#markup' => $output);
+    }
+	  break;
+	case 'filmstrip':
+	  $desk = '<div class="no-mobile center-txt">'.getDumbDFP(25).'</div>';
+	  $mobile = '<div class="mobile-only center-txt">'.getDumbDFP(26).'</div>';
+	  $block['content'] = array('#markup' => $desk.$mobile);
+	  break;
+  }
+  return $block;
+}
+
+function getDumbDFP($id){
+  $b = block_load('jci_dfp','jci-dfp-block-'.$id);
+  return drupal_render(_block_get_renderable_array(_block_render_blocks(array($b))));
+
+}
+/**
+ * @} End of "combo_ad_blocks".
+ */

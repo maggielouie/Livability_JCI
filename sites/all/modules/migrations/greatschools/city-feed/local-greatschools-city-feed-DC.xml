@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><greatschools-city-feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.greatschools.org/feeds/greatschools-city2.xsd">
+<city>
+<id>405695</id>
+<name>Washington</name>
+<state>DC</state>
+<rating>5</rating>
+<url>http://www.greatschools.org/city/Washington/DC</url>
+<lat>38.9041</lat>
+<lon>-77.0171</lon>
+<active>1</active>
+</city>
+<city>
+<id>446474</id>
+<name>Washington, D.C.</name>
+<state>DC</state>
+<rating/>
+<url>http://www.greatschools.org/city/Washington,_D.C./DC</url>
+<lat>38.892</lat>
+<lon>-76.9246</lon>
+<active>1</active>
+</city>
+</greatschools-city-feed>

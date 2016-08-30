@@ -1,0 +1,9 @@
+name = "City Geocoding"
+description = "Take city information and write back the lat/long to geo field"
+package = "Livability"
+core = 7.x
+dependencies[] = migrate
+
+files[] = CityCounty.inc
+files[] = cityGeocode.inc
+files[] = citySource.inc

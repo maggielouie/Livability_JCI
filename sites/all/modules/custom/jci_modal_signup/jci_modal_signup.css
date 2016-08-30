@@ -1,0 +1,61 @@
+#overlay-once {
+  position:fixed;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0,0,0,0.75);
+  z-index: 9999;
+  text-align: center;
+  top: 0;
+}
+
+#overlay-once iframe {
+  width: 90%;
+  max-width: 600px;
+  height: 96%;
+  max-height: 620px;
+  margin: 20px;
+  overflow: auto;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+#overlay-once #framewrap {
+  position: relative;
+  display: inline-block;
+  width: 90%;
+  max-width: 600px;
+  height: 90%;
+  max-height: 620px;
+  margin: 20px;
+}
+
+#overlay-once #framewrap.jciSignupPresented,
+#overlay-once #framewrap.jciSignupPresented iframe {
+  max-height: 800px;
+}
+
+#overlay-once #close {
+  position: absolute;
+  border: 1px solid #ccc;
+  height: 20px;
+  min-width: 20px;
+  background: #fff;
+  right: 46px; /*30px;*/
+  top: 30px; /*20px;*/
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+#overlay-once a#close,
+#overlay-once a#close:hover {
+  color: #999;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 20px;
+}
+
+#overlay-once a#close:hover {
+  color:#909070;
+}

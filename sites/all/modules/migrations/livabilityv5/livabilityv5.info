@@ -1,0 +1,23 @@
+name = "Livability V5 > V6 migration"
+description = "Migrate Content from Livability V5 site to D7"
+package = "Livability"
+core = 7.x
+
+dependencies[] = migrate
+dependencies[] = image
+
+files[] = livabilityv5.module
+files[] = areas.inc
+files[] = terms.inc
+files[] = writers.inc
+files[] = writer_images.inc
+files[] = articles.inc
+files[] = article_images.inc
+files[] = article_categories.inc
+files[] = article_cities.inc
+files[] = best_places_terms.inc
+files[] = best_places_images.inc
+files[] = best_places.inc
+files[] = best_places_items.inc
+files[] = top_100.inc
+files[] = digital_magazines.inc

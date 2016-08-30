@@ -1,0 +1,11 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Removing bad alias.
+ */
+function livability_citys_update_7000() {
+  db_query('DELETE FROM {url_alias} WHERE alias = :alias', array(':alias' => 'syracuse'));
+}

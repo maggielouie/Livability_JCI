@@ -1,0 +1,4 @@
+name = "Livability Taboola Blocks"
+description = "Provides Taboola 'You May Also Be Interested In'  blocks."
+core = 7.x
+package = Livability

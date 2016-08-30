@@ -1,0 +1,17 @@
+diff --git a/subpathauto.module b/subpathauto.module
+index 4fd2eda..0b71cd5 100644
+--- a/subpathauto.module
++++ b/subpathauto.module
+@@ -20,6 +20,12 @@ function subpathauto_menu() {
+  * Implements hook_url_inbound_alter().
+  */
+ function subpathauto_url_inbound_alter(&$path, $original_path, $language) {
++  if (!defined('MAINTENANCE_MODE') || MAINTENANCE_MODE != 'update') {
++    global $theme;
++    if (!isset($theme)) {
++      menu_set_custom_theme();
++    }
++  }
+   // If the current menu item exists at this path, then we should not continue
+   // processing.
+   $item = menu_get_item($path);

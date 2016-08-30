@@ -1,0 +1,37 @@
+<div class="photo-strip-container">
+	<ul class="photo-strip rsDefault">
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-1" src="/images/city-images/thumb1.jpg"></span>	
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-2" src="/images/city-images/thumb2.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-3"  src="/images/city-images/thumb3.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-4"  src="/images/city-images/thumb4.jpg"></span>		
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-5"  src="/images/city-images/thumb5.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-6"  src="/images/city-images/thumb6.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-7"  src="/images/city-images/thumb7.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-8"  src="/images/city-images/thumb1.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-9"  src="/images/city-images/thumb2.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-10"  src="/images/city-images/thumb3.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-11"  src="/images/city-images/thumb4.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-12"  src="/images/city-images/thumb5.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-13"  src="/images/city-images/thumb6.jpg"></span>			
+		<span><img class="rsTmb" data-link="/city-gallery.html#image-14"  src="/images/city-images/thumb7.jpg"></span>	
+	</ul>
+</div>
+<script>
+  	jQuery(document).ready(function($) {  		
+		var slider = $('.photo-strip').royalSlider({
+			controlNavigation: 'thumbnails',
+			thumbs: {
+			  appendSpan: true,
+			  firstMargin: false,
+			  spacing:2,
+			}
+		});
+		$('.photo-strip').css({
+			opacity: 1
+		})
+	});
+	
+	$(".photo-strip").on("click", ".rsThumb", function(e) {
+		window.location.href = $(this).find('.rsTmb').data('link')
+	})
+</script>

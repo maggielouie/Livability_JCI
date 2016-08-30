@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Recent Global Articles feature.
+ */
+
+include_once 'recent_global_articles.features.inc';

@@ -1,0 +1,75 @@
+<?php
+/**
+ * @file
+ * Code for the Image Editor Settings feature.
+ */
+
+include_once 'image_editor_settings.features.inc';
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function image_editor_settings_form_file_entity_add_upload_alter(&$form, &$form_state) {
+  // Add a preview image to the file entity edit form used by the media browser.
+  if (isset($form_state['step']) && $form_state['step'] == 4) {
+    $fid = isset($form_state['values']['upload']) ? $form_state['values']['upload'] : $form_state['storage']['upload'];
+    $file = file_load($fid);
+    _image_editor_settings_form_append_preview($form, $file);
+  } 
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function image_editor_settings_form_file_entity_edit_alter(&$form, &$form_state) {
+  // Make sure we have an entity to work with.
+  if (!isset($form['#entity'])) {
+    return;
+  }
+  _image_editor_settings_form_append_preview($form, $form['#entity']);
+}
+
+/**
+ * Append the preview field to file edit forms.
+ *
+ * @param array $form
+ *   The form array provided by hook_form_alter() to attach the preview to.
+ * @param object $file
+ *   The file object we should be adding the preview for.
+ */
+function _image_editor_settings_form_append_preview(&$form, $file) {
+  if (is_object($file)) {
+    $form['image_editor_settings'] = array(
+      '#type' => 'container',
+      '#prefix' => '<label>' . t('Aviary Preview') . '</label>',
+      'thumbnail' => array(
+        '#type' => 'markup',
+        '#theme' => 'image_style',
+        '#style_name' => 'large',
+        '#path' => $file->uri,
+        '#alt' => $file->alt,
+        '#title' => $file->title,
+      ),
+      'image_editor_settings_help' => _image_editor_settings_help(),
+    );
+
+    // To prevent duplicate image previews from displaying we should go ahead
+    // and limit access to the preview element. Media does this already in some
+    // instances, but not all.
+    $form['preview']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Retrieve the help text for a focal point field.
+ *
+ * @return array
+ *   A render array for the help text to display on a focal point field.
+ */
+function _image_editor_settings_help() {
+  return array(
+    '#prefix' => '<div class="liv-aviary-help">',
+    '#markup' => t('Hover over the image and click on the Aviary Icon to edit this image.'),
+    '#suffix' => '</div>',
+  );
+}

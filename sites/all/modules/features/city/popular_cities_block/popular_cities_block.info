@@ -1,0 +1,7 @@
+name = Popular Cities Block
+description = A block displaying Popular Cities as determined by Sponsored, Top 100, and most populous.
+package = Livability
+core = 7.x
+dependencies[] = block
+dependencies[] = google_analytics_counter
+

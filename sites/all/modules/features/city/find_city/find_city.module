@@ -1,0 +1,139 @@
+<?php
+
+function find_city_menu(){
+    //url /find-city
+    $items = array();
+    $items['find-city'] = array('title' => 'Find A City','access callback'=>true,'page callback' => 'find_city_home');
+    $items['find-city.json'] = array('title'=>'find a city json','access callback'=>true,'page callback'=>'find_city_json');
+return $items;
+}
+
+
+function find_city_home(){
+    $content = '
+<style>
+.find-city-input{}
+.find-city ul {background:white;width:100%;opacity:.8;}
+.find-city li{padding-left:15px;color:black;text-align: left;font-weight: bold;}
+.find-city li a{ color:black;}
+</style>
+<div class="find"><div class="find-hero">
+
+    <div class="find-hero-content">
+        <h1>Find A City</h1>
+        <p>
+            Search for any city in the United States to find your best place to live.
+        </p>
+        <form class="find-city">
+            <input class="find-city-input"  autocomplete="off" placeholder="Enter a city, state" name="search"><i class="icon-search"></i>
+            <ul></ul>
+        </form>
+    </div>
+</div>';
+
+    $content .= '<div class="states shadow-inset-tb ">';
+    
+    // Ad info
+    /*$topad = block_load('combo_ad_blocks', 'leaderboard_top');
+    $topad_output = _block_get_renderable_array(_block_render_blocks(array($topad)));
+    $content .= drupal_render($topad_output); */
+
+    $block = module_invoke('block', 'block_view', '22');
+    $content .=  render($block['content']);
+
+	$content .= '<h1>Find Best Place to Live <span>by State</span></h1>
+	<ul>';
+    foreach(locality::$states as $code => $name){
+        $content .= '<li><a href="/'.strtolower($code).'"><i class="stateface-'.strtolower($code).'"></i>'.$name.'</a></li>';
+    }
+    $content .= '</ul>';
+
+    // Ad info
+    /*$middlead = block_load('combo_ad_blocks', 'leaderboard_middle');
+    $middlead_output = _block_get_renderable_array(_block_render_blocks(array($middlead)));
+    $content .= drupal_render($middlead_output);*/
+
+    $block = module_invoke('block', 'block_view', '20');
+    $content .=  render($block['content']);
+
+    $content .= '<h1>Find Best Place to Live <span>by Metro Area</span></h1>';
+
+    // Metro Areas
+    $content .= views_embed_view('metro_areas', 'block_1');
+
+    // Ad info
+    $bottomad = block_load('combo_ad_blocks', 'leaderboard_bottom');
+    $bottomad_output = _block_get_renderable_array(_block_render_blocks(array($bottomad)));
+    $content .= drupal_render($bottomad_output);
+
+
+/*    drupal_add_js('sites/all/themes/liv/livability/js/mapdata.js');
+    drupal_add_js('sites/all/themes/liv/livability/js/usmap.js');
+//    <script src="/sites/all/themes/liv/livability/js/mapdata.js"></script>
+//    <script src="/sites/all/themes/liv/livability/js/usmap.js"></script>
+
+    $content .= '
+	<div id="map"></div>
+';
+*/
+    /*<script>
+		jQuery(\'#map\').on("mouseenter", "path", function (e) {
+	        $(this).next(\'text\').css({
+	            fill: \'#ffffff\'
+	        })
+	    })
+        jQuery(\'#map\').on("mouseleave", "path", function (e) {
+            $(this).next(\'text\').css({
+                    fill: \'#838383\'
+            })
+	    })
+</script>';
+*/
+//    $content .= citySectionInclude('stubs/ad728');
+    $content .= '</div>';
+/*
+    $content .= '<div class="most-popular shadow-inset-b">
+	<div class="hero">
+		<h2>Most Popular Cities</h2>
+	</div>
+	<ul class="top-three">
+		<li>
+			<a href="#">
+				<span class="no">1</span>
+				<span class="city">Rancho Santa Margarita</span>
+				<span class="state">California</span>
+			</a>
+		</li>
+
+	</ul>
+	<ul>
+		<li>
+			<a href="#">
+				<span class="no">4</span>
+				<span class="city">New York City</span>
+				<span class="state">New York</span>
+			</a>
+		</li>
+
+	</ul>
+</div>';
+*/
+    $content .= '</div>';//end find div
+    //todo https://github.com/JournalCommunications/livability_design/blob/firstStab/views/find-states.html
+
+    return $content;
+}
+
+function find_city_json(){
+    //drupal_set_message($_GET['search_api_views_fulltext']);
+    $view = views_get_view_result('find_a_city','page',array('search_api_views_fulltext'=>$_GET['search_api_views_fulltext']));
+    $r=array();
+  //print_r($view);
+    foreach($view as $city){
+        //todo determine json array structure for autocomplete endpoint
+        $n = city_node_load($city->entity);
+        $path = drupal_get_path_alias('node/'.$n->nid);
+        $r[] = array('city'=>$n->title,'stateCode'=>strtolower($n->state->field_state_code[LANGUAGE_NONE][0]['value']),'state'=>$n->state->title,'path'=>$path,'type'=>$n->type);
+    }
+    return drupal_json_output($r);
+}

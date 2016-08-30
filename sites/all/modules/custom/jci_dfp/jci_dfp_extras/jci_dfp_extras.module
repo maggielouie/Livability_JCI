@@ -1,0 +1,805 @@
+<?php
+
+/*Implementation hook_menu
+*
+* Add a page for all the options for targeting
+*/
+
+function jci_dfp_extras_menu() {
+    
+$items['admin/config/jci_dfp_settings/targeting_extra_options'] = array(
+      'title' => 'JCI DFP Targeting Extras',
+      'type' => MENU_NORMAL_ITEM,
+      'page callback' => 'jci_dfp_extras_targeting',
+      'access arguments' => array('access administration pages'),
+    );
+    
+    return $items;
+}
+
+
+/* JCI DFP Extra targeting Page */
+
+function jci_dfp_extras_targeting() {
+  return drupal_get_form('jci_dfp_extras_targeting_form');
+}
+
+
+/* JCI DFP Extras targeting Settings Form */
+
+function jci_dfp_extras_targeting_form($form_state) {
+
+  $form['jci-dfp-extras-fielset-vocabularies'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting by Taxonomy Vocabulary"), 
+  );
+  
+           //All Taxonomy Vocabularies
+            $form['jci-dfp-extras-fielset-vocabularies']['jci-dfp-extras-vocabularies-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Taxonomy Vocabularies'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-VOCABULARY', '')
+            ); 
+
+            $form['jci-dfp-extras-fielset-vocabularies']['jci-dfp-extras-vocabularies-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for taxonomy vocabularies targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-VOCABULARY', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-vocabularies']['jci-dfp-extras-fielset-list-vocabularies'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all Vocabularies"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+            
+            $vocabularies = taxonomy_get_vocabularies();
+            foreach($vocabularies as $vocabulary) {
+            $clean_vocabulary = preg_replace('/[^a-z0-9\s]/i', '', $vocabulary->name);
+            $clean_vocabulary = str_replace(' ', '-', $clean_vocabulary);
+                
+                        $form['jci-dfp-extras-fielset-vocabularies']['jci-dfp-extras-fielset-list-vocabularies']['jci-dfp-extras-target-'. strtolower($clean_vocabulary)] = array(
+                            '#type' => 'checkbox', 
+                            '#title' => t('Activate JCI DFP to target '. $vocabulary->name . ' vocabulary'), 
+                            '#default_value' => variable_get('jci-dfp-'. strtolower($clean_vocabulary) . '-TARGET', '')
+                        ); 
+
+                        $form['jci-dfp-extras-fielset-vocabularies']['jci-dfp-extras-fielset-list-vocabularies']['jci-dfp-extras-key-'. strtolower($clean_vocabulary)] = array(
+                            '#type' => 'textfield', 
+                            '#title' => t('Keyword identifier to target ' . $vocabulary->name . ' vocabulary'), 
+                            '#default_value' => variable_get('jci-dfp-'. strtolower($clean_vocabulary) . '-KEY', '')
+                        );
+            }
+
+
+
+
+  $form['jci-dfp-extras-fielset-terms'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting by Taxonomy Term"), 
+  );
+  
+           //All Taxonomy Terms
+            $form['jci-dfp-extras-fielset-terms']['jci-dfp-extras-terms-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Taxonomies Terms'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-TERMS', '')
+            ); 
+
+            $form['jci-dfp-extras-fielset-terms']['jci-dfp-extras-terms-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for taxonomy terms targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-TERMS', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-terms']['jci-dfp-extras-fielset-list-terms'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all Terms"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+            
+            $vocabularies = taxonomy_get_vocabularies();
+            foreach($vocabularies as $vocabulary) {
+                $terms = taxonomy_get_tree($vocabulary->vid);
+                
+                foreach($terms as $term) {
+                $clean_term = preg_replace('/[^a-z0-9\s]/i', '', $term->name);
+                $clean_term = str_replace(' ', '-', $clean_term);
+    
+                        $form['jci-dfp-extras-fielset-terms']['jci-dfp-extras-fielset-list-terms']['jci-dfp-extras-target-'. strtolower($clean_term)] = array(
+                            '#type' => 'checkbox', 
+                            '#title' => t('Activate JCI DFP to target '. $term->name . ' term'), 
+                            '#default_value' => variable_get('jci-dfp-'. strtolower($clean_term) . '-TARGET', '')
+                        ); 
+
+                        $form['jci-dfp-extras-fielset-terms']['jci-dfp-extras-fielset-list-terms']['jci-dfp-extras-key-'. strtolower($clean_term)] = array(
+                            '#type' => 'textfield', 
+                            '#title' => t('Keyword identifier to target ' . $term->name . ' term'), 
+                            '#default_value' => variable_get('jci-dfp-'. strtolower($clean_term) . '-KEY', '')
+                        );
+                }
+            }
+  
+  
+  $form['jci-dfp-extras-fielset-content-types'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting by Content Type"), 
+  );
+           //All Content Types
+            $form['jci-dfp-extras-fielset-content-types']['jci-dfp-extras-ct-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Content Types'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-CT', '')
+            ); 
+            
+            $form['jci-dfp-extras-fielset-content-types']['jci-dfp-extras-ct-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for content types targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-CT', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-content-types']['jci-dfp-extras-fielset-list-content-types'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all Content Types"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+            
+            $cts = node_type_get_types(); //content_types();
+                foreach($cts as $ct) {
+                $clean_ct = preg_replace('/[^a-z0-9\s]/i', '', $ct->type);
+                $clean_ct = str_replace(' ', '-', $clean_ct);
+
+                    $form['jci-dfp-extras-fielset-content-types']['jci-dfp-extras-fielset-list-content-types']['jci-dfp-extras-target-'. strtolower($clean_ct)] = array(
+                        '#type' => 'checkbox', 
+                        '#title' => t('Activate JCI DFP '. $ct->type .' content type targeting'), 
+                        '#default_value' => variable_get('jci-dfp-'. strtolower($clean_ct) . '-TARGET', '')
+                    ); 
+
+                    $form['jci-dfp-extras-fielset-content-types']['jci-dfp-extras-fielset-list-content-types']['jci-dfp-extras-key-'. strtolower($clean_ct)] = array(
+                        '#type' => 'textfield', 
+                        '#title' => t('Keyword identifier to target ' . $ct->type . ' content type'), 
+                        '#default_value' => variable_get('jci-dfp-'. strtolower($clean_ct) . '-KEY', '')
+                    );
+                }
+                         
+  $form['jci-dfp-extras-fielset-views'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting for Pages generated by Views"), 
+  ); 
+  
+           //All Views
+            $form['jci-dfp-extras-fielset-views']['jci-dfp-extras-views-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Views Pages'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-VIEWS', '')
+            ); 
+
+            $form['jci-dfp-extras-fielset-views']['jci-dfp-extras-views-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for views pages targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-VIEWS', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-views']['jci-dfp-extras-fielset-list-views'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all pages generated with Views"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+
+        if(function_exists('views_get_all_views')) {            
+            $views = views_get_all_views();
+        }
+        
+        if(!empty($views)) {
+                foreach($views as $view) {
+                    
+                    foreach($view->display as $display) {
+      
+                      if($display->display_plugin == 'page' && !$view->disabled) {
+
+                        $form['jci-dfp-extras-fielset-views']['jci-dfp-extras-fielset-list-views']['jci-dfp-extras-target-'. $display->display_options['path']] = array(
+                            '#type' => 'checkbox', 
+                            '#title' => t('Activate JCI DFP to target '. $display->display_options['path']), 
+                            '#default_value' => variable_get('jci-dfp-'. $display->display_options['path'] . '-TARGET', '')
+                        ); 
+
+                        $form['jci-dfp-extras-fielset-views']['jci-dfp-extras-fielset-list-views']['jci-dfp-extras-key-'. $display->display_options['path']] = array(
+                            '#type' => 'textfield', 
+                            '#title' => t('Keyword identifier to target ' . $display->display_options['path']), 
+                            '#default_value' => variable_get('jci-dfp-'. $display->display_options['path'] . '-KEY', '')
+                        );
+                      }
+                    }
+                }
+            }
+                         
+  $form['jci-dfp-extras-fielset-context'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting by Context"), 
+  ); 
+  
+           //All Contexts
+            $form['jci-dfp-extras-fielset-context']['jci-dfp-extras-contexts-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Contexts'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-CONTEXT', '')
+            ); 
+
+            $form['jci-dfp-extras-fielset-context']['jci-dfp-extras-contexts-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for context targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-CONTEXT', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-context']['jci-dfp-extras-fielset-list-context'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all Contexts"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+
+        if(function_exists('context_context_list')) {            
+            $contexts = context_context_list();
+        }
+
+        if(!empty($contexts)) {
+                foreach($contexts as $context) {
+
+                    $form['jci-dfp-extras-fielset-context']['jci-dfp-extras-fielset-list-context']['jci-dfp-extras-target-'. $context] = array(
+                        '#type' => 'checkbox', 
+                        '#title' => t('Activate JCI DFP '. $context .' context targeting'), 
+                        '#default_value' => variable_get('jci-dfp-'. $context . '-TARGET', '')
+                    ); 
+
+                    $form['jci-dfp-extras-fielset-context']['jci-dfp-extras-fielset-list-context']['jci-dfp-extras-key-'. $context] = array(
+                        '#type' => 'textfield', 
+                        '#title' => t('Keyword identifier to target ' . $context . ' context'), 
+                        '#default_value' => variable_get('jci-dfp-'. $context . '-KEY', '')
+                    );
+                }
+            }
+                       
+  $form['jci-dfp-extras-fielset-role'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Create Custom targeting by User Role"), 
+    '#prefix' => '<div id="dfp-ad-units-fields">',
+    '#suffix' => '</div>',
+  ); 
+  
+           //All Roles
+            $form['jci-dfp-extras-fielset-role']['jci-dfp-extras-roles-general-activate'] = array(
+                '#type' => 'checkbox', 
+                '#title' => t('Activate JCI DFP for all Roles'), 
+                '#default_value' => variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-ROLES', '')
+            ); 
+
+            $form['jci-dfp-extras-fielset-role']['jci-dfp-extras-roles-general'] = array(
+                '#type' => 'textfield', 
+                '#title' => t('DFP targeting - Default Keyword identifier for roles targeting'), 
+                '#default_value' => variable_get('jci-dfp-ID-EXTRAS-DEFAULT-ROLES', '')
+            );
+            
+            $form['jci-dfp-extras-fielset-role']['jci-dfp-extras-fielset-list-roles'] = array(
+                '#type' => 'fieldset', 
+                '#title' => t("List of all Roles"), 
+                '#collapsible' => TRUE, 
+                '#collapsed' => TRUE
+            );
+            
+            $roles = user_roles();
+            
+                foreach($roles as $role) {
+                $clean_role = preg_replace('/[^a-z0-9\s]/i', '', $role);
+                $clean_role = str_replace(' ', '-', $clean_role);
+
+                    $form['jci-dfp-extras-fielset-role']['jci-dfp-extras-fielset-list-roles']['jci-dfp-extras-target-'. strtolower($clean_role)] = array(
+                        '#type' => 'checkbox', 
+                        '#title' => t('Activate JCI DFP '. $role .' targeting'), 
+                        '#default_value' => variable_get('jci-dfp-'. strtolower($clean_role) . '-TARGET', '')
+                    ); 
+
+                    $form['jci-dfp-extras-fielset-role']['jci-dfp-extras-fielset-list-roles']['jci-dfp-extras-key-'. strtolower($clean_role)] = array(
+                        '#type' => 'textfield', 
+                        '#title' => t('Keyword identifier to target ' . $role), 
+                        '#default_value' => variable_get('jci-dfp-'. strtolower($clean_role) . '-KEY', '')
+                    );
+                }
+                
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save DFP Extra Targeting Settings'
+  );            
+              return $form;
+              
+}
+
+
+/* JCI DFP targeting Form Submit */
+function jci_dfp_extras_targeting_form_submit($form, &$form_state) {
+
+    /**** Save all of them in 1 array for easy access on pages ***/
+    
+   $jci_dfp_all_variables = array();            
+
+
+/*****DEFAULTS ******/
+                //ACTIVATE CHECKBOXES
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-VOCABULARY', $form_state['values']['jci-dfp-extras-vocabularies-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-VOCABULARY';
+                
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-TERMS', $form_state['values']['jci-dfp-extras-terms-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-TERMS';
+
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-CT', $form_state['values']['jci-dfp-extras-ct-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-CT';
+
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-VIEWS', $form_state['values']['jci-dfp-extras-views-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-VIEWS';
+
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-CONTEXT', $form_state['values']['jci-dfp-extras-contexts-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-CONTEXT';
+
+                variable_set('jci-dfp-ACTIVATE-EXTRAS-ALL-ROLES', $form_state['values']['jci-dfp-extras-roles-general-activate']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ACTIVATE-EXTRAS-ALL-ROLES';
+
+                //DEFAULT KEYS
+                
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-VOCABULARY', $form_state['values']['jci-dfp-extras-vocabularies-general']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-VOCABULARY';
+
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-TERMS', $form_state['values']['jci-dfp-extras-terms-general'] );
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-TERMS';
+
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-CT', $form_state['values']['jci-dfp-extras-ct-general']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-CT';
+
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-VIEWS', $form_state['values']['jci-dfp-extras-views-general']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-VIEWS';
+
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-CONTEXT', $form_state['values']['jci-dfp-extras-contexts-general']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-CONTEXT';
+
+                variable_set('jci-dfp-ID-EXTRAS-DEFAULT-ROLES', $form_state['values']['jci-dfp-extras-roles-general']);
+                $jci_dfp_all_default_variables[] = 'jci-dfp-ID-EXTRAS-DEFAULT-ROLES';
+
+                
+/*****LOOPS ******/
+
+    /***** VOCABULARIES ******/
+    
+            $vocabularies = taxonomy_get_vocabularies();
+            foreach($vocabularies as $vocabulary) {
+            $clean_vocabulary = preg_replace('/[^a-z0-9\s]/i', '', $vocabulary->name);
+            $clean_vocabulary = str_replace(' ', '-', $clean_vocabulary);
+    
+                //ACTIVATE CHECKBOXES
+                variable_set('jci-dfp-'. strtolower($clean_vocabulary) . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. strtolower($clean_vocabulary)]);
+                $jci_dfp_all_vocabulary_variables[] = 'jci-dfp-'. strtolower($clean_vocabulary) . '-TARGET';
+
+                //DEFAULT KEYS
+                variable_set('jci-dfp-'. strtolower($clean_vocabulary) . '-KEY', $form_state['values']['jci-dfp-extras-key-'. strtolower($clean_vocabulary)]);
+                $jci_dfp_all_vocabulary_variables[] = 'jci-dfp-'. strtolower($clean_vocabulary) . '-KEY';
+
+             }   
+                
+    /***** TERMS ******/
+    
+            foreach($vocabularies as $vocabulary) {
+                $terms = taxonomy_get_tree($vocabulary->vid);
+                
+                foreach($terms as $term) {
+                $clean_term = preg_replace('/[^a-z0-9\s]/i', '', $term->name);
+                $clean_term = str_replace(' ', '-', $clean_term);
+                
+                //ACTIVATE CHECKBOXES
+                variable_set('jci-dfp-'. strtolower($clean_term) . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. strtolower($clean_term)]);
+                $jci_dfp_all_terms_variables[] = 'jci-dfp-'. strtolower($clean_term) . '-TARGET';
+
+                //DEFAULT KEYS
+                variable_set('jci-dfp-'. strtolower($clean_term) . '-KEY', $form_state['values']['jci-dfp-extras-key-'. strtolower($clean_term)]);
+                $jci_dfp_all_terms_variables[] = 'jci-dfp-'. strtolower($clean_term) . '-KEY';
+
+                }
+            }
+
+    /***** CONTENT TYPES ******/
+    
+            $cts = content_types();
+                foreach($cts as $ct) {
+                $clean_ct = preg_replace('/[^a-z0-9\s]/i', '', $ct['type']);
+                $clean_ct = str_replace(' ', '-', $clean_ct);
+
+                //ACTIVATE CHECKBOXES
+                variable_set('jci-dfp-'. strtolower($clean_ct) . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. strtolower($clean_ct)]);
+                $jci_dfp_all_ct_variables[] = 'jci-dfp-'. strtolower($clean_ct) . '-TARGET';
+
+                //DEFAULT KEYS
+                variable_set('jci-dfp-'. strtolower($clean_ct) . '-KEY', $form_state['values']['jci-dfp-extras-key-'. strtolower($clean_ct)]);
+                $jci_dfp_all_ct_variables[] = 'jci-dfp-'. strtolower($clean_ct) . '-KEY';
+
+                }
+
+    /***** VIEWS ******/
+    
+        if(function_exists('views_get_all_views')) {            
+            $views = views_get_all_views();
+        }
+        
+        if(!empty($views)) {
+                foreach($views as $view) {
+                    
+                    foreach($view->display as $display) {
+      
+                      if($display->display_plugin == 'page' && !$view->disabled) {
+
+                        //ACTIVATE CHECKBOXES
+                        variable_set('jci-dfp-'. $display->display_options['path'] . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. $display->display_options['path']]);
+                        $jci_dfp_all_views_variables[] = 'jci-dfp-'. $display->display_options['path'] . '-TARGET';
+
+                        //DEFAULT KEYS
+                        variable_set('jci-dfp-'. $display->display_options['path'] . '-KEY', $form_state['values']['jci-dfp-extras-key-'. $display->display_options['path']]);
+                        $jci_dfp_all_views_variables[] = 'jci-dfp-'. $display->display_options['path'] . '-KEY';
+
+                      }
+                    }
+                }
+         }
+
+
+    /***** CONTEXTS ******/
+
+        if(function_exists('context_context_list')) {            
+            $contexts = context_context_list();
+        }
+        
+        if(!empty($contexts)) {
+                foreach($contexts as $context) {
+
+                //ACTIVATE CHECKBOXES
+                 variable_set('jci-dfp-'. $context . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. $context]);
+                 $jci_dfp_all_context_variables[] = 'jci-dfp-'. $context . '-TARGET';
+
+                //DEFAULT KEYS
+                 variable_set('jci-dfp-'. $context . '-KEY', $form_state['values']['jci-dfp-extras-key-'. $context]);
+                 $jci_dfp_all_context_variables[] = 'jci-dfp-'. $context . '-KEY';
+
+                }
+        }
+
+    /***** ROLES ******/
+            $roles = user_roles();
+                foreach($roles as $role) {
+                $clean_role = preg_replace('/[^a-z0-9\s]/i', '', $role);
+                $clean_role = str_replace(' ', '-', $clean_role);
+
+                //ACTIVATE CHECKBOXES
+                 variable_set('jci-dfp-'. strtolower($clean_role) . '-TARGET', $form_state['values']['jci-dfp-extras-target-'. strtolower($clean_role)]);
+                 $jci_dfp_all_roles_variables[] = 'jci-dfp-'. strtolower($clean_role) . '-TARGET';
+
+                //DEFAULT KEYS
+                 variable_set('jci-dfp-'. strtolower($clean_role) . '-KEY', $form_state['values']['jci-dfp-extras-key-'. strtolower($clean_role)]);
+                 $jci_dfp_all_roles_variables[] = 'jci-dfp-'. strtolower($clean_role) . '-KEY';
+
+                }
+                
+                 variable_set('jci_dfp_all_default_variables', $jci_dfp_all_default_variables);
+                 variable_set('jci_dfp_all_vocabulary_variables', $jci_dfp_all_vocabulary_variables);
+                 variable_set('jci_dfp_all_terms_variables', $jci_dfp_all_terms_variables);
+                 variable_set('jci_dfp_all_ct_variables', $jci_dfp_all_ct_variables);
+                 variable_set('jci_dfp_all_views_variables', $jci_dfp_all_views_variables);
+                 variable_set('jci_dfp_all_context_variables', $jci_dfp_all_context_variables);
+                 variable_set('jci_dfp_all_roles_variables', $jci_dfp_all_roles_variables);
+
+}
+
+/*
+ * Apply hook_jci_dfp_targets()
+*/
+
+function jci_dfp_extras_jci_dfp_targets($node, $context, $roles, $views) {
+
+//Lets separate the params so we can create an easier loop
+$params = array('default', 'vocabulary', 'terms', 'ct', 'views', 'context', 'roles');
+
+//Lets get the contents of the variables
+    foreach($params as $param) {
+           ${'jci_dfp_all'.$param} = variable_get('jci_dfp_all_' . $param .'_variables', '');
+
+       $activate_all = variable_get('jci-dfp-ACTIVATE-EXTRAS-ALL-'.strtoupper($param), '');
+       $default = variable_get('jci-dfp-ID-EXTRAS-DEFAULT-'. strtoupper($param), '');
+
+              
+       //get node_object
+       if(arg(0) == 'node') {
+         $node_object = $node;
+       }
+         
+         switch ($param) {
+         case 'vocabulary' :
+         
+            //only applies to node pages
+            if(arg(0) == 'node') {
+            
+              //if there are taxonomies
+              if(!empty($node_object->taxonomy)) {
+
+                //collect all vocabularies of the node
+                $all_vocabularies_collection = array();
+
+                //Case activate ALL    
+                if($activate_all == 1) {
+                    foreach($node_object->taxonomy as $tid) {
+                        $vid = $tid->vid;
+                        $vocs = taxonomy_get_vocabularies();
+                        $all_vocabularies['key'] = $default;
+                        $all_vocabularies['value'] = str_replace(" ", "-",strtolower($vocs[$vid]->name)); 
+                        $all_vocabularies_collection[] = $all_vocabularies;
+                    }    
+                } else {
+                //Case Individual Active    
+                    $stored_vars = variable_get('jci_dfp_all_vocabulary_variables', '');
+                    if(isset($stored_vars) && is_array($stored_vars)) {
+                        foreach($stored_vars as $var) {
+                            if (strpos($var,'TARGET') !== false) {
+                              $var_get = variable_get($var, '');
+                                if($var_get == 1) {                                
+                                    $var = str_replace("-TARGET", "", $var);
+                                    $var = str_replace("jci-dfp-", "", $var);
+                                    $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                                    
+                                    if(!empty($individual_default)) {
+                                    $all_vocabularies['key'] = $individual_default;
+                                    }else{
+                                    $all_vocabularies['key'] = $default;
+                                    }
+                                    $all_vocabularies['value'] = $var; 
+                                    $all_vocabularies_collection[] = $all_vocabularies;
+                                }
+                            }
+                        }
+                      }
+                }
+              }
+            }
+            
+         break;
+       
+
+         case 'terms' :
+         
+            //only applies to node pages
+            if(arg(0) == 'node') {
+            
+              //if there are taxonomies
+              if(!empty($node_object->taxonomy)) {
+
+                //Case activate ALL    
+                if($activate_all == 1) {
+
+                    //collect all terms of the node
+                    foreach($node_object->taxonomy as $tid) {
+                        $tid_name = str_replace(" ", "-",strtolower($tid->name));
+                        $terms[] = $tid_name;
+                    }
+                
+                    //set the DFP Target 
+                    $all_terms_collection = array();
+                    foreach($terms as $term) {
+                        //get the default variable for all vocabularies
+                        $all_terms['key'] = $default;
+                        $all_terms['value'] = $term; 
+                        $all_terms_collection[] = $all_terms;
+                     }
+                 }else{
+                //Case Individual Active    
+                 if(isset($stored_vars) && is_array($stored_vars)) {
+                    $stored_vars = variable_get('jci_dfp_all_terms_variables', '');
+                        foreach($stored_vars as $var) {
+                            if (strpos($var,'TARGET') !== false) {
+                              $var_get = variable_get($var, '');
+                                if($var_get == 1) {     
+                                    $var = str_replace("-TARGET", "", $var);
+                                    $var = str_replace("jci-dfp-", "", $var);
+                                    $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                                    
+                                    if(!empty($individual_default)) {
+                                    $all_terms['key'] = $individual_default;
+                                    }else{
+                                    $all_terms['key'] = $default;
+                                    }
+                                    $all_terms['value'] = $var; 
+                                    $all_terms_collection[] = $all_terms;
+                                }
+                            }
+                        }
+                     }
+                }
+              }
+            }
+            
+         break;
+         
+         case 'ct' :
+         
+            //only applies to node pages
+            if(arg(0) == 'node') {
+                //Case activate ALL    
+                if($activate_all == 1) {
+                 $all_content_type['key'] = $default;
+                 $all_content_type['value'] = $node_object->type; 
+             }else{
+                //Case Individual Active    
+                  if(isset($stored_vars) && is_array($stored_vars)) {
+                    $stored_vars = variable_get('jci_dfp_all_ct_variables', '');
+                    foreach($stored_vars as $var) {
+                       if (strpos($var,'TARGET') !== false) {
+                       $var_get = variable_get($var, '');
+                           if($var_get == 1) {  
+                              $var = str_replace("-TARGET", "", $var);
+                              $var = str_replace("jci-dfp-", "", $var);
+                              if($node_object->type == $var) {
+                              $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                              if(!empty($individual_default)) {
+                              $all_content_type['key'] = $individual_default;
+                              }else{
+                              $all_content_type['key'] = $default;
+                              }
+                              $all_content_type['value'] = $node_object->type;       
+                              }
+                            }
+                        }
+                    }
+                  }
+             }
+            }
+                     
+         break; 
+         
+         
+         case 'views' :
+            if($activate_all == 1) {
+                     $all_views['key'] = $default;
+                     $all_views['value'] = $views->view->name . '-' . $views->display->id; 
+             }else{
+
+                //Case Individual Active    
+                if(isset($stored_vars) && is_array($stored_vars)) {
+                    $stored_vars = variable_get('jci_dfp_all_views_variables', '');
+                    foreach($stored_vars as $var) {
+                       if (strpos($var,'TARGET') !== false) {
+                       $var_get = variable_get($var, '');
+                           if($var_get == 1) {  
+                              $var = str_replace("-TARGET", "", $var);
+                              $var = str_replace("jci-dfp-", "", $var);
+                                if($views->options['path'] == $var) {
+                                $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                                if(!empty($individual_default)) {
+                                $all_views['key'] = $individual_default;
+                                }else{
+                                $all_views['key'] = $default;
+                                }
+                                $all_views['value'] = $views->view->name . '-' . $views->display->id;       
+                                }
+                            }
+                        }
+                    }
+                  }
+             }
+
+
+         break;  
+         
+         
+         case 'context' :
+            //Case activate ALL    
+            if($activate_all == 1) {
+                   foreach($context['context'] as $each_context) {
+                     $all_contexts['key'] = $default;
+                     $all_contexts['value'] = $each_context->name; 
+                   }
+             }else{
+                //Case Individual Active    
+                  if(isset($stored_vars) && is_array($stored_vars)) {
+                    $stored_vars = variable_get('jci_dfp_all_context_variables', '');
+                    foreach($stored_vars as $var) {
+                       if (strpos($var,'TARGET') !== false) {
+                       $var_get = variable_get($var, '');
+                           if($var_get == 1) {  
+                              $var = str_replace("-TARGET", "", $var);
+                              $var = str_replace("jci-dfp-", "", $var);
+    
+                            if(!empty($context['context'])) {
+                              foreach($context['context'] as $each_context) {
+                                if($each_context->name == $var) {
+                                $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                                if(!empty($individual_default)) {
+                                $all_contexts['key'] = $individual_default;
+                                }else{
+                                $all_contexts['key'] = $default;
+                                }
+                                $all_contexts['value'] = $each_context->name;       
+                                }
+                               } 
+                              } 
+                            }
+                        }
+                      }
+                    }
+             }
+
+         break;   
+         
+         case 'roles' :
+         
+        GLOBAL $user;
+         
+            //Case activate ALL    
+            if($activate_all == 1) {
+                 foreach($user->roles as $role) {
+                     $all_contexts['key'] = $default;
+                     $all_contexts['value'] = str_replace(" ", "-",strtolower($role)); ; 
+                   }
+             }else{
+                //Case Individual Active    
+                  if(isset($stored_vars) && is_array($stored_vars)) {
+                    $stored_vars = variable_get('jci_dfp_all_roles_variables', '');
+                    foreach($stored_vars as $var) {
+                       if (strpos($var,'TARGET') !== false) {
+                       $var_get = variable_get($var, '');
+                           if($var_get == 1) {  
+                              $var = str_replace("-TARGET", "", $var);
+                              $var = str_replace("jci-dfp-", "", $var);
+                              foreach($user->roles as $role) {
+                                if(str_replace(" ", "-",strtolower($role)) == $var) {
+                                $individual_default = variable_get("jci-dfp-" . $var . "-KEY", '');
+                                if(!empty($individual_default)) {
+                                $all_roles['key'] = $individual_default;
+                                }else{
+                                $all_roles['key'] = $default;
+                                }
+                                $all_roles['value'] = str_replace(" ", "-",strtolower($role));       
+                                }
+                               }  
+                            }
+                        }
+                      }
+                    }
+             }
+         
+         break;                    
+         
+         }
+    }
+   
+    $new_targets = array(); 
+    //Vocabularies
+    if (isset($all_vocabularies_collection)) 
+    $new_targets[] = $all_vocabularies_collection;
+    
+    //Terms
+    if (isset($all_terms_collection))
+    $new_targets[] = $all_terms_collection;
+    
+    //Content Type
+    if (isset($all_content_type))
+    $new_targets[] = $all_content_type;
+
+    //Views
+    if (isset($all_views))
+    $new_targets[] = $all_views;
+
+    //Contexts
+    if (isset($all_contexts))
+    $new_targets[] = $all_contexts;
+    
+    //Roles
+    if (isset($all_roles))
+    $new_targets[] = $all_roles;    
+
+    
+    return $new_targets;
+}

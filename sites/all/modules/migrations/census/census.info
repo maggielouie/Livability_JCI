@@ -1,0 +1,15 @@
+name = "Census Data Migration"
+description = "Using census api to keep our data up to date."
+package = "Livability"
+core = 7.x
+
+;node_reference is useful but not required
+;dependencies[] = node_reference
+
+files[] = census.module
+files[] = censusapi.inc
+files[] = state.inc
+files[] = county.inc
+files[] = city.inc
+files[] = citydemo.inc
+files[] = previous.inc

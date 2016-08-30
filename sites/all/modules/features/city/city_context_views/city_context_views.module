@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the City Context Views feature.
+ */
+
+include_once 'city_context_views.features.inc';

@@ -1,0 +1,8 @@
+name = "Metro Area Import Migration"
+description = "Create metro area nodes for Livability.com"
+package = "Livability"
+core = 7.x
+dependencies[] = migrate
+
+files[] = metro_area.inc
+files[] = metro_county.inc

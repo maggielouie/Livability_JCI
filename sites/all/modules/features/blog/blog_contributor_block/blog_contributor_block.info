@@ -1,0 +1,15 @@
+name = Blog Contributor Block
+description = A view that creates a block of Blog Authors
+core = 7.x
+package = Livability
+version = 7.x-1.1
+project = blog_contributor_block
+dependencies[] = ds
+dependencies[] = entity
+dependencies[] = views
+features[ctools][] = ds:ds:1
+features[ctools][] = views:views_default:3.0
+features[ds_view_modes][] = mini
+features[features_api][] = api:2
+features[views_view][] = blog_contributors
+features_exclude[dependencies][ctools] = ctools

@@ -1,0 +1,1041 @@
+<?php
+
+/*
+* This module allows the follwoing:
+* 1. Set up DFP ID and Ad Units through a settings page
+* 2. Provides a block for each Ad Unit Setted up.
+* 3. Provides a settings page for Specifically Journal Communications ad targeting needs.
+* 4. Prints all DFP code needed to display the ads
+* 5. Provides with a hook (hook_jci_dfp) to add targettings for DFP
+* 6. Contains a secondary module which is more robust and less specific to our companie's needs.
+
+******CUSTOM HOOK FOR JCI DFP ****
+* JCI DFP Hook to allow adding more targets 
+* The name is hook_jci_dfp_targets()
+* For an example, visit jci_dfp_extras
+*/
+
+/*Implementation hook_menu
+*
+* Page 1 Settings (ID & Google Slots)
+* Page 2 targeting Needed
+* Currently this module does not integrate with Placements from DFP
+*/
+
+function jci_dfp_menu() {
+
+  $items['admin/config/jci_dfp_settings'] = array(
+    'title' => 'JCI DFP General Settings',
+    'description' => 'With JCI DFP Module you can integrate DFP generated Slots into the website & generate
+      specific targeting for each page. Simplifying ad trafficking with only keyword targeting is the end result, 
+      therefore at the moment we are not using placements from DFP',
+    'page callback' => 'jci_dfp_settings',
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('access administration pages'),
+  );
+    
+  $items['admin/config/jci_dfp_settings/targeting'] = array(
+    'title' => 'JCI DFP Targeting Settings',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'jci_dfp_targeting',
+    'access arguments' => array('access administration pages'),
+  );
+    
+  return $items;
+}
+
+
+/* JCI DFP Settings Page */
+
+function jci_dfp_settings() {  
+  $form = drupal_get_form('jci_dfp_settings_form');
+  return $form;
+}
+
+/* JCI DFP targeting Page */
+
+function jci_dfp_targeting() {
+  return drupal_get_form('jci_dfp_targeting_form');
+}
+
+/* JCI DFP Settings Form */
+
+function jci_dfp_settings_form($node, &$form_state) {
+
+  $form['jci-dfp-activate'] = array(
+    '#type' => 'checkbox', 
+    '#title' => t('Activate JCI DFP'), 
+    '#default_value' => variable_get('jci-dfp-ACTIVATE', '')
+  );   
+
+  $form['jci-dfp-id'] = array(
+    '#type' => 'textfield', 
+    '#title' => t('Google ca-pub DFP ID'), 
+    '#default_value' => variable_get('jci-dfp-ID', '')
+  );
+
+  if (!isset($form_state['values']['quantity'])) {
+    $quantity = variable_get('jci-dfp-QUANTITY', '');
+    if (!empty($quantity)) {
+      $quantity = $quantity;
+    }
+    else {
+      $quantity = 1;
+    }
+  }
+  else {
+    // If the form has been submitted we get the quantity that was stored.
+    $quantity = $form_state['values']['quantity'];
+    // We then do a check to see if the user has clicked the "Add another car" button, if they have we increase the amount by 1.
+    if (isset($form_state['values']['jci-dfp-slots-fieldset']['add_more']) && $form_state['values']['op'] == 'Add another DFP slot') {
+      $quantity++;
+      $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$quantity] = $quantity;
+      variable_set('jci-dfp-QUANTITY', $quantity);
+    }
+            
+    if (isset($form_state['values']['jci-dfp-slots-fieldset']['remove']) && $form_state['values']['op'] == 'Remove DFP slot') {
+      $quantity--;
+      if ($quantity > 0) {
+        $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$quantity] = $quantity;
+        variable_set('jci-dfp-QUANTITY', $quantity);
+      }
+    }
+  }
+
+  // We create a hidden form element to store the amount of fields that the user has added.
+  $form['quantity'] = array(
+    '#type' => 'value',
+    '#value' => $quantity,
+  );
+
+  $form['jci-dfp-slots-fieldset'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("Google DFP Slots"), 
+    '#prefix' => '<div id="dfp-ad-units-fields">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE // This is important for ahah_helper.
+  );
+
+  //Loop to create however many textfields are defined by $form['storage']['quantity']
+  for($i = 1; $i <= $quantity; $i++) {
+    if (isset($form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i])) {
+      $value = $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i];
+    }
+    else {
+      $value = NULL;
+    }
+    $variable_value = variable_get('jci-dfp-SLOT-'.$i, '');
+    if (isset($value)) {
+      $value = $value;
+    }
+    else {
+      $value = $variable_value;
+    }
+    $form['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP Ad Unit'),
+      '#default_value' => $value, 
+    );
+  }
+
+  $form['jci-dfp-slots-fieldset']['add_more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another DFP slot'),
+    '#ajax' => array(
+        'event' => 'click', //when the button is clicked, AHA will do it's job
+        'callback' => 'jci_dfp_slots_stuff',
+        'wrapper' => 'dfp-ad-units-fields', // then define the wrapper which will be changed
+//        'method' => 'append',
+     ),
+  );
+
+  $form['jci-dfp-slots-fieldset']['remove'] = array(
+    '#type' => 'submit',
+    '#value' => t('Remove DFP slot'),
+    '#ajax' => array(
+        'event' => 'click', //when the button is clicked, AHA will do it's job
+        'callback' => 'jci_dfp_slots_stuff',
+        //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+        'wrapper' => 'dfp-ad-units-fields', // then define the wrapper which will be changed
+        ),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save DFP Settings')
+  );
+
+  return $form;
+}
+
+/* JCI DFP Settings Form Submit*/
+function jci_dfp_settings_form_submit($form, &$form_state) {  
+
+  if ($form_state['values']['op'] == 'Save DFP Settings') {
+    variable_set('jci-dfp-ACTIVATE', $form_state['values']['jci-dfp-activate']);
+    variable_set('jci-dfp-ID', $form_state['values']['jci-dfp-id']);
+    variable_set('jci-dfp-QUANTITY', $form_state['values']['quantity']);
+    $quantity = $form_state['values']['quantity'];
+    for($i = 1; $i <= $quantity; $i++) {
+      if (!empty($form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i])) {
+        variable_set('jci-dfp-SLOT-'.$i, $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i]);
+      }
+    }
+    drupal_set_message('JCI DFP Settings Saved!', 'status');
+  }
+  if ($form_state['values']['op'] == 'Remove DFP slot') {
+    $quantity = variable_get('jci-dfp-QUANTITY', '');
+    $quantity--;
+    if ($quantity > 0 ) {
+      variable_set('jci-dfp-QUANTITY', $quantity);
+    }
+  }
+  if ($form_state['values']['op'] == 'Add another DFP slot') {
+    $quantity = variable_get('jci-dfp-QUANTITY', '');
+    $quantity++;
+    variable_set('jci-dfp-QUANTITY', $quantity);
+    for($i = 1; $i <= $quantity; $i++) {
+      if (!empty($form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i])) {
+        variable_set('jci-dfp-SLOT-'.$i, $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i]);
+      }
+      else {
+        variable_set('jci-dfp-SLOT-'.$i, '');
+      }
+    }
+  }
+}
+
+function jci_dfp_slots_stuff($form, &$form_state) {
+
+  $form['jci-dfp-slots-fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("Google DFP Slots"),
+//    '#prefix' => '<div id="jci-dfp-slots-fieldset-wrapper">',
+//    '#suffix' => '</div>',
+  );
+  if (!isset($form_state['values']['quantity'])) {
+    $quantity = variable_get('jci-dfp-QUANTITY', '');
+    if (isset($quantity)) {
+      $quantity = $quantity;
+    }
+    else {
+      $quantity = 1;
+    }
+  }
+  else {
+    // If the form has been submitted we get the quantity that was stored.
+    $quantity = $form_state['values']['quantity'];
+  }
+  if ($form_state['values']['op'] == "Add another DFP slot") {
+    $quantity++;
+  }
+  if ($form_state['values']['op'] == "Remove DFP slot") {
+    $quantity--;
+  }
+  $form_state['values']['quantity'] = $quantity;
+  variable_set('jci-dfp-QUANTITY', $quantity);
+  for($i = 1; $i <= $quantity; $i++) {
+    if (isset($form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i])) {
+      $value = $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i];
+    }
+    else {
+      $value = NULL;
+    }
+    $variable_value = variable_get('jci-dfp-SLOT-'.$i, '');
+    if (isset($value)) {
+      $value = $value;
+    }
+    else {
+      $value = $variable_value;
+    }
+    variable_set('jci-dfp-SLOT-'.$i, $value);
+    $form['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP Ad Unit'),
+      '#default_value' => $value,
+      '#value' => $value, 
+    );
+  }
+
+  $form['jci-dfp-slots-fieldset']['add_more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another DFP slot'),
+    '#ajax' => array(
+        'event' => 'click', //when the button is clicked, AHA will do it's job
+        'callback' => 'jci_dfp_slots_stuff',
+        'wrapper' => 'dfp-ad-units-fields', // then define the wrapper which will be changed
+//        'method' => 'append',
+     ),
+  );
+
+
+  $form['jci-dfp-slots-fieldset']['remove'] = array(
+    '#type' => 'submit',
+    '#value' => t('Remove DFP slot'),
+    '#ajax' => array(
+      'event' => 'click', //when the button is clicked, AHA will do it's job
+      'callback' => 'jci_dfp_slots_stuff',
+      //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+      'wrapper' => 'dfp-ad-units-fields', // then define the wrapper which will be changed
+      ),
+    );
+
+  return $form['jci-dfp-slots-fieldset'];
+}
+
+
+/* JCI DFP targeting Settings Form */
+
+function jci_dfp_targeting_form($form_state) {
+  $params = array('category', 'nid', 'path', 'type', 'domain', 'city', 'state', 'global');
+
+  foreach($params as $param) {
+  $target = variable_get('jci-dfp-' . $param . '-TARGET', '');
+  $key = variable_get('jci-dfp-' . $param . '-KEY', '');
+
+  $form['jci-dfp-' . $param . '-target'] = array(
+    '#type' => 'checkbox', 
+    '#title' => t('Activate ' . $param . ' targeting '), 
+    '#default_value' => variable_get('jci-dfp-' . strtoupper($param) . '-TARGET', '')
+  );   
+
+  $form['jci-dfp-' . $param .'-key'] = array(
+    '#type' => 'textfield', 
+    '#title' => t('DFP custom targeting criteria - Keyword identifier for ' . $param . ' targeting'), 
+    '#default_value' => variable_get('jci-dfp-' . strtoupper($param) . '-KEY', '')
+  );
+}
+
+/* 8. Custom targeting with AHAH functionality */
+
+  $form['jci-dfp-custom-target'] = array(
+    '#type' => 'checkbox', 
+    '#title' => t('Activate site\'s custom targeting '), 
+    '#default_value' => variable_get('jci-dfp-CUSTOM-TARGET', '')
+  ); 
+  
+  $form['jci-dfp-target-fieldset'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("DFP Custom targeting"), 
+    '#prefix' => '<div id="dfp-custom-targeting-fields">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE // This is important for ahah_helper.
+  ); 
+  
+  // We check to see if quantity has been set, ie if the form has been submitted yet.  If not, we show 1 field, you can change this to however many fields you want to show up as default.
+  if (!isset($form_state['values']['targeting_quantity'])) {
+    $targeting_quantity = variable_get('jci-dfp-T-QUANTITY', '');
+    if (!empty($targeting_quantity)) {
+      $targeting_quantity = $targeting_quantity;            
+    }
+    else {
+      $targeting_quantity = 1;
+    }
+  }
+  else {
+    // If the form has been submitted we get the quantity that was stored.
+    $targeting_quantity = $form_state['values']['targeting_quantity'];
+  }
+  // We then do a check to see if the user has clicked the "Add another car" button, if they have we increase the amount by 1.
+  if (isset($form_state['values']['jci-dfp-target-fieldset']['add_more']) && $form_state['values']['op'] == 'Add another DFP target') {
+    $targeting_quantity++;
+  }
+            
+  if (isset($form_state['values']['jci-dfp-target-fieldset']['remove']) && $form_state['values']['op'] == 'Remove DFP target') {
+    $targeting_quantity--;
+    if ($targeting_quantity < 1) {
+      $targeting_quantity = 1;
+    }
+  }
+  
+ $form_state['values']['targeting_quantity'] = $targeting_quantity; 
+ $form['targeting_quantity']  = array(
+    '#type' => 'value',
+    '#value' => $targeting_quantity,  
+  );
+
+  for($i = 1; $i <= $targeting_quantity; $i++) {
+  
+    //Wrapper for grouping 2 text fields needed for custom targeting  
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i] = array(
+      '#type' => 'fieldset', 
+      '#title' => t("Group"), 
+    ); 
+    
+    if (isset($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i])) {
+      $key = $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i];
+    }
+    else {
+      $key = variable_get('jci-dfp-CUSTOM-KEY-'.$i, '');
+    }
+  
+    if (isset($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i])) {
+      $value = $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i];
+    }
+    else {
+      $value = variable_get('jci-dfp-CUSTOM-VALUE-'.$i, '');
+    }
+
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP custom targeting criteria - Key for custom targeting'),
+      '#default_value' => $key,
+    );
+  
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP custom targeting criteria - Value for custom targeting'), 
+      '#default_value' => $value,
+    );
+  
+  }
+  
+  
+  // Add More Button
+  $form['jci-dfp-target-fieldset']['add_more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another DFP target'),
+    '#ajax' => array(
+      'event' => 'click', //when the button is clicked, AHA will do it's job
+      'callback' => 'jci_dfp_targeting_stuff',
+      //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+      'wrapper' => 'dfp-custom-targeting-fields', // then define the wrapper which will be changed
+    ),
+  );
+
+  // Remove More Button
+  $form['jci-dfp-target-fieldset']['remove'] = array(
+    '#type' => 'submit',
+    '#value' => t('Remove DFP target'),
+    '#ajax' => array(
+      'event' => 'click', //when the button is clicked, AHA will do it's job
+      'callback' => 'jci_dfp_targeting_stuff',
+      //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+      'wrapper' => 'dfp-custom-targeting-fields', // then define the wrapper which will be changed
+    ),
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save DFP Targeting Settings'
+  );
+
+  return $form;
+}
+
+
+/* JCI DFP targeting Form Submit */
+function jci_dfp_targeting_form_submit($form, &$form_state) {
+  $params = array('category', 'nid', 'path', 'type', 'domain', 'city', 'state', 'global');
+
+  foreach($params as $param) {  
+    variable_set('jci-dfp-' . strtoupper($param) . '-TARGET', $form_state['values']['jci-dfp-' . $param . '-target']);
+    variable_set('jci-dfp-' . strtoupper($param) . '-KEY', $form_state['values']['jci-dfp-' .  $param . '-key']);
+  }
+  
+  /*Custom targeting Fields*/
+  variable_set('jci-dfp-CUSTOM-TARGET', $form_state['values']['jci-dfp-custom-target']);
+  variable_set('jci-dfp-T-QUANTITY', $form_state['values']['targeting_quantity']);
+  
+  $tquantity = $form_state['values']['targeting_quantity'];
+  for($i = 1; $i <= $tquantity; $i++) {
+    if (!empty($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i])) {
+      variable_set('jci-dfp-CUSTOM-KEY-'.$i, $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i]);
+    }
+
+    if (!empty($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i])) {
+      variable_set('jci-dfp-CUSTOM-VALUE-'.$i, $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i]);
+    }
+  }
+
+  drupal_set_message('JCI DFP targeting Settings Saved!', 'status');
+}
+
+function jci_dfp_targeting_stuff($form, &$form_state) {
+  $form['jci-dfp-target-fieldset'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t("DFP Custom targeting"), 
+//    '#prefix' => '<div id="dfp-custom-targeting-fields">',
+//    '#suffix' => '</div>',
+    '#tree' => TRUE // This is important for ahah_helper.
+  ); 
+  
+  // We check to see if quantity has been set, ie if the form has been submitted yet.  If not, we show 1 field, you can change this to however many fields you want to show up as default.
+  if (!isset($form_state['values']['targeting_quantity'])) {
+    $targeting_quantity = variable_get('jci-dfp-T-QUANTITY', '');
+    if (!empty($targeting_quantity)) {
+      $targeting_quantity = $targeting_quantity;            
+    }
+    else {
+      $targeting_quantity = 1;
+    }
+  }
+  else {
+    // If the form has been submitted we get the quantity that was stored.
+    $targeting_quantity = $form_state['values']['targeting_quantity'];
+  }
+
+  // We then do a check to see if the user has clicked the "Add another car" button, if they have we increase the amount by 1.
+  if (isset($form_state['values']['jci-dfp-target-fieldset']['add_more']) && $form_state['values']['op'] == 'Add another DFP target') {
+    $targeting_quantity++;
+    $form_state['values']['jci-dfp-slots-fieldset']['jci-dfp-slot_'.$targeting_quantity] = '';
+  }
+            
+  if (isset($form_state['values']['jci-dfp-target-fieldset']['remove']) && $form_state['values']['op'] == 'Remove DFP target') {
+    $targeting_quantity--;
+  }  
+
+  $form_state['values']['itargeting_quantity'] = $targeting_quantity;
+  variable_set('jci-dfp-T-QUANTITY', $targeting_quantity);
+
+/*
+  $form['targeting_quantity']  = array(
+    '#type' => 'value',
+    '#value' => $targeting_quantity,  
+  );
+*/
+
+  for($i = 1; $i <= $targeting_quantity; $i++) {
+    //Wrapper for grouping 2 text fields needed for custom targeting  
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i] = array(
+      '#type' => 'fieldset', 
+      '#title' => t("Group"), 
+    ); 
+    
+    if (isset($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i])) {
+      $key = $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i];
+    }
+    else {
+      $key = variable_get('jci-dfp-CUSTOM-KEY-'.$i, '');
+    }
+  
+    if (isset($form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i])) {
+      $value = $form_state['values']['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i];
+    }
+    else {
+      $value = variable_get('jci-dfp-CUSTOM-VALUE-'.$i, '');
+    }
+
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-key-'. $i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP custom targeting criteria - Key for custom targeting'),
+      '#default_value' => $key,
+    );
+  
+    $form['jci-dfp-target-fieldset']['jci-dfp-target-fieldset_grouping-' . $i]['jci-dfp-custom-value-'. $i] = array(
+      '#type' => 'textfield', 
+      '#title' => t('DFP custom targeting criteria - Value for custom targeting'), 
+      '#default_value' => $value,
+    );
+  
+  }
+  
+  
+  // Add More Button
+  $form['jci-dfp-target-fieldset']['add_more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another DFP target'),
+    '#ajax' => array(
+      'event' => 'click', //when the button is clicked, AHA will do it's job
+      'callback' => 'jci_dfp_targeting_stuff',
+      //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+      'wrapper' => 'dfp-custom-targeting-fields', // then define the wrapper which will be changed
+    ),
+  );
+
+  // Remove More Button
+  $form['jci-dfp-target-fieldset']['remove'] = array(
+    '#type' => 'submit',
+    '#value' => t('Remove DFP target'),
+    '#ajax' => array(
+      'event' => 'click', //when the button is clicked, AHA will do it's job
+      'callback' => 'jci_dfp_targeting_stuff',
+      //so our form wrapper is $form['jci-dfp-slots-fieldset'], so we set this to array('jci-dfp-slots-fieldset')
+      'wrapper' => 'dfp-custom-targeting-fields', // then define the wrapper which will be changed
+    ),
+  );
+  return $form['jci-dfp-target-fieldset'];
+}
+
+/* DFP Header Addition */
+function jci_dfp_header_script () {
+  $googletag = '';
+  $quantity = variable_get('jci-dfp-QUANTITY', '');
+  $ad_units = array();
+  for($i = 1; $i <= $quantity; $i++) {
+    $ad_units[$i] = variable_get('jci-dfp-SLOT-'.$i, '');
+    $string = substr($ad_units[$i], strrpos($ad_units[$i], '_') + 1); 
+    $size = str_ireplace("x", ", ", $string);
+    $googletag .= "googletag.defineSlot('/17972781/".$ad_units[$i]."', [".$size."], 'div-gpt-ad-1445012326705-".$i."').addService(googletag.pubads());".PHP_EOL;
+  }
+  //drupal_add_js('//www.googletagservices.com/tag/js/gpt.js', 'external');
+  //drupal_add_js("GS_googleEnableAllServices(); ".PHP_EOL ,array('type' => 'inline', 'scope' => 'header', 'defer' => FALSE, 'cache' => TRUE, 'preprocess' => TRUE));
+    if (function_exists('views_get_page_view')) {
+        $views = views_get_page_view();
+    }
+    $roles = user_roles();
+  //DFP Variables needed Custom Criteria targeting
+  $path = request_uri();
+  $path = substr($path, 1);
+  if (is_numeric(arg(1))) {
+    $node_object = node_load(arg(1));
+  }
+  else {
+    $path_beg = explode("/", $path);
+    if (isset($path_beg[1])) {
+      $citypath = drupal_lookup_path("source", $path_beg[0].'/'.$path_beg[1]);
+      $node_object = menu_get_object("node", 1, $citypath);
+      if (isset($path_beg[2])) {
+        $citycat = $path_beg[2];
+      }
+    }
+  }
+  $citytarget = 'LIV_151';
+  if (isset($node_object) && is_object($node_object)) {
+    $type = $node_object->type;
+    // SET UP STATE HERE TOO
+    if ($node_object->type == 'city') {
+      if (!isset($path_beg[2])) { $cityhome = TRUE; }
+      if (isset($node_object->field_ad_targeting_project_id['und'])) {
+        $citytargetlegacy = str_replace(" ", "-", rtrim($node_object->field_ad_targeting_project_id['und'][0]['value']));
+      }
+      if (isset($node_object->field_place_id['und'])) {
+        $citytarget = $node_object->field_place_id['und'][0]['value'];
+      }
+      if (isset($node_object->field_state['und'])) {
+        $statenode = node_load($node_object->field_state['und'][0]['target_id']);
+        $state = $statenode->field_state_code['und'][0]['value'];
+      }
+    }
+    else {
+      if (!empty($node_object->field_place['und'][0]['value'])) {
+        $citycollection = entity_load('field_collection_item',array($node_object->field_place['und'][0]['value']));
+        foreach($citycollection as $fc => $ctcoll) {
+          if (isset($ctcoll->field_place_ref['und'])) {
+            $city = node_load($ctcoll->field_place_ref['und'][0]['target_id']);
+            switch ($city->type) {
+              case 'city':
+                if (isset($city->field_place_id['und'])) {
+                  $citytarget = $city->field_place_id['und'][0]['value'];
+                }
+                break;
+              case 'area':
+                if (isset($city->field_city['und'])) {
+                  $realcity = node_load($city->field_city['und'][0]['target_id']);
+                  if (isset($realcity->field_place_id['und'])) {
+                    $citytarget = $realcity->field_place_id['und'][0]['value'];
+                  }
+                  if (isset($realcity->field_ad_targeting_project_id['und'])) {
+                    $citytargetlegacy = str_replace(" ", "-", rtrim($realcity->field_ad_targeting_project_id['und'][0]['value']));
+                  }
+                  if (isset($realcity->field_state['und'])) {
+                    $statenode = node_load($realcity->field_state['und'][0]['target_id']);
+                    $state = $statenode->field_state_code['und'][0]['value'];
+                  }
+                }
+                unset($realcity);
+               break;
+            }
+            if (isset($city->field_ad_targeting_project_id['und'])) {
+              $citytargetlegacy = str_replace(" ", "-", rtrim($city->field_ad_targeting_project_id['und'][0]['value']));
+            }
+            if (isset($city->field_state['und'])) {
+              $statenode = node_load($city->field_state['und'][0]['target_id']);
+              $state = $statenode->field_state_code['und'][0]['value'];
+            }
+          }
+        }
+        unset($citycollection);
+        unset($statenode);
+      }
+      if (isset($node_object->field_city['und'])) {
+        $city = node_load($node_object->field_city['und'][0]['target_id']);
+        switch ($city->type) {
+          case 'city':
+            if (isset($city->field_place_id['und'])) {
+              $citytarget = $city->field_place_id['und'][0]['value'];
+           }
+            break;
+        }
+        if (isset($city->field_ad_targeting_project_id['und'])) {
+          $citytargetlegacy = str_replace(" ", "-", rtrim($city->field_ad_targeting_project_id['und'][0]['value']));
+        }
+        if (isset($city->field_state['und'])) {
+          $statenode = node_load($city->field_state['und'][0]['target_id']);
+          $state = $statenode->field_state_code['und'][0]['value'];
+        }
+      }
+      if (isset($node_object->field_gallery_city['und'])) {
+        $city = node_load($node_object->field_gallery_city['und'][0]['target_id']);
+        switch ($city->type) {
+          case 'city':
+            if (isset($city->field_place_id['und'])) {
+              $citytarget = $city->field_place_id['und'][0]['value'];
+           }
+            break;
+        }
+        if (isset($city->field_ad_targeting_project_id['und'])) {
+          $citytargetlegacy = str_replace(" ", "-", rtrim($city->field_ad_targeting_project_id['und'][0]['value']));
+        }
+        if (isset($city->field_state['und'])) {
+          $statenode = node_load($city->field_state['und'][0]['target_id']);
+          $state = $statenode->field_state_code['und'][0]['value'];
+        }
+      }
+    }
+  }
+  //DFP Custom Criteria targeting
+  $params = array('category', 'nid', 'path', 'type', 'domain', 'city', 'state', 'global');
+
+  $param_target = variable_get('jci-dfp-PATH-TARGET', '');
+  $param_key = variable_get('jci-dfp-PATH-KEY', '');
+  $target = '';
+  $legacytarget = '';
+  foreach($params as $param) {
+    $param_target = variable_get('jci-dfp-' . strtoupper($param) . '-TARGET', '');
+    $param_key = variable_get('jci-dfp-' . strtoupper($param) . '-KEY', '');
+    if (!empty($param_key)) {
+      switch ($param) {
+        case 'category' :
+          $tidtarget = array();
+          if (isset($node_object->field_category['und'])) {
+            foreach($node_object->field_category['und'] as $delta => $catcollection) {
+              $category_collection = entity_load('field_collection_item',array($catcollection['value']));
+              foreach($category_collection as $fc => $cat) {
+                if (isset($cat->field_category_ref['und'])) {
+                  $tidtarget[] = $cat->field_category_ref['und'][0]['tid'];
+                }
+              }
+            }
+          }
+          if (isset($citycat)) {
+            $citycatterm = taxonomy_get_term_by_name($citycat);
+            $tidtarget[] = key($citycatterm);
+          }
+          /* Need to add another method for finding the category on
+           *  yet-to-be-created Category Landing Pages
+           */
+          $cattarget = array();
+          foreach($tidtarget as $tid) {
+            switch($tid) {
+              case "4" : // Place - Attractions
+                $cattarget[] = 'ATTR';
+                break;
+              case "6" : // Place - Business
+                $cattarget[] = 'BIZ';
+                $cattarget[] = 'BUSINESS';
+                break;
+              case "5" : // Place - Food & Drink
+                $cattarget[] = 'FOOD';
+                $cattarget[] = 'TTD';
+                break;
+              case "3" : // Place - Sports & Rec
+                $cattarget[] = 'SPORT';
+                break;
+              case "9" : // Place - Shopping
+                $cattarget[] = 'SHOP';
+                break;
+              case "7" : // Place - Schools
+                $cattarget[] = 'SCH';
+                $cattarget[] = 'SCHOOLS';
+                break;
+              case "8" : // Place - RE
+                $cattarget[] = 'RE';
+                $cattarget[] = 'REAL_ESTATE';
+                break;
+              case "11" : // Global - ArtsEnt
+                $cattarget[] = 'AE';
+                break;
+              case "12" : // Global - BusinessEcon
+                $cattarget[] = 'BIZ';
+                $cattarget[] = 'BUSINESS';
+                break;
+              case "13" : // Global - Community
+                $cattarget[] = 'COMM';
+                break;
+              case "14" : // Global - Ed&Schools
+                $cattarget[] = 'SCH';
+                $cattarget[] = 'SCHOOLS';
+                break;
+              case "15" : // Global - FoodDrink
+                $cattarget[] = 'FOOD';
+                $cattarget[] = 'TTD';
+                break;
+              case "16" : // Global - HealthWell
+                $cattarget[] = 'HLTH';
+                $cattarget[] = 'HEALTH';
+                break;
+              case "17" : // Global - Housing RE
+                $cattarget[] = 'HOUS';
+                break;
+              case "18" : // Global - Transport
+                $cattarget[] = 'TRANS';
+                $cattarget[] = 'TRANSPORTATION';
+                break;
+              case "105" : // Relocate
+                // $cattarget[] = 'BUBBA';
+                break;
+              case "107" : // Relocate - How-To
+                $cattarget[] = 'GUID';
+                break;
+              case "106" : // Relocate - Checklist
+                $cattarget[] = 'CHCK';
+                break;
+              case "108" : // Relocate - Countdown
+                $cattarget[] = 'COUNT';
+                break;
+              case "999" : // Relocate - Estimate
+                $cattarget[] = 'EST';
+                break;
+            }
+          }
+          foreach($cattarget as $category) {
+            $target .=  "googletag.pubads().setTargeting('". $param_key."', ['liv_".$category."', 'liv_general']);" .PHP_EOL;
+            if (isset($citytargetlegacy)) {
+              $legacytarget .= "googletag.pubads().setTargeting('Project', '".$citytargetlegacy."_".$category."');" .PHP_EOL;
+            }
+          }
+          if (!isset($category)) {
+            $category = NULL;
+          }
+          if (isset($path_beg[2]) && $path_beg[2] != strtolower($category)) {
+            switch ($path_beg[2]) {
+              case 'things-to-do':
+                $path_beg[2] = 'ttd';
+                break;
+            }
+            $path_beg[2] = preg_replace('/-/', '_', $path_beg[2]);
+            $target .= "googletag.pubads().setTargeting('". $param_key."', ['liv_".$path_beg[2]."', 'liv_general']);" .PHP_EOL;
+            if (isset($citytargetlegacy)) {
+              $legacytarget .= "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."_".$path_beg[2]."']);" .PHP_EOL;
+            }
+          }
+          if (drupal_is_front_page()) {
+            $target .= "googletag.pubads().setTargeting('". $param_key."', ['liv_home', 'liv_general']);" .PHP_EOL;
+          }
+          if (!empty($node_object)) {
+            if (drupal_get_path_alias('node/' . $node_object->nid) == substr(request_uri(), 1) && $node_object->type == 'city') {
+              $target .= "googletag.pubads().setTargeting('Category', ['liv_home', 'liv_general']);" . PHP_EOL;
+            }
+          }
+          break;
+
+     case 'nid' :
+       if ($param_target == 1) {
+         if (arg(0) == 'node') {
+           $target .=  "googletag.pubads().setTargeting('".$param_key."', ['liv-".arg(1)."']);" .PHP_EOL;
+         }
+       }
+       break;
+
+     case 'path' :
+       if ($param_target == 1) {
+         if (drupal_is_front_page()) {
+           $path = 'LIV_151_home';
+         }
+         else {
+           $path = request_uri();
+           $path = substr($path, 1);
+           $path = (strlen($path) > 40) ? substr($path,0,40) : $path;
+        }
+        $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$path."']);" .PHP_EOL;
+        if(arg(2)) {
+          if (in_array(arg(2), array('photos', 'photos-video'))) {
+            $legacytarget .= "googletag.pubads().setTargeting('Project', ['".$legacytarget."_photos']);".PHP_EOL;
+          }
+          if (arg(2) == 'digital-magazine') {
+            $legacytarget .= "googletag.pubads().setTargeting('Project', ['".$legacytarget."_dm']);".PHP_EOL;
+          }
+        }
+      }
+      break;
+
+    case 'type':
+      if ($param_target == 1 && isset($type)) {
+        $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$type."']);".PHP_EOL;
+      }
+
+      if (isset($citytargetlegacy) && $type == 'digital_magazine') {
+        $legacytarget .= "googletag.pubads().setTargeting('Category', ['liv_dm', 'liv_general']);".PHP_EOL;
+        $legacytarget .= "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."_dm']);".PHP_EOL;
+      }
+      if (isset($citytargetlegacy) && $type == 'gallery') {
+          $legacytarget .= "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."_photos']);".PHP_EOL;
+      }
+      break;
+
+    case 'domain' :
+      if ($param_target == 1) {
+        $domain = $_SERVER['HTTP_HOST'];
+        $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$domain."']);".PHP_EOL;
+      }
+      break;
+
+    case 'city' :
+      if ($param_target == 1) {
+        $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$citytarget."']);".PHP_EOL;
+        if (isset($path_beg) && isset($path_beg[1])) {
+          $legacytarget .=  "googletag.pubads().setTargeting('Project', ['".$path_beg[1]."/".$path_beg[0]."']);".PHP_EOL;
+        }
+
+        if (isset($citytargetlegacy)) {
+           $legacytarget .=  "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."']);".PHP_EOL;
+           $legacytarget .=  "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."_all']);".PHP_EOL;
+           if (isset($cityhome) && $cityhome == TRUE) {
+             $legacytarget .=  "googletag.pubads().setTargeting('Project', ['".$citytargetlegacy."_home']);".PHP_EOL;
+             $legacytarget .=  "googletag.pubads().setTargeting('Page', ['city_home']);".PHP_EOL;
+             $legacytarget .=  "googletag.pubads().setTargeting('Project', ['".$node_object->title."/".$state."']);".PHP_EOL;
+           }
+        }
+      }
+      break;
+
+    case 'state' :
+/****** TO DO : Change to Full word ***/
+      if (isset($state)) {
+        $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$state."']);".PHP_EOL;
+      }
+      break;
+
+    case 'global' :
+      if ($param_target == 1) {
+        if (function_exists('context_get')) {
+          $context_get = context_get();
+          if ($context_get == 'national_level') {
+            $global = 'liv-global' ;
+            $target .=  "googletag.pubads().setTargeting('".$param_key."', ['".$global."']);".PHP_EOL;
+          }
+        }
+      }
+      break;
+
+    }
+    }
+  }
+// The most Legacy of all Legacy ad-targeting support:
+  $legacytarget .= "googletag.pubads().setTargeting('Project', ['LIV_151']);".PHP_EOL;
+  $legacytarget .= "googletag.pubads().setTargeting('Project', ['LIV_151_all']);".PHP_EOL;
+
+  $custom_target = variable_get('jci-dfp-CUSTOM-TARGET', '');
+  $tquantity = variable_get('jci-dfp-T-QUANTITY', '');
+  $custom_keys = array();
+  $custom_values = array();
+
+  if ($custom_target == 1) {
+
+    for($i = 1; $i <= $tquantity; $i++) {
+      $custom_key = variable_get('jci-dfp-CUSTOM-KEY-'.$i, '');
+      $custom_value = variable_get('jci-dfp-CUSTOM-VALUE-'.$i, '');
+      $target .= "googletag.pubads().setTargeting('".$custom_key."', '".$custom_value."');" .PHP_EOL;
+    }
+  }
+
+// Check if anybody is altering $target to add/change targetings
+// We won't allow other modules to modify the main $target variable at this moment
+// Since only journal custom set up would be modified... for that we won't be developing a new module
+// instead, we will be modifying this file directly.
+  if(!isset($node_object)) { $node_object = NULL; }
+  $targets_collected = module_invoke_all('jci_dfp_targets', $node_object, $roles, $views);
+  //drupal_alter('jci_dfp_targets', $target);
+
+  foreach($targets_collected as $target_collected) {
+    if (isset($target_collected['key']) && isset($target_collected['value']) ) {
+      $key_collected = $target_collected['key'];
+      $value_collected = $target_collected['value'];
+      $target .= "googletag.pubads().setTargeting('".$key_collected."', ['".$value_collected."']);" .PHP_EOL;
+    }
+    else {
+      if (is_array($target_collected)) {
+        foreach($target_collected as $target_collected) {
+          if (isset($target_collected['key']) && isset($target_collected['value']) ) {
+            $key_collected = $target_collected['key'];
+            $value_collected = $target_collected['value'];
+            $target .= "googletag.pubads().setTargeting('".$key_collected."', ['".$value_collected."']);" .PHP_EOL;
+          }
+        }
+      }
+    }
+  }
+
+  $output = '<!-- DFP targeting Start -->' . PHP_EOL ;
+  $output .= <<<EOT
+googletag.cmd.push(function() {
+$googletag googletag.pubads().enableSingleRequest();
+googletag.pubads().collapseEmptyDivs();
+$target$legacytarget googletag.enableServices();
+});
+EOT;
+  $dfp = <<<EOT
+  (function() {
+    var useSSL = 'https:' == document.location.protocol;
+    var src = (useSSL ? 'https:' : 'http:') +
+        '//www.googletagservices.com/tag/js/gpt.js';
+    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+  })();
+EOT;
+  $dfp2 = <<<EOT
+  var googletag = googletag || {};
+	googletag.cmd = googletag.cmd || [];
+	(function() {
+		var gads = document.createElement('script');
+		gads.async = true;
+		gads.type = 'text/javascript';
+		var useSSL = 'https:' == document.location.protocol;
+		gads.src = (useSSL ? 'https:' : 'http:') +
+			'//www.googletagservices.com/tag/js/gpt.js';
+		var node = document.getElementsByTagName('script')[0];
+		node.parentNode.insertBefore(gads, node);
+	})();
+EOT;
+
+  $output .= '<!-- DFP targeting End -->';
+  drupal_add_js($dfp2, array('type' => 'inline', 'scope' => 'header', 'defer' => FALSE, 'cache' => TRUE, 'preprocess' => TRUE));
+  drupal_add_js($output, array('type' => 'inline', 'scope' => 'header', 'defer' => FALSE, 'cache' => TRUE, 'preprocess' => TRUE));
+    //drupal_add_js("GA_googleFetchAds();", array('type' => 'inline', 'scope' => 'header', 'defer' => FALSE, 'cache' => TRUE, 'preprocess' => TRUE));
+
+}
+
+/*
+* Implementation of hook_block_info
+*/
+function jci_dfp_block_info() {
+
+  $count = variable_get('jci-dfp-QUANTITY', '');
+  $dfp_slots = variable_get('jci-dfp-SLOT', '');
+  $i = 1;
+  while( $i <= $count) {
+    $blocks['jci-dfp-block-' . $i] = array(
+      'info' => t('jci-dfp-block-' .$i . '/' . variable_get('jci-dfp-SLOT-' . $i, '')),
+      'cache' => DRUPAL_CACHE_GLOBAL,
+    );
+    $i++;
+  }  
+
+  return $blocks;
+}
+
+function jci_dfp_block_view($delta) {
+  $block['title'] = t('');
+//  $block['subject'] = t('');
+  $i = str_replace('jci-dfp-block-', '', $delta); 
+  $block['content'] = jci_dfp_block_content($i);
+  $block['region'] = '';
+
+  return $block;
+}
+
+function jci_dfp_block_content($i) {
+  $name = variable_get('jci-dfp-SLOT-'.$i);
+  $unit = "<!-- /17972781/".$name." -->
+<div id='div-gpt-ad-1445012326705-".$i."'>
+  <script type='text/javascript'>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1445012326705-".$i."'); });
+  </script>
+</div>";
+  $output = PHP_EOL.'<span class="ad">'.PHP_EOL.$unit.PHP_EOL.'</span>';
+  return $output;
+}
+
+function jci_dfp_page_build(&$page) {
+    jci_dfp_header_script();
+}

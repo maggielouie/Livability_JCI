@@ -1,0 +1,12 @@
+name = Recent Global Articles
+description = Provides a block for the homepage
+core = 7.x
+package = Livability
+version = 7.x-1.3
+project = recent_global_articles
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = recent_global_articles
+features_exclude[dependencies][ctools] = ctools
+mtime = 1433452928

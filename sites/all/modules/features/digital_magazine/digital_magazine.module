@@ -1,0 +1,138 @@
+<?php
+/**
+ * @file
+ * Code for the Digital Magazine feature.
+ */
+
+include_once 'digital_magazine.features.inc';
+
+/**
+ * Implements hook_block_info().
+ */
+function digital_magazine_block_info() {
+  $blocks['digital_magazine'] = array(
+    'info' => t('Digital Magazine'),
+  );
+  return $blocks;
+}
+/**
+ * Implements hook_block_view().
+ */
+function digital_magazine_block_view($delta = '') {
+  $node = menu_get_object('node');
+  if (!empty($node) && $node->type == 'city') {
+    $city_nid = $node->nid;
+    $result = db_query('SELECT c.entity_id, field_mag_cover_fid FROM {field_data_field_city} c
+      JOIN {field_data_field_mag_cover} mg ON mg.entity_id = c.entity_id
+      WHERE field_city_target_id = :city_nid',
+      array(
+        ':city_nid' => $city_nid,
+      )
+    )->fetchObject();
+  }
+
+  if (!empty($result)) {
+    $file = file_load($result->field_mag_cover_fid);
+    $image = theme('image_style', array('path' => $file->uri, 'style_name' => 'digital_magazine'));
+    $content = '<div class="digital-magazine widget stay-full"><h3>Digital Magazine</h3>'
+      . l($image, 'node/' . $result->entity_id, array('html' => TRUE)) . '</div>';
+  }
+
+  $block = array(
+    'content' => $content,
+  );
+
+  return $block;
+}
+
+function digital_magazine_preprocess_page(&$vars, $hook) {
+  // breadcrumb
+  if (isset($vars['node']) && (is_object($vars['node']))) {
+    if ($vars['node']->type == 'digital_magazine') {
+      $crumbs = array();
+      $crumbs[] = l(t('Livability.com'), '<front>');
+      $node = $vars['node'];
+      if (isset($node->field_city['und']) && !is_null($node->field_city['und'][0]['target_id'])) {
+            $primeplace = node_load($node->field_city['und'][0]['target_id']);
+            $countyquery = 'SELECT title FROM {node} n WHERE n.nid = :d';
+            if (isset($primeplace->field_county['und'])) {
+              $countyname = db_query($countyquery,  array(':d' => $primeplace->field_county['und'][0]['target_id']))->fetchAll();
+            }
+            $metroareaquery = 'SELECT title FROM {node} n WHERE n.nid = :primecity';
+            if (isset($primeplace->field_city['und'])) {
+              $metroname = db_query($metroareaquery, array(':primecity' => $primeplace->field_city['und'][0]['target_id']))->fetchALL();
+            }
+            $citystate = node_load($primeplace->field_state['und'][0]['target_id']);
+            $state = $citystate->field_state_code['und'][0]['value'];
+            $crumbs[] = l($state, 'node/'.$primeplace->field_state['und'][0]['target_id']);
+            $crumbs[] = l($primeplace->title, 'node/'.$primeplace->nid);
+            $vars['cityname'] = $primeplace->title;
+            $vars['cityurl'] = url('node/' . $node->field_city['und'][0]['target_id']);
+            if (isset($metroname[0])) {
+              $vars['metroname'] = $metroname[0]->title;
+            }
+            else { $vars['metroname'] = FALSE; }
+            if (isset($countyname[0])) {
+              $vars['countyname'] = $countyname[0]->title .' County';
+            }
+            else { $vars['countyname'] = FALSE; }
+            $vars['state'] = $state;
+      }
+      drupal_set_title('Magazine of ' . $primeplace->title . ', ' . $state);
+      drupal_set_breadcrumb($crumbs);
+    }
+  }
+}
+
+function digital_magazine_preprocess_node(&$vars, $hook) {
+  // breadcrumb
+  if (isset($vars['node']) && (is_object($vars['node']))) {
+    if ($vars['node']->type == 'digital_magazine') {
+      $node = $vars['node'];
+      if (isset($node->field_city['und']) && !is_null($node->field_city['und'][0]['target_id'])) {
+            $primeplace = node_load($node->field_city['und'][0]['target_id']);
+            $citystate = node_load($primeplace->field_state['und'][0]['target_id']);
+            $state = $citystate->field_state_code['und'][0]['value'];
+            $vars['cityname'] = $primeplace->title;
+            $vars['state'] = $state;
+      }
+      // Add a paired-down view link to the content.
+      if (!empty($vars['field_mag_pdf'])) {
+        $url = file_create_url($vars['field_mag_pdf'][0]['uri']);
+        $vars['content']['field_mag_pdf_link'] = array(
+          '#theme' => 'link',
+          '#path' => $url,
+          '#text' => t('Download Now'),
+          '#options' => array(
+            'attributes' => array(
+              'class' => array('mag-download-link'),
+              'target' => '_blank',
+            ),
+          ),
+        );
+      }
+    }
+  }
+}
+
+function digital_magazine_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'digital_magazine') {
+    $node = $context['data']['node'];
+    $alias = digital_magazine_alias_maker($node);
+  }
+}
+
+function digital_magazine_alias_maker($node) {
+  if ($node->type == 'digital_magazine') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $alias = '';
+    if (isset($node->field_city['und']) && !is_null($node->field_city['und'])) {
+      $place = node_load($node->field_city['und'][0]['target_id']);
+      $state = node_load($place->field_state['und'][0]['target_id']);
+      $alias .= pathauto_cleanstring($state->field_state_code['und'][0]['value']) .'/';
+      $alias .= pathauto_cleanstring($place->title) .'/';
+    }
+    $alias .= 'digital-magazine'; //pathauto_cleanstring($node->title);
+    return $alias;
+  }
+}

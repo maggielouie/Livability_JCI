@@ -1,0 +1,4 @@
+name = "JCI DFP"
+description = "Integration with DFP"
+core = 7.x
+package = JCI

@@ -1,0 +1,17 @@
+name = Article Views
+core = 7.x
+package = Livability
+version = 7.x-1.7
+project = article_views
+features[ctools][] = taxonomy_display:taxonomy_display:1
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[taxonomy_display][] = category
+features[views_view][] = articles_by_category
+features[views_view][] = categories
+features[views_view][] = featured_articles
+features[views_view][] = global_articles
+features[views_view][] = homepage_marquee
+features[views_view][] = related_articles
+features[views_view][] = topics
+mtime = 1430944749

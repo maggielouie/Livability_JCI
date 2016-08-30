@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Popular Blog Posts feature.
+ */
+
+include_once 'popular_blog_posts.features.inc';

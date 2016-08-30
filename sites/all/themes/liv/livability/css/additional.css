@@ -1,0 +1,942 @@
+.icon-arrow-left-circle, .icon-arrow-right-circle, .icon-arrow-up-circle, .icon-arrow-down-circle {
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+}
+
+.top-100 table {
+  color: #333;
+  width: 100%;
+}
+.top-100 table th {
+  background-color: #ccc;
+  border-left: 1px solid #838383;
+  border-right: 1px solid #838383;
+  font-size: 11px;
+  font-size: 0.6875rem;
+  line-height: 16px;
+  line-height: 1rem;
+  padding: 20px 0px;
+  width: 80px;
+  position: relative;
+}
+.top-100 table th.rank {
+  width: 60px;
+}
+.top-100 table th.city {
+  width: 168px;
+}
+.top-100 table th a {
+  color: #333;
+}
+.top-100 table th .tooltip {
+  background-color: #838383;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  color: #fff;
+  display: inline-block;
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+}
+.top-100 table th .tooltip .tip {
+  display: none;
+}
+.top-100 table th .tooltip:hover .tip {
+  display: flex;
+  flex-direction: column;
+  -moz-box-shadow: rgba(50, 50, 50, 0.75) 1px 1px 5px 1px inset;
+  -webkit-box-shadow: rgba(50, 50, 50, 0.75) 1px 1px 5px 1px inset;
+  box-shadow: rgba(50, 50, 50, 0.75) 1px 1px 5px 1px inset;
+  font-size: 10px;
+  font-size: 0.625rem;
+  line-height: 14px;
+  line-height: 0.875rem;
+  color: #666;
+  background-color: #fff;
+  width: 150px;
+  padding: 10px;
+  text-align: left;
+  z-index: 999;
+  position: absolute;
+}
+.top-100 table th .table-label {
+  margin: 15px 10px;
+}
+.top-100 table th .table-head-bottom {
+  width: 100%;
+  height: 15px;
+  position: absolute;
+  bottom: 0;
+  background: #838383;
+}
+.top-100 table th .table-arrow {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  bottom: -1px;
+  left: 40px;
+  z-index: 1;
+}
+.top-100 table th .table-arrow img {
+  width: 13px;
+  height: 13px;
+}
+.top-100 table tbody {
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+.top-100 table tr {
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+  background-color: #fff;
+}
+.top-100 table tr.odd {
+  background-color: #eee;
+}
+.top-100 table td {
+  text-align: center;
+  padding: 10px 5px;
+  border: 1px solid #c8c8c8;
+  vertical-align: middle;
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+  width: 80px;
+}
+.top-100 table td.rank {
+  width: 60px;
+}
+.top-100 table td.city {
+  width: 168px;
+  text-align: left;
+}
+.top-100 table td .city a {
+  color: #333;
+}
+.top-100 table td .state a {
+  color: #666;
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+}
+.top-100 table .city-rank {
+  display: inline-block;
+  background: #7cc242;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 60px;
+  line-height: 3.75rem;
+  color: #fff;
+  text-align: center;
+}
+.top-100 table .city-score {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 30px;
+  line-height: 1.875rem;
+  background: #009bd5;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  color: #fff;
+  text-align: center;
+}
+.top-100 .top-100-content h2 {
+  font-size: 28px;
+  font-size: 1.75rem;
+  line-height: 40px;
+  line-height: 2.5rem;
+  font-weight: 500;
+  margin: .5em 0;
+}
+.top-100 .top-100-content li.top-100-city h2 {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 24px;
+  line-height: 1.5rem;
+  margin: 0;
+}
+.top-100 .top-100-content li.top-100-city .city-image {
+  overflow: hidden;
+}
+
+.best-of .view-header {
+  width: 94%;
+  margin: 0 auto;
+}
+.best-of .view-header h2 {
+  color: #474747;
+  font-weight: 600;
+  font-size: 30px;
+  font-size: 1.875rem;
+  line-height: 36px;
+  line-height: 2.25rem;
+  text-transform: uppercase;
+}
+
+.page-top-10 article h1, .node-type-best-places article h1, .page-best-places-top-100 article h1 {
+  padding: 0;
+}
+.page-top-10 article h2 a, .node-type-best-places article h2 a, .page-best-places-top-100 article h2 a {
+  color: #7cc242;
+}
+
+.node-type-top-cities-list article h2 a,
+.node-type-top-100 article h2 a {
+  color: #009bd5;
+}
+.node-type-top-cities-list article h2 span a,
+.node-type-top-100 article h2 span a {
+  color: #7cc242;
+}
+.node-type-top-cities-list article .top-10-nav,
+.node-type-top-100 article .top-10-nav {
+  padding: 5px 0;
+}
+.node-type-top-cities-list article .field-name-field-deck,
+.node-type-top-100 article .field-name-field-deck {
+  padding-bottom: 10px;
+}
+.node-type-top-cities-list .view-footer,
+.node-type-top-100 .view-footer {
+  clear: both;
+  margin-top: 4em;
+  display: block;
+}
+
+.page-best-places-top-100 .rankings .section {
+  padding: 25px;
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 18px;
+  line-height: 1.125rem;
+}
+.page-best-places-top-100 .rankings .section.even {
+  background-color: #efefef;
+  border: 1px solid #cdcdcd;
+}
+.page-best-places-top-100 .rankings .section.even .js-more {
+  background-color: #efefef;
+  padding: 4px 0 0 8px;
+}
+.page-best-places-top-100 .rankings .section.odd {
+  background-color: #fff;
+}
+.page-best-places-top-100 .rankings .section.odd .js-more {
+  background-color: #fff;
+  padding: 4px 0 0 8px;
+}
+.page-best-places-top-100 .rankings .section h2 {
+  color: #666;
+  font-weight: 500;
+  font-size: 18px;
+  font-size: 1.125rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+  text-align: left;
+  margin: 0;
+}
+.page-best-places-top-100 .rankings .section .control {
+  height: 1.5em;
+  width: 1.5em;
+  display: inline-block;
+  -moz-border-radius: 100px;
+  -webkit-border-radius: 100px;
+  border-radius: 100px;
+  font-size: 18px;
+  font-size: 1.125rem;
+  line-height: 26px;
+  line-height: 1.625rem;
+  background: #009bd5;
+  color: #fff;
+  text-align: center;
+  margin-right: 1em;
+  margin-bottom: 1em;
+}
+.page-best-places-top-100 .rankings .section .control:before {
+  /*				content: "\f106"; */
+}
+.page-best-places-top-100 .rankings .section .ctools-collapsed .control:before {
+  content: "\f107";
+}
+.page-best-places-top-100 .rankings .section .ctools-collapsed .control {
+  background: #666666;
+}
+.page-best-places-top-100 .rankings .section .ctools-toggle {
+  display: none;
+}
+.page-best-places-top-100 .advisory-board .section h2 {
+  margin-top: 0 !important;
+}
+.page-best-places-top-100 .top-100-links li.active span {
+  padding: 0 5px;
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  font-weight: 600;
+  border-right: 1px solid #838383;
+}
+.page-best-places-top-100 .top-100-links li:last-child.active span {
+  border: none;
+}
+
+.article-content ul {
+  list-style-type: disc;
+  margin-left: 1em;
+}
+
+.tabs ul {
+  margin-top: 1em;
+}
+.tabs ul li {
+  float: left;
+  margin-left: 1em;
+}
+
+.item-list ul.pagination li, .item-list ul.pages li {
+  margin: 0 5px 0 0;
+}
+
+article span.year {
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+}
+article h2 {
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 22px;
+  line-height: 2rem;
+}
+article h2 a {
+  color: #474747;
+}
+article .hero-slider {
+  margin-bottom: 35px;
+}
+article .media-element-container {
+  font-size: 11px;
+  font-size: 0.6875rem;
+  line-height: 14px;
+  line-height: 0.875rem;
+  margin-bottom: 1.5em;
+  color: #838383;
+  font-style: italic;
+}
+article .media-element-container img {
+  padding-bottom: 5px;
+}
+article .media-element-container .caption:after {
+  content: ' ';
+}
+
+p.credit {
+  font-size: 11px;
+  font-size: 0.6875rem;
+  line-height: 14px;
+  line-height: 0.875rem;
+  color: #838383;
+  font-style: italic;
+}
+
+.featured-image p.credit {
+  margin: 1em 1em 0;
+}
+
+.hero-slider .summary {
+  background: rgba(0, 0, 0, 0.5);
+  top: auto;
+  bottom: 0;
+  padding: 20px 45px;
+  min-height: 120px;
+}
+.hero-slider .summary h3 {
+  color: #fff;
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+  background: none;
+  text-align: left;
+  padding: 0;
+}
+.hero-slider .summary p.credit {
+  font-size: 10px;
+  font-size: 0.625rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  color: #bdbdbd;
+}
+
+footer .site-links ul li.promote-your-city {
+  padding-top: 0;
+}
+
+.block-jci-dfp {
+  text-align: center;
+}
+
+.page-user .padded {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.page-user h1 {
+  color: #474747;
+}
+.page-user h2 {
+  font-size: 22px;
+  font-size: 1.375rem;
+  line-height: 22px;
+  line-height: 1.375rem;
+  text-transform: uppercase;
+  color: #666666;
+  margin: 10px 0;
+}
+.page-user .headshot {
+  background-size: cover;
+  height: 162px;
+  width: 162px;
+  float: left;
+  margin-right: 2em;
+}
+.page-user .bio {
+  display: table;
+}
+.page-user .column-content {
+  padding-top: 10px;
+}
+.page-user .author .social {
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+}
+.page-user .author .social li {
+  float: left;
+  margin-right: 6px;
+}
+.page-user .author .social li img {
+  width: auto;
+}
+
+.element-invisible {
+  display: none;
+}
+
+input.form-submit:hover {
+  text-decoration: underline;
+}
+
+#search-block-form div div {
+  display: inline;
+}
+#search-block-form .form-item, #search-block-form .form-actions {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#search-form div div div {
+  display: inline;
+}
+
+.search-results {
+  list-style-type: none;
+}
+.search-results .title {
+  background: none;
+  text-align: left;
+  display: inline;
+  padding-left: 0;
+  font-size: 1.2em;
+  margin-right: 1em;
+}
+.search-results .search-snippet-info {
+  padding-left: 0;
+  margin-top: .6em;
+}
+.search-results p {
+  padding-bottom: 0;
+}
+.search-results li {
+  clear: left;
+  margin: 1em 0 2em;
+}
+
+.search-snippet img {
+  width: auto;
+  float: left;
+  margin-right: 20px;
+  margin-top: 7px;
+}
+
+.node-type-digital-magazine .column-content {
+  padding-top: 10px;
+}
+.node-type-digital-magazine .sponsor {
+  float: right;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-size: 0.6875rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  color: #bdbdbd;
+  margin-left: 30px;
+}
+
+.digital-magazine.widget {
+  padding-bottom: .4em;
+}
+.digital-magazine.widget h3 {
+  margin-bottom: 1em;
+}
+.digital-magazine.widget img {
+  margin: 0 auto;
+  width: inherit;
+}
+
+.rsGCaption p {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 21px;
+  line-height: 1.3125rem;
+  padding-bottom: 10px;
+}
+
+.featured-image p.credit {
+  margin: 1em 1em 0;
+}
+
+/* re-mapping icons for our taxonomies */
+.icon-attractions:before {
+  content: "\e637";
+}
+
+.icon-arts-and-entertainment:before {
+  content: "\e637";
+}
+
+.icon-business-and-economy:before {
+  content: "\e642";
+}
+
+.icon-education-and-schools:before {
+  content: "\e634";
+}
+
+.icon-food-and-drink:before {
+  content: "\e63f";
+}
+
+.icon-health-and-wellness:before {
+  content: "\e64b";
+}
+
+.icon-health-and-wellness:before {
+  content: "\e64b";
+}
+
+.icon-housing-and-real-estate:before {
+  content: "\e631";
+}
+
+.icon-how-to-guides:before {
+  content: "\e639";
+}
+
+.icon-real-estate:before {
+  content: "\e631";
+}
+
+.icon-schools:before {
+  content: "\e634";
+}
+
+.icon-shopping:before {
+  content: "\e647";
+}
+
+.icon-sports-and-recreation:before {
+  content: "\e63e";
+}
+
+p.unpublished {
+  color: #fff;
+  background: #d46469;
+  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  line-height: 1.25rem;
+  padding: .5em;
+  margin-left: -30px;
+  margin-right: -30px;
+}
+
+.stateface {
+  font-size: 42px;
+  font-size: 2.625rem;
+  line-height: 42px;
+  line-height: 2.625rem;
+  vertical-align: middle;
+}
+
+.view-related-articles .view-display-id-block_1 h3 {
+  background: transparent;
+  text-align: left;
+  padding-left: 0;
+  font-size: 22px;
+  font-size: 1.375rem;
+  line-height: 22px;
+  line-height: 1.375rem;
+  text-transform: uppercase;
+  color: #666666;
+  margin: 10px 0;
+}
+
+.view-related-articles span.no-pic {
+  height: 165px;
+  display: block;
+  background: #7cc242;
+}
+
+.guide {
+  color: #838383;
+  text-transform: uppercase;
+}
+
+.path a {
+  color: #838383;
+}
+
+.krumo-root img {
+  width: auto;
+}
+
+.widget li {
+  clear: left;
+}
+
+.front .panels-flexible-region-1-center,
+.front .panels-flexible-region-new-center {
+  width: 100%;
+}
+
+.front .panel-separator {
+  margin: 0;
+}
+
+.node-type-page article {
+  margin: 0 1em;
+}
+.node-type-page article h2 {
+  margin: 1em 0;
+}
+.node-type-page article ul {
+  list-style: disc;
+  margin: 0 0 0 2em;
+}
+
+.about-us .about-us-hero {
+  height: 450px;
+}
+.about-us .about-us-hero .about-us-hero-content {
+  text-align: center;
+  padding-top: 123px;
+}
+.about-us .about-us-hero .about-us-hero-content img {
+  width: auto;
+  margin: 0 auto;
+}
+.about-us .about-us-hero .about-us-hero-content h1 {
+  font-size: 36px;
+  font-size: 2.25rem;
+  line-height: 50px;
+  line-height: 3.125rem;
+  color: #fff;
+  text-shadow: rgba(0, 0, 0, 0.75) 2px 2px 2px;
+}
+.about-us .about-us-hero .breadcrumbs li {
+  color: #fff;
+}
+.about-us .about-us-hero .breadcrumbs li a, .about-us .about-us-hero .breadcrumbs li span {
+  color: #fff;
+}
+.about-us .summary-generic {
+  padding: 75px 100px;
+}
+.about-us .summary-generic p {
+  text-align: center;
+}
+.about-us .facts-stats .map-bg {
+  background: url("/sites/all/themes/liv/images/map-blue.png");
+  background-position: center center;
+  background-size: cover;
+  position: absolute;
+  width: 100%;
+  width: 961px;
+  height: 588px;
+  left: 50%;
+  margin-left: -480px;
+  top: 65px;
+  z-index: 1;
+}
+.about-us .facts-stats .infograph {
+  position: relative;
+  z-index: 2;
+  max-width: 1210px;
+  margin: 0 auto;
+  background: #fff;
+}
+.about-us .facts-stats .infograph .one-q:last-child {
+  border-bottom: none;
+}
+.about-us .facts-stats .infograph li {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  padding: 20px;
+}
+.about-us .leadership .leaders li {
+  text-align: center;
+}
+.about-us .leadership .leaders li .circle {
+  width: 255px;
+  height: 255px;
+  margin: 10px auto 20px;
+}
+.about-us .leadership .leaders li .name {
+  display: block;
+  font-weight: bold;
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 24px;
+  line-height: 1.5rem;
+}
+.about-us .leadership .leaders li .title {
+  font-size: 13px;
+  font-size: 0.8125rem;
+  line-height: 18px;
+  line-height: 1.125rem;
+  color: #bdbdbd;
+}
+.about-us .partners ul {
+  margin-top: 55px;
+  display: block;
+  /* mobile-check for the values below */
+  width: 60%;
+  margin: 55px 20% 0;
+}
+.about-us .partners ul li {
+  width: 23%;
+  margin: 0 1% 20px;
+  background: #838383;
+  height: auto;
+  max-height: 100px;
+  float: left;
+}
+.about-us .about .logos {
+  max-width: 960px;
+  margin: 0 auto;
+}
+.about-us .about .logos img {
+  max-width: 253px;
+  margin: 40px auto 0;
+}
+.about-us .about p {
+  text-align: center;
+}
+
+.bg-diag {
+  background: url("/sites/all/themes/liv/images/diagonal.png");
+  display: block;
+}
+
+.section {
+  padding: 60px 30px;
+}
+.section h2 {
+  font-size: 38px;
+  font-size: 2.375rem;
+  line-height: 45px;
+  line-height: 2.8125rem;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+span.ad {
+  display: block;
+  padding: 20px 0 0 0;
+  text-align: center;
+  clear: both;
+}
+span.ad ins {
+  background-color: #fff;
+}
+
+.ad-middle span.ad {
+  padding-bottom: 30px;
+}
+
+.top-100-sponsored-by {
+  position: absolute;
+  right: 3em;
+  overflow: hidden;
+  width: 14em;
+  display: none;
+}
+.top-100-sponsored-by .sponsored-by-txt {
+  display: block;
+  float: left;
+  margin-right: 1em;
+  color: #999;
+  font-style: italic;
+  margin-top: .4em;
+}
+.top-100-sponsored-by .ad {
+  width: 100px;
+  clear: none !important;
+  display: inline;
+}
+
+[class^="addthis_"] {
+  float: right;
+}
+
+.page-topics [class^="addthis_"], .page-moving [class^="addthis_"] {
+  margin-bottom: 5px;
+  margin-top: -40px;
+}
+
+.top-10-nav [class^="addthis_"] {
+  float: left;
+}
+
+html {
+  height: 100%;
+}
+
+body.page-404, body.page-404-page-not-found {
+  height: 100%;
+}
+body.page-404 .container, body.page-404-page-not-found .container {
+  height: 100%;
+}
+body.page-404 .slide, body.page-404-page-not-found .slide {
+  height: 100%;
+  text-align: center;
+}
+body.page-404 .slide:before, body.page-404-page-not-found .slide:before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+body.page-404 .slide section, body.page-404-page-not-found .slide section {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 600px;
+  text-align: left;
+  padding: 20px 40px;
+}
+body.page-404 p, body.page-404-page-not-found p {
+  max-width: 90%;
+}
+body.page-404 p.summary, body.page-404-page-not-found p.summary {
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 28px;
+  line-height: 1.75rem;
+}
+body.page-404 p.summary strong, body.page-404-page-not-found p.summary strong {
+  color: #7cc242;
+}
+
+span.taboola-title {
+  color: #474747;
+  padding: 15px 0 0;
+  display: block;
+  font-size: 24px;
+  font-size: 1.5rem;
+  line-height: 28px;
+  line-height: 1.75rem;
+}
+
+table.webform-grid {
+  min-width: 60%;
+}
+table.webform-grid tr.even, table.webform-grid tr.odd {
+  background-color: #fff;
+  line-height: 4em;
+}
+
+.livability-partners .additional-info {
+  font-size: 10px;
+  font-size: 0.625rem;
+  line-height: 13px;
+  line-height: 0.8125rem;
+}
+
+.block-best-places-block .seal-orange {
+  margin-right: 10px;
+  float: left;
+}
+.block-best-places-block .seal-orange i {
+  font-size: 36px;
+  font-size: 2.25rem;
+  line-height: 72px;
+  line-height: 4.5rem;
+}
+.block-best-places-block ul {
+  margin: 0 20px;
+}
+.block-best-places-block ul li {
+  line-height: 62px;
+  padding: 6px 0;
+  border-bottom: none;
+}
+.block-best-places-block ul li span.circle {
+  background-size: cover;
+  height: 62px;
+  width: 62px;
+  float: left;
+  margin-right: 10px;
+}
+
+.schools .infograph .fill-bar-label {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 3px;
+  line-height: 0.1875rem;
+}
+
+.schools-index .infograph h4 {
+  padding-bottom: 30px;
+}
+
+.school-list-circle {
+  background: #999999;
+  color: #FFFFFF;
+  border: 1px solid #999999;
+  border-radius: 50%;
+  padding: 10px;
+  width: 10px;
+  height: 10px;
+  text-align: center;
+  float: left;
+  line-height: 3px;
+  margin-right: 3px;
+}
+
+.top-cities h1 {
+  padding: 0;
+}
+
+/*# sourceMappingURL=additional.css.map */

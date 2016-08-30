@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the User Authored Content feature.
+ */
+
+include_once 'user_authored_content.features.inc';

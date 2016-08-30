@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Content Card feature.
+ */
+
+include_once 'content_card.features.inc';

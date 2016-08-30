@@ -1,0 +1,6 @@
+name = Top 100 Promo Block
+description = Provides the Top 100 Promo block
+package = Livability
+core = 7.x
+dependencies[] = block
+

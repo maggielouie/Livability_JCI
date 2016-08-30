@@ -1,0 +1,30 @@
+<?php
+/**
+ * @file
+ * Code for the User FIelds and Permissions feature.
+ */
+
+include_once 'user_fields.features.inc';
+
+function user_fields_preprocess_user_profile(&$vars) {
+	if ($vars['elements']['#view_mode'] == 'article_bottom') {
+		$vars['theme_hook_suggestions'][] = 'user_profile__article_bottom';
+	}
+	if ($vars['elements']['#view_mode'] == 'mini') {
+		$vars['theme_hook_suggestions'][] = 'user_profile__mini';
+	}
+	if ($vars['elements']['#view_mode'] == 'sidebar_block_bottom') {
+		$vars['theme_hook_suggestions'][] = 'user_profile__sidebar_block_bottom';
+	}
+}
+
+
+function user_fields_preprocess_page(&$vars, $hook) {
+	if (arg(0) == 'user') {
+		$crumbs = array();
+		$crumbs[] = l(t('Livability.com'), '<front>');
+		$crumbs[] = 'Company';
+		$crumbs[] = 'Profiles';
+		drupal_set_breadcrumb($crumbs);
+	}
+}

@@ -1,0 +1,7 @@
+name = Combo Ad Blocks
+description = Combines Desktop/Mobile ad blocks for placement convenience.
+package = Livability
+core = 7.x
+dependencies[] = block
+dependencies[] = jci_dfp
+

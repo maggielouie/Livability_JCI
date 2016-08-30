@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Liv Nav feature.
+ */
+
+include_once 'liv_nav.features.inc';

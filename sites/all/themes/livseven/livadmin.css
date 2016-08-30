@@ -1,0 +1,83 @@
+
+form .field-multiple-table th.field-label {
+  padding-left: 10px;
+}
+
+.node-form .field-name-field-year fieldset {
+  padding: 1em 0 0 0;
+}
+
+.node-form .field-name-field-year .container-inline-date .date-padding {
+  padding: 10px 0 0 0;
+}
+
+.node-form .field-name-field-year .container-inline-date > .form-item {
+  margin-bottom: 0;
+}
+
+.node-article-form .field-multiple-table .ds-form {
+  float: left;
+  width: 88%;
+}
+
+.node-best_places-form .field-multiple-table .ds-form {
+  width: 86%;
+}
+
+.node-form .field-multiple-table input[value="Remove"] {
+  float: right;
+}
+
+.node-article-form .field-name-field-author {
+  float: left;
+  width: 32%;
+  margin-right: 2%;
+}
+
+.node-article-form .field-name-field-publish-on {
+/*  float: left;
+  width: 66%; */
+}
+
+.node-form .field-name-field-page-title,
+.node-form .field-name-field-featured-homepage,
+.node-form .field-name-field-deck {
+  clear: both;
+}
+
+.node-form .field-name-field-top-100-item .ds-1col div,
+.node-best_places-form .field-name-field-list-item table div {
+  float: left;
+  margin-right: 5px;
+}
+
+.node-form .field-name-field-top-100-item .ds-1col fieldset,
+.node-best_places-form .field-name-field-list-item fieldset {
+  float: left;
+}
+
+
+.node-form .field-name-field-top-100-item .ds-1col fieldset div,
+.node-form .field-name-field-top-100-item .ds-1col fieldset fieldset,
+.node-best_places-form .field-name-field-list-item fieldset div,
+.node-best_places-form .field-name-field-list-item fieldset fieldset {
+  float: none;
+}
+
+.node-article-form div.image-widget-data,
+.node-best_places-form div.image-widget-data {
+/*  width: 150px; */
+}
+
+.page-node-add-blog-post #help{
+  width: 400px;
+  position:relative;
+  top:85px;
+}
+
+.field-type-entityreference #autocomplete {
+  background: #FFF;
+}
+.field-type-entityreference #autocomplete li.selected {
+  color: #000;
+}

@@ -1,0 +1,13 @@
+name = Airports
+core = 7.x
+package = Livability
+version = 7.x-1.0
+project = liv_airports
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[field_base][] = field_faa_code
+features[field_instance][] = node-airports-body
+features[field_instance][] = node-airports-field_faa_code
+features[field_instance][] = node-airports-field_geo
+features[node][] = airports
+project path = sites/all/modules/liv

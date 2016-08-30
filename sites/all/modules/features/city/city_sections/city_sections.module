@@ -1,0 +1,735 @@
+<?php
+global $citySectionMenu;
+global $cityContextActive;
+$cityContextActive = false;
+function liv_photos(){
+    return MENU_NOT_FOUND;
+}
+function liv_digital_magazine(){
+    return MENU_NOT_FOUND;
+}
+function city_sections_init(){
+    if ($GLOBALS['user']->uid) {
+        global $conf;
+        // $conf['cache'] = FALSE;
+    }
+}
+$citySectionMenu = array(
+    'home' => array('title'=> 'Home','icon'=>'flag'),
+    'things-to-do' => array('title' => 'Things to Do','icon'=>'entertainment'),
+    'photos' => array('title' => 'Photos and Video','icon'=>'photos'),
+/*    'weather' => array('title' => 'Weather','icon' => 'weather',
+        'submenu' => array(
+            'average-temperatures' => array('title' => 'Average Temperatures'),
+            'average-rainfall' => array('title' => 'Average Rainfall'),
+            'air-water-quality' => array('title' => 'Air water Quality')
+        )
+    ),*/
+    'schools' => array('title' => 'Schools','icon' => 'education',
+        'submenu' => array(
+            'public-schools' => array('title' => 'Public Schools'),
+            'private-schools' => array('title' => 'Private Schools'),
+            //'colleges' => array('title' => 'Colleges')
+        )
+    ),
+    'real-estate' => array('title' => 'Real Estate','icon' => 'housing',
+        'submenu' => array(
+
+            'housing' => array('title' => 'Housing'),
+            'home-values' => array('title' => 'Home Values')
+        )
+    ),
+    'business' => array('title' => 'Business','icon' => 'business',
+        'submenu' =>
+            array(
+
+                'major-industries' => array('title' => 'Top Industries'),
+                'employment' => array('title' => 'Employment')
+            )
+    ),
+    'health' => array('title' => 'Health','icon' => 'health',
+        'submenu' =>
+            array('healthy-lifestyle' => array('title' => 'Healthy Lifestyle'),
+                'doctors' => array('title' => 'Doctors'),
+                'hospitals' => array('title' => 'Hospitals')
+            )
+    ),
+/*    'transportation' => array('title' => 'Transportation','icon' => 'transportation',
+        'submenu' => array(
+            'commute-times' => array('title' => 'Commute Times'),
+            'airports' => array('title' => 'Airports'),
+            'major-highways' => array('title' => 'Major Highways')
+        )
+    ),
+    'government' => array('title' => 'Government','icon' => 'government',
+        'submenu' => array(
+            'local-officials' => array('title' => 'Local Officials'),
+            'federal-officials' => array('title' => 'Federal Officials'),
+
+        )
+    ),
+    'demographics' => array('title' => 'Demographics','icon' => 'demographics',
+        'submenu' =>
+            array('population' => array('title' => 'Population'),
+                'cost-of-living' => array('title' => 'Cost of living'),
+                'income-levels' => array('title' => 'Income Levels')
+            )
+    ),*/
+    'digital-magazine' => array('title' => 'Digital Magazine','icon'=>'digital-magazine')
+);
+foreach(array_keys($citySectionMenu) as $name){
+    module_load_include('inc','city_sections',$name);
+}
+function city_sections_menu(){
+    /*note this only runs on cc all and relies on livgeneratemenu
+    TODO make this a wrapper of nav so we can get modifications beyond generate menu functionality
+    */
+    global $citySectionMenu;
+    $menu = LivGenerateMenu($citySectionMenu);
+    $menu['city_sections/views/ajax'] = array(
+      'title' => 'City Content',
+      'page callback' => 'city_sections_ajax',
+      'delivery callback' => 'drupal_json_output',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    );
+    return $menu;
+}
+
+function LivGenerateMenu($menu){
+    $items = array();
+    foreach(locality::$states as $twoLetter => $full){
+        $twoLetter = strtolower($twoLetter);
+        foreach($menu as $name => $data){
+            if(array_key_exists('menu_hook',$data) && $data['menu_hook'] == false){ continue;}
+            $callback = str_replace('-','_',$name);
+            $items[$twoLetter.'/%/'.$name.'/%'] = array(
+                'title' => $name,
+                'description' => $name.' sub-section',
+                'page callback' => 'liv_'.$callback,
+                'type' => MENU_NORMAL_ITEM,
+                'access callback' => true,
+            );
+            $items[$twoLetter.'/%/'.$name] = array(
+                'title' => $name,
+                'description' => $name.' section',
+                'page callback' => 'liv_'.$callback,
+                'type' => MENU_NORMAL_ITEM,
+                'access callback' => true,
+            );
+        }
+
+    }
+    return($items);
+}
+
+function excludedTids(){
+    $ret = array();
+    $schools = taxonomy_get_term_by_name('Schools','category');
+    $schools = array_pop($schools);
+    $ret[$schools->tid] = $schools;
+    $health = taxonomy_get_term_by_name('Health','category');
+    $health = array_pop($health);
+    $ret[$health->tid] = $health;
+    $business = taxonomy_get_term_by_name('Business','category');
+    $business=array_pop($business);
+    $ret[$business->tid] = $business;
+    $realestate = taxonomy_get_term_by_name('Real Estate','category');
+    $realestate=array_pop($realestate);
+    $ret[$realestate->tid] = $realestate;
+    return $ret;
+}
+function getContentByTermAndPlace($term,$c,$offset=0,$num=10) {
+    $terms = array();
+    if (is_array($term)) {
+      foreach($term as $item) {
+        $thisterm = taxonomy_get_term_by_name($item,'category');
+        $thisterm = array_shift($thisterm);
+        $terms[] = $thisterm->tid;
+      }
+    }
+    elseif(!empty($term)) {
+      $thisterm = taxonomy_get_term_by_name($term,'category');
+      $thisterm = array_shift($thisterm);
+      $terms[] = $thisterm->tid;
+    }
+    $mq = 'SELECT n.nid FROM node n '.
+        'LEFT JOIN field_data_field_place pc on pc.entity_id = n.nid '.
+        'LEFT JOIN field_data_field_place_ref p on p.entity_id = pc.field_place_value '.
+        'LEFT JOIN field_data_field_category cc on cc.entity_id = n.nid '.
+        'LEFT JOIN field_data_field_category_ref c on c.entity_id = cc.field_category_value '.
+        'WHERE n.status = 1 AND '.
+        'p.bundle = \'field_place\' AND '.
+        'p.field_place_ref_target_id = :place ';
+        if (!empty($terms)) {
+          $mq .= 'AND c.field_category_ref_tid IN (:cat) ';
+        }
+    if (!empty($terms)) {
+      $countQuery = db_query($mq,array(':place' => $c->nid, ':cat' => $terms));
+    }
+    else {
+      $countQuery = db_query($mq,array(':place' => $c->nid));
+    }
+    $total = $countQuery->rowCount();
+    $q = 'SELECT n.nid, fc.field_featured_in_category_value, n.created as featured FROM node n '.
+        'LEFT JOIN field_data_field_place pc on pc.entity_id = n.nid '.
+        'LEFT JOIN field_data_field_place_ref p on p.entity_id = pc.field_place_value '.
+        'LEFT JOIN field_data_field_category cc on cc.entity_id = n.nid '.
+        'LEFT JOIN field_data_field_category_ref c on c.entity_id = cc.field_category_value '.
+        'LEFT JOIN field_data_field_featured_in_category fc on fc.entity_id = n.nid '.
+        'WHERE n.status = 1 AND '.
+        'p.bundle = \'field_place\' AND '.
+        'p.field_place_ref_target_id = :place ';
+        if (!empty($terms)) {
+          $q .= 'AND c.field_category_ref_tid IN (:cat) ';
+        }
+        $q .= 'ORDER BY fc.field_featured_in_category_value DESC '.
+        ', n.created DESC '.
+        'LIMIT ' . $offset .', '.$num;
+    if (!empty($terms)) {
+      $contentQuery = db_query($q,array(':place' => $c->nid, ':cat' => $terms));
+    }
+    else {
+      $contentQuery = db_query($q,array(':place' => $c->nid));
+    }
+    $nodes = array();
+    $featured = array();
+    foreach($contentQuery as $content){
+        $node = node_load($content->nid);
+        if($content->featured == 1){
+            $featured[] = $content->nid;
+            $node->featured = true;
+        }
+        $nodes[$node->nid] = $node;
+    }
+    return array('nodes' => $nodes,'featured' =>$featured,'term' =>$term, 'total' => $total);
+}
+function liv_page_alter(&$page){
+
+    global $citySectionMenu;
+    $c = getCityContext();
+    if($c !== false && is_object($c)){
+        $nav = new liv_nav($citySectionMenu);
+        $leftNav = $nav->renderNav();
+        if ($c->type == 'state') {
+        $page['special_header'] ='<span class="city-pin">'.
+            l('<i class="icon-pin green no-mobile"></i>'.
+                '<h2>'.$c->title.'</h2>',arg(0).'/'.arg(1),array('html' => true)).'
+                </span>';
+        }
+        else {
+          $page['special_header'] ='<span class="city-pin">'.
+            l('<i class="icon-pin green no-mobile"></i>'.
+                '<h2>'.$c->title.', '.
+                '<strong class="green">'.
+                    $c->state->field_state_code[LANGUAGE_NONE][0]['value'].
+                '</strong></h2>'
+                ,arg(0).'/'.arg(1),array('html' => true)).'
+                </span>'
+                . '<span class="county-area no-mobile">'.
+                l($c->county->name, 'node/'.$c->county->nid). //, Prescott Metro Area'.'
+                        '</span>'
+                ;
+		}
+        drupal_add_js(drupal_get_path('module', 'city_sections') . '/js/add_more.js');
+        /* sidebars no longer set here, set by Context */
+        switch(arg(2)){
+            case 'health':
+                break;
+            case 'things-to-do':
+                if (NULL == arg(3)) {
+                  drupal_set_title('Things to Do in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value']);
+                }
+                else {
+                  drupal_set_title(preg_replace('/And/', 'and', ucwords(preg_replace('/-/', ' ', arg(3)))) . ' in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value']);
+                }
+                break;
+            case 'real-estate':
+                switch(arg(3)) {
+                    case 'housing':
+                      drupal_set_title('Housing and Housing Statistics in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value']);
+                      break;
+                    case 'home-values':
+                      drupal_set_title('Home Values in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value']);
+                      break;
+                    case null:
+                    default:
+                      drupal_set_title('Real Estate in ' . $c->title . ', ' . $c->state->field_state_code[LANGUAGE_NONE][0]['value']);
+                      break;
+                }
+                break;
+            case null:
+                //home
+                if ($c->type == 'state') {
+                  drupal_set_title('Best Places to Live in ' . $c->title);
+                }
+                else {
+                  drupal_set_title($c->title . ', ' . $c->state->title/*field_state_code[LANGUAGE_NONE][0]['value']*/);
+                }
+                break;
+            default:
+                //default if in a city and no specific sidebar rules
+                //print 'in the default!';
+                break;
+        }
+        $page['sidebar_second']['city_section_nav'] = array('#type' => 'markup', '#markup' => $leftNav);
+    }
+    else {
+        if(arg(0) == 'node') {
+            $n = node_load(arg(1));
+        }
+        else { $n = new stdClass();$n->type=false;}
+
+      // Moving section.
+      if (strpos(request_uri(), '/moving') !== FALSE && $n->type == '') {
+        $globalMenu = new liv_nav($citySectionMenu);
+        $globalNav = $globalMenu->renderNav();
+        $page['sidebar_second']['global_nav'] = array('#type' => 'markup', '#markup' => $globalNav);
+      }
+      if ($n->type == 'article' || strpos(request_uri(), '/topics/') !== false){
+            $globalMenu = new liv_nav($citySectionMenu);
+            $globalNav = $globalMenu->renderNav();
+            $page['sidebar_second']['global_nav'] = array('#type' => 'markup', '#markup' => $globalNav);
+        }
+        elseif ($n->type == 'blog_post' || strpos(request_uri(),'blog')!==false){
+           if (isset($n->field_blog_category[LANGUAGE_NONE][0])) {
+                $cat = array_pop($n->field_blog_category[LANGUAGE_NONE][0]);
+                $category = livHelper::machineNameToWordsUpper($cat->name);
+                $page['special_header']['test'] = array('#type' => 'markup','#markup' =>
+                    '<span class="blog-pin"><i class="icon-'.str_replace(' ', '-', strtolower($cat->name)).' green no-mobile"></i>'.
+                    '<h1>'.$category.'</h1>'.
+                    '<span class="county-area no-mobile">Livability Blog</span>'.
+                    '</span>');
+           }
+           else {
+                $urlParts = explode('/',request_uri());
+                if (count($urlParts) >2) {
+                    $icon = $urlParts[2];
+                }
+                else {
+                    $icon = $urlParts[1];
+                }
+                $page['special_header']['test'] = array('#type' => 'markup','#markup' =>
+                    '<span class="blog-pin"><i class="icon-'.$icon.' green no-mobile"></i>'.
+                    '<h1>'.ucwords($icon).'</h1>'.
+                    '<span class="county-area no-mobile">Livability Blog</span>'.
+                    '</span>');
+            }
+            $globalMenu = new liv_nav($citySectionMenu);
+            $globalNav = $globalMenu->renderNav();
+            $page['sidebar_second']['global_nav'] = array('#type' => 'markup', '#markup' => $globalNav);
+        }
+        elseif ($n->type == 'state') {
+            $page['special_header'] ='<span class="city-pin">'.
+                l('<i class="icon-pin green no-mobile"></i>'.
+                    '<h2>'.$n->title.'</h2>',drupal_get_path_alias('node/'.$n->nid),array('html' => true)).'
+                </span>';
+            unset($page['sidebar_second']);
+            drupal_set_title('State of ' . $n->title . ' | Livability');
+        }
+        elseif (strpos(request_uri(),'/find-city')!==false) {
+            unset($page['sidebar_second']);
+        }
+        else {
+            /* $globalMenu = new liv_nav($citySectionMenu);
+            $globalNav = $globalMenu->renderNav();
+            $page['sidebar_second']['global_nav'] = array('#type' => 'markup', '#markup' => $globalNav);
+            */
+        }
+    }
+}
+function citySectionInclude($path,$vars=null){
+    ob_start();
+    //the include has the scope of this function so we use variables variables to pass data to templates
+    if($vars != null){
+        foreach($vars as $name => $value){
+           $$name = $value;
+        }
+    }
+    include './'.drupal_get_path('module','city_sections').'/includes/'.$path.'.inc';
+    $contents = ob_get_clean();
+    return $contents;
+}
+function getCityContext($nid = null){
+    global $currentCity;
+    $ret = false;
+    /*by id*/
+    if($nid !== null){
+        $ret = city_node_load($nid);
+    }
+    elseif (arg(0) == 'node' && is_numeric(arg(1)) && !in_array(arg(2), array('edit', 'add', 'delete'))) {
+        $n=node_load(arg(1));
+        
+        if ($n->type == 'city') {
+            $ret = city_node_load(arg(1));
+        } elseif (($n->type == 'article') && isset($n->field_place[LANGUAGE_NONE])) {
+            //todo verify this where an article or blog_post has city context use it
+            $item = field_collection_item_load($n->field_place[LANGUAGE_NONE][0]['value']);
+            if(isset($item->field_place_ref[LANGUAGE_NONE][0])){
+                $ret = city_node_load($item->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+            } else {
+                return false;
+            }
+        } elseif($n->type == 'gallery') {
+            $nid = $n->field_gallery_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } elseif($n->type == 'digital_magazine') {
+            $nid = $n->field_city[LANGUAGE_NONE][0]['target_id'];
+            $ret = city_node_load($nid);
+        } else {
+            return false;
+        }
+    } else {
+
+        $alias = drupal_get_path_alias();
+        $aliasParts = explode('/',$alias);
+        if(strlen($aliasParts[0]) == 2 && array_key_exists(strtoupper($aliasParts[0]),locality::$states)){
+            //todo safely handle no matches
+            if(array_key_exists(strtoupper($aliasParts[0]),locality::$states)){
+            	if (isset($aliasParts[1])) {
+	                $path = drupal_get_normal_path($aliasParts[0].'/'.$aliasParts[1]);
+	            }
+	            else {
+	                $path = drupal_get_normal_path($aliasParts[0]);
+	            }
+                $nodeParts = explode('/',$path);
+                $citynid = array_pop($nodeParts);
+                $ret = city_node_load($citynid);
+            }
+        }
+    }
+    $currentCity = $ret;
+    drupal_page_is_cacheable(TRUE);
+    return $ret;
+}
+function city_node_load($nid){
+    $node = node_load($nid);
+    if(is_object($node) && $node !== false){
+        if($node->type == 'city' || $node->type == 'metro_area'){
+            $ret = city_load_area($node);
+        }elseif($node->type == 'article'){
+            //todo need to pay attention to the checkbox field for primary place, dont' just pick first one
+            if(isset($node->field_place[LANGUAGE_NONE]) && array_key_exists('value',$node->field_place[LANGUAGE_NONE][0])){
+                $fc = field_collection_field_get_entity($node->field_place[LANGUAGE_NONE][0]);
+                if(isset($fc->field_place_ref[LANGUAGE_NONE])) {
+                  $place = node_load($fc->field_place_ref[LANGUAGE_NONE][0]['target_id']);
+                  $ret = city_load_area($place);
+                }
+                else {
+                  return false;
+                }
+            }else{
+                return false;
+            }
+        }elseif($node->type == 'gallery'){
+            $city = node_load($node->field_gallery_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        }elseif($node->type == 'digital_magazine'){
+            $city = node_load($node->field_city[LANGUAGE_NONE][0]['target_id']);
+            $ret = city_load_area($city);
+        }elseif($node->type == 'state'){
+            $ret = $node;
+        }else{
+            //drupal_set_message('no city context available');
+            return false;
+        }
+
+        return $ret;
+    }
+}
+function city_load_area($node){
+    $node->state = node_load($node->field_state[LANGUAGE_NONE][0]['target_id']);
+    $node->county = node_load($node->field_county[LANGUAGE_NONE][0]['target_id']);
+    $state = $node->state->field_state_code[LANGUAGE_NONE][0]['value'];
+    $cacheDir = drupal_get_path('module','census_cache').DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR;
+
+    $statecode = $node->state->field_fips[LANGUAGE_NONE][0]['value'];
+    if(strlen($statecode)<2){
+        $statecode = '0'.$statecode;
+    }
+    $cacheStateFilePath = $cacheDir.'state'.DIRECTORY_SEPARATOR.$statecode.'.json';
+    $pid = $node->field_fips[LANGUAGE_NONE][0]['value'];
+    if(strlen($pid) < 5){
+        $pid = '0'.$pid;
+    }
+  	$node->pid = $pid;
+    $cachePlaceFilePath = $cacheDir.'place'.DIRECTORY_SEPARATOR.$statecode.DIRECTORY_SEPARATOR.$pid.'.json';
+    $node->census = json_decode(file_get_contents($cachePlaceFilePath),true);
+    $node->state->census = json_decode(file_get_contents($cacheStateFilePath),true);
+    $node->nation = json_decode(file_get_contents($cacheDir.'national.json'),true);
+    //sites/all/modules/custom/census_cache/cache/47/27740.json <---franlin data
+    $node->county->name = $node->county->title;
+    return $node;
+}
+
+function getCityMeta($nid){
+    $c = getCityContext($nid);
+    $view = views_get_view('nearby_cities');
+    $view->execute('block');
+    dpm($view->result);
+    foreach($view->result as $row){
+        $inPopulationOrder[$row->field_field_population[0]['raw']['value']] = $row;
+    }
+    arsort($inPopulationOrder);
+    $largestNearby = array_shift($inPopulationOrder);
+    $ret = $c->title.', '.$c->state->field_state_code[LANGUAGE_NONE][0]['value'].
+        ', located in '.$c->county->name. // in the [Metro Area Name] metro area
+        'and about '.number_format($largestNearby->field_data_field_geo_geofield_distance,0).
+        ' miles from '.$largestNearby->node_title.', '.
+        $largestNearby->field_field_state_code[0]['raw']['value'].'. '.
+        'According to the latest US Census, '.$c->title.' has a population of '.
+        number_format($c->field_population[LANGUAGE_NONE][0]['value'],0).'.';
+    return $ret;
+}
+function city_sections_xmlsitemap_link_alter($link){
+    if($link['type'] == 'node' && $link['subtype'] == 'city'){
+        if($link['id'] !== null){
+            $n = node_load($link['id']);
+            $cityUrl = drupal_get_path_alias('node/'.$n->nid);
+            global $citySectionMenu;
+            $id = $n->field_place_id[LANGUAGE_NONE][0]['value'];
+            $b =1;
+            foreach($citySectionMenu as $urlkey => $menuItem){
+                if($urlkey == 'home'){
+                    continue;
+                }
+                if($urlkey == 'photos' || $urlkey == 'digital-magazine'){
+                    //do nothing because these content types are included in the xmlsitemap through it's content plugin
+                }else{
+                    xmlsitemap_link_save(makeSiteMapArray($cityUrl.'/'.$urlkey,$id.$b));
+                    if(array_key_exists('submenu',$menuItem)){
+                        foreach($menuItem['submenu'] as $subUrlKey => $subMenuItem){
+                            $c=1;
+                            $thelink = $cityUrl.'/'.$urlkey.'/'.$subUrlKey;
+                            $thelinkArray = makeSiteMapArray($thelink,$id.$b.$c);
+                            xmlsitemap_link_save($thelinkArray);
+                            $c++;
+                        }
+                    }
+                }
+                $b++;
+            }
+        }
+    }
+
+}
+function makeSiteMapArray($link,$id,$priority = '0.8'){
+    $ret = array();
+    $ret['type'] = 'city_section';
+    $ret['subtype'] = 'sub_section';
+    $ret['id'] = $id;
+    $ret['loc'] = $link;
+    $ret['priority'] = $priority;
+    return $ret;
+}
+function getCountyFIP($c){
+    $countyFIP = $c->county->field_fips['und'][0]['value'];
+    while(strlen($countyFIP) < 3){
+        $countyFIP = '0'.$countyFIP;
+    }
+    $stateFIP = $c->state->field_fips['und'][0]['value'];
+    while(strlen($stateFIP) < 2){
+        $stateFIP = '0'.$stateFIP;
+    }
+    return $stateFIP.$countyFIP;
+}
+
+function city_sections_ajax() {
+  $offset = 0;
+  $rows = array();
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  if (isset($_REQUEST['nid']) && is_numeric($_REQUEST['nid'])) {
+    $nid = $_REQUEST['nid'];
+    $c = getCityContext($nid);
+    $terms = null;
+    if (isset($_REQUEST['terms'])) {
+      $terms = $_REQUEST['terms'];
+    }
+    $stuff = getContentByTermAndPlace($terms,$c,$offset,3);
+    foreach($stuff['nodes'] as $things) {
+      $content[] = $things;
+    }
+    foreach($content as $node) {
+      $view = node_view($node,'teaser');
+      $row = '<li class="one-third">';
+      $row .= '<span class="image-icon">';
+      $row .= '<a href="/'.drupal_get_path_alias('node/'.$node->nid).'">';
+      if (isset($node->field_image[LANGUAGE_NONE])) {
+          $row .= '<img src="'.image_style_url('325x216', $node->field_image[LANGUAGE_NONE][0]['uri']).'">';
+      } else {
+          $row .= '<img src="/sites/all/themes/liv/images/325x216.jpg">';
+      }
+      $row .= '</a>';
+      $fi = entity_load('field_collection_item',$node->field_category[LANGUAGE_NONE][0]);
+      $fi = array_shift($fi);
+      $tid = $fi->field_category_ref[LANGUAGE_NONE][0]['tid'];
+      $tax = taxonomy_term_load($tid);
+      $pieces = explode(' ',strtolower($tax->name));
+      $icon = implode('-',$pieces);
+      $row .= '<span class="circle-icon"><span class="sticker-orange-horizontal"><i class="icon-'.$icon.' white"></i>';
+      $row .= '</span></span>';
+      $row .= '</span>';
+      $row .= '<span class="summary">';
+      $row .= '<h2><a href="/'.drupal_get_path_alias('node/'.$node->nid).'">'.$node->title.'</a></h2>';
+/*      $row .= '<p class="no-mobile">'.strip_tags($view['body'][0]['#markup']).'</p>';
+      $row .= citySectionInclude('stubs/interact'); */
+      $row .= '</span>';
+      $row .= '</li>';
+      $rows[] = $row;
+    }
+  }
+  drupal_json_output($rows);
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function city_sections_block_info() {
+  $blocks['city_accolades'] = array(
+    'info' => t('City Accolades'),
+  );
+  $blocks['city_quote'] = array(
+    'info' => t('City Quote'),
+  );
+  $blocks['nearby_cities'] = array(
+    'info' => t('Nearby Cities'),
+  );
+  $blocks['trulia_widget'] = array(
+    'info' => t('Trulia Widget'),
+  );
+  return $blocks;
+}
+/**
+ * Implements hook_block_view().
+ */
+function city_sections_block_view($delta = '') {
+  switch ($delta) {
+    case 'city_accolades':
+      $c = getCityContext();
+      $noreturn = TRUE;
+      $accolades = '<div class="city-accolades widget stay-full">
+            <h3>City Accolades</h3>
+            <ul>';
+      $thQuery = new EntityFieldQuery();
+      $thResults = $thQuery->entityCondition('entity_type','field_collection_item')
+                           ->fieldCondition('field_top_100_city','target_id',$c->nid)
+                           ->execute();
+      $current_city_state = drupal_get_path_alias($_GET['q']);
+      $acconode = array();
+      if (isset($thResults['field_collection_item'])) {
+        foreach($thResults['field_collection_item'] as $id =>$dat) {
+          $thNodeQuery = new EntityFieldQuery();
+          $thNodeQueryResults = $thNodeQuery->entityCondition('entity_type','node')
+                                            ->fieldCondition('field_top_100_item','value',$id)
+                                            ->execute();
+          if (isset($thNodeQueryResults['node'])) {
+            foreach ($thNodeQueryResults['node'] as $pop) {
+              $thnode = node_load($pop->nid);
+              if ($thnode->status == 1) {
+                $noreturn = FALSE;
+                $thnode->title = str_replace('Top 100','',$thnode->title);
+                if ($thnode->title == '') { $thnode->title = "Best Places to Live"; }
+                $year = date('Y',strtotime($thnode->field_year[LANGUAGE_NONE][0]['value']));
+                $acconode[$year.$thnode->created] = '<li>';
+                $acconode[$year.$thnode->created] .= '<span class="seal-orange"><i class="icon-top10 white"></i></span>';
+                $acconode[$year.$thnode->created] .= '<span class="accolade">Top 100</span>';
+                $acconode[$year.$thnode->created] .= l($thnode->title.' '.$year, 'node/'.$thnode->nid, array('html' => TRUE, 'attributes' => array('target' => '_blank')));
+                $acconode[$year.$thnode->created] .= '</li>';
+              }
+            }
+          }
+        }
+/*        krsort($thNodes);
+        foreach($thNodes as $created => $content) {
+          $accolades .= $content;
+        }
+*/
+      }
+      $bpQuery = new EntityFieldQuery();
+      $bpResults = $bpQuery->entityCondition('entity_type','field_collection_item')
+                           ->fieldCondition('field_city','target_id',$c->nid)
+                           ->execute();
+      if (isset($bpResults['field_collection_item'])) {
+        foreach($bpResults['field_collection_item'] as $id =>$dat) {
+          $bpNodeQuery = new EntityFieldQuery();
+          $bpNodeQueryResults = $bpNodeQuery->entityCondition('entity_type','node')
+                                            ->fieldCondition('field_list_item','value',$id)
+                                            ->execute();
+          if (isset($bpNodeQueryResults['node'])) {
+            foreach($bpNodeQueryResults['node'] as $pop) {
+              $bpNode = node_load($pop->nid);
+              if ($bpNode->status == 1) {
+                $accolade_alias = drupal_get_path_alias('node/'.$bpNode->nid);
+                $noreturn = FALSE;
+                $bpNode->title = str_replace('10 Best','',$bpNode->title);
+                $year = date('Y',strtotime($bpNode->field_year[LANGUAGE_NONE][0]['value']));
+                $acconode[$year.$bpNode->created] = '<li>';
+                $acconode[$year.$bpNode->created] .= '<span class="seal-orange"><i class="icon-top10 white"></i></span>';
+                $acconode[$year.$bpNode->created] .= '<span class="accolade">Top 10</span>';
+                $acconode[$year.$bpNode->created] .= l($bpNode->title.' '.$year, $accolade_alias . '/' . $current_city_state, array('html' => TRUE, 'attributes' => array('target' => '_blank')));
+                $acconode[$year.$bpNode->created] .= '</li>';
+              }
+            }
+          }
+        }
+      }
+      krsort($acconode);
+      foreach($acconode as $created => $content) {
+        $accolades .= $content;
+      }
+      $accolades .= '</ul></div>';
+      if (!$noreturn) {
+        $block['content'] = array('#markup' => $accolades);
+      }
+      else {
+        $populararticles = block_load('popular_articles_block', 'popular_articles');
+		$populararticles = _block_get_renderable_array(_block_render_blocks(array($populararticles)));
+		$pablock = drupal_render($populararticles);
+        $block['content'] = array('#markup' => $pablock);
+      }
+      break;
+    case 'city_quote':
+      $c = getCityContext();
+      if (isset($c->field_city_quotes[LANGUAGE_NONE])) {
+        $quote = '<div class="city-quote widget stay-full">';
+        foreach($c->field_city_quotes[LANGUAGE_NONE] as $key => $quoteObj) {
+          $quote .= '<span class="quote"><i class="open"></i>';
+          $quote .= '<p>'.$quoteObj['value'].'</p>';
+          if (isset($c->field_city_quote_author[LANGUAGE_NONE][$key])) {
+            $quote .= '<span class="author">'.$c->field_city_quote_author[LANGUAGE_NONE][$key]['value'].'</span>';
+          }
+          $quote .= '<i class="close"></i></span>';
+        }
+        $quote .= '</div>';
+        $block['content'] = array('#markup' => $quote);
+      }
+      break;
+    case 'nearby_cities':
+      $c = getCityContext();
+      $nearby = '<div class="cities-nearby widget stay-full">
+        <h3>Cities Nearby</h3>';
+      $view = views_get_view('nearby_cities');
+      $view->execute('block');
+      $nearby .= '<ul class="nearby-cities">';
+      $rowCount = 1;
+      foreach($view->result as $row){
+        $nearbyc = city_node_load($row->nid);
+        $nearby .= '<li>';
+        $nearby .= l('<span class="number">'.$rowCount.'</span>'.$nearbyc->title.', '.$nearbyc->state->field_state_code['und'][0]['value'].
+        '<i class="icon-arrow-right-circle white"></i>', 'node/'.$nearbyc->nid, array('html' => TRUE));
+        //number_format($row->field_data_field_geo_geofield_distance,0).' miles'.
+        $nearby .= '</li>';
+        $rowCount++;
+      }
+      $nearby .= '</ul></div>';
+      $block['content'] = array('#markup' => $nearby);
+      break;
+    case 'trulia_widget':
+      $c = getCityContext();
+      $block['content'] = citySectionInclude('real-estate/block-listing-a');
+      break;
+  }
+  if (isset($block)) return $block;
+}

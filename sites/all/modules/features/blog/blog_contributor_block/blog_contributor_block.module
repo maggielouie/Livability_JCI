@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Blog Contributor Block feature.
+ */
+
+include_once 'blog_contributor_block.features.inc';

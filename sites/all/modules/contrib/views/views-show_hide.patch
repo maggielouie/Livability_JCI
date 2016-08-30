@@ -1,0 +1,191 @@
+From 4d57b595ffef76cae8d44b9871497d62d08ad4d8 Mon Sep 17 00:00:00 2001
+From: OnkelTem <OnkelTem@239962.no-reply.drupal.org>
+Date: Fri, 10 Oct 2014 01:51:55 +0400
+Subject: [PATCH] Issue #1217394 by dawehner, jsacksick, MichaelCole,
+ rutcreate, damiankloip: Fixed "Display even if view has no
+ result" not working. (D7 backport)
+
+---
+ handlers/views_handler_area.inc        |   13 +++++++++++++
+ handlers/views_handler_area_view.inc   |   23 +++++++++++++++++++++--
+ plugins/views_plugin_display.inc       |   28 ++++++++++++++++++++++++++++
+ plugins/views_plugin_display_block.inc |   25 ++++++++++++++++++++++++-
+ 4 files changed, 86 insertions(+), 3 deletions(-)
+
+diff --git a/handlers/views_handler_area.inc b/handlers/views_handler_area.inc
+index 9fed11c..9826f5a 100644
+--- a/handlers/views_handler_area.inc
++++ b/handlers/views_handler_area.inc
+@@ -95,6 +95,19 @@ class views_handler_area extends views_handler {
+   }
+ 
+   /**
++   * Does that area have nothing to show.
++   *
++   * This method should be overridden by more complex handlers where the output
++   * is not static and maybe itself be empty if it's rendered.
++   *
++   * @return bool
++   *   Return TRUE if the area is empty, else FALSE.
++   */
++  public function is_empty() {
++    return empty($this->options['empty']);
++  }
++
++  /**
+    * Area handlers shouldn't have groupby.
+    */
+   function use_group_by() {
+diff --git a/handlers/views_handler_area_view.inc b/handlers/views_handler_area_view.inc
+index 45ea499..b0bd703 100644
+--- a/handlers/views_handler_area_view.inc
++++ b/handlers/views_handler_area_view.inc
+@@ -12,6 +12,13 @@
+  */
+ class views_handler_area_view extends views_handler_area {
+ 
++  /**
++   * Stores whether the embedded view is actually empty.
++   *
++   * @var bool
++   */
++  protected $is_empty;
++
+   function option_definition() {
+     $options = parent::option_definition();
+ 
+@@ -71,13 +78,25 @@ class views_handler_area_view extends views_handler_area {
+       }
+       else {
+         if (!empty($this->options['inherit_arguments']) && !empty($this->view->args)) {
+-          return $view->preview($display_id, $this->view->args);
++          $output = $view->preview($display_id, $this->view->args);
+         }
+         else {
+-          return $view->preview($display_id);
++          $output = $view->preview($display_id);
+         }
++        $this->is_empty = $view->display_handler->output_is_empty();
++        return $output;
+       }
+     }
+     return '';
+   }
++
++  public function is_empty() {
++    if (isset($this->is_empty)) {
++      return $this->is_empty;
++    }
++    else {
++      return parent::is_empty();
++    }
++  }
++
+ }
+diff --git a/plugins/views_plugin_display.inc b/plugins/views_plugin_display.inc
+index db124de..b2cec16 100644
+--- a/plugins/views_plugin_display.inc
++++ b/plugins/views_plugin_display.inc
+@@ -2772,6 +2772,34 @@ class views_plugin_display extends views_plugin {
+     return TRUE;
+   }
+ 
++ /**
++  * Is the output of the view empty.
++  *
++  * If a view has no result and neither the empty, nor the footer nor the header
++  * does show anything return FALSE.
++  *
++  * @return bool
++  *   Returns TRUE if the output is empty, else FALSE.
++  */
++  public function output_is_empty() {
++    if (!empty($this->view->result)) {
++      return FALSE;
++    }
++
++    // Check whether all of the area handlers are empty.
++    foreach (array('empty', 'footer', 'header') as $type) {
++      $handlers = $this->get_handlers($type);
++      foreach ($handlers as $handler) {
++        // If one is not empty, return FALSE now.
++        if (!$handler->is_empty()) {
++          return FALSE;
++        }
++      }
++    }
++
++    return TRUE;
++  }
++
+   /**
+    * Provide the block system with any exposed widget blocks for this display.
+    */
+diff --git a/plugins/views_plugin_display_block.inc b/plugins/views_plugin_display_block.inc
+index c903a9b..ef39acc 100644
+--- a/plugins/views_plugin_display_block.inc
++++ b/plugins/views_plugin_display_block.inc
+@@ -16,6 +16,7 @@ class views_plugin_display_block extends views_plugin_display {
+ 
+     $options['block_description'] = array('default' => '', 'translatable' => TRUE);
+     $options['block_caching'] = array('default' => DRUPAL_NO_CACHE);
++    $options['block_hide_empty'] = array('default' => FALSE);
+ 
+     return $options;
+   }
+@@ -53,7 +54,10 @@ class views_plugin_display_block extends views_plugin_display {
+     // display, and arguments should be set on the view.
+     $info['content'] = $this->view->render();
+     $info['subject'] = filter_xss_admin($this->view->get_title());
+-    if (!empty($this->view->result) || $this->get_option('empty') || !empty($this->view->style_plugin->definition['even empty'])) {
++    if ($this->output_is_empty() && $this->get_option('block_hide_empty') && empty($this->view->style_plugin->definition['even empty'])) {
++      return array();
++    }
++    else {
+       return $info;
+     }
+   }
+@@ -92,6 +96,12 @@ class views_plugin_display_block extends views_plugin_display {
+       'title' => t('Block caching'),
+       'value' => $types[$this->get_cache_type()],
+     );
++
++     $options['block_hide_empty'] = array(
++      'category' => 'other',
++      'title' => t('Hide block if the view output is empty'),
++      'value' => $this->get_option('block_hide_empty') ? t('Hide') : t('Show'),
++    );
+   }
+ 
+   /**
+@@ -147,6 +157,16 @@ class views_plugin_display_block extends views_plugin_display {
+           '#default_value' => $this->get_cache_type(),
+         );
+         break;
++      case 'block_hide_empty':
++        $form['#title'] .= t('Block empty settings');
++
++        $form['block_hide_empty'] = array(
++          '#title' => t('Hide block if no result/empty text'),
++          '#type' => 'checkbox',
++          '#description' => t('Hide the block if there is no result and no empty text and no header/footer which is shown on empty result'),
++          '#default_value' => $this->get_option('block_hide_empty'),
++        );
++        break;
+       case 'exposed_form_options':
+         $this->view->init_handlers();
+         if (!$this->uses_exposed() && parent::uses_exposed()) {
+@@ -176,6 +196,9 @@ class views_plugin_display_block extends views_plugin_display {
+         $this->set_option('block_caching', $form_state['values']['block_caching']);
+         $this->save_block_cache($form_state['view']->name . '-'. $form_state['display_id'], $form_state['values']['block_caching']);
+         break;
++      case 'block_hide_empty':
++        $this->set_option('block_hide_empty', $form_state['values']['block_hide_empty']);
++        break;
+     }
+   }
+ 
+-- 
+1.7.9.5
+
+

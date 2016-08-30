@@ -1,0 +1,42 @@
+<?php
+/**
+* Modal Email Signup
+*
+*/
+
+function jci_modal_signup_block_info() {
+  // This example comes from node.module.
+  $blocks['jci_modal_signup'] = array(
+    'info' => t('Modal Email Signup Container'),
+  );
+  return $blocks;
+}
+
+function jci_modal_signup_block_view($delta = '') {
+  drupal_add_library('system', 'jquery.cookie');
+  switch ($delta) {
+    case 'jci_modal_signup':
+      $block['subject'] = t('');
+      $block['content'] = array(
+        // '#theme' => '', //way too many divs on this thing
+        // see http://www.metachunk.com/blog/adding-module-path-drupal-7-theme-registry#comment-32
+//        '#markup' => '<div id="email_signup"></div>',
+        '#attached' => array(
+           'css' => array(
+             drupal_get_path('module', 'jci_modal_signup') . '/jci_modal_signup.css',
+           ),
+          'js' => array(
+            drupal_get_path('module', 'jci_modal_signup') . '/js/jci_modal_signup.js' => array(
+              'type' => 'file',
+              'scope' => 'footer',
+            ),
+          ),
+        ),
+      );
+      break;
+  }
+  return $block;
+    
+}
+
+

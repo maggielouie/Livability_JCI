@@ -1,0 +1,72 @@
+name = Liv
+description = HTML5, SASS, Responsive grid base theme.
+screenshot = images/screenshot.gif
+core = "7.x"
+;base theme = "basic"
+;project = "basic"
+engine = phptemplate
+
+regions[page_top] = Page top
+regions[header] = Header
+regions[highlighted] = Highlighted
+regions[help] = Help
+regions[content_top_ad] = Content Leaderboard Top
+regions[content] = Content
+regions[sidebar_first] = First sidebar
+regions[sidebar_second] = Second sidebar
+regions[footer] = Footer
+regions[page_bottom] = Page bottom
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = main_menu
+features[] = secondary_menu
+
+; Stylesheets
+stylesheets[all][] = livability/css/reset.css
+;stylesheets[all][] = livability/css/variables.css
+stylesheets[all][] = livability/css/master.css
+stylesheets[all][] = livability/css/royalslider.css
+stylesheets[all][] = livability/css/tablet-only.css
+stylesheets[all][] = livability/css/mobile-only.css
+;stylesheets[all][] = livability/css/menu.css
+;stylesheets[all][] = livability/css/screen.css
+stylesheets[all][] = livability/css/sprites.css
+stylesheets[all][] = livability/css/icons.css
+stylesheets[all][] = livability/css/additional.css
+
+;stylesheets[all][] = livability/css/ie.css
+
+
+stylesheets[all][] = system.menus.css
+stylesheets[all][] = system.base.css
+
+stylesheets[print][] = livability/css/print.css
+
+; Scripts
+;scripts[] = js/modernizr.js
+
+settings[basic_tabs] = 1
+settings[basic_breadcrumb] = 1
+settings[basic_breadcrumb_home] = 1
+settings[basic_breadcrumb_separator] = »
+settings[clear_registry] = 0
+settings[basic_ie_enabled] = 0
+settings[basic_ie_enabled_versions][ie8] = 0
+settings[basic_ie_enabled_versions][ie9] = 0
+settings[basic_ie_enabled_versions][ie10] = 0
+
+;btp scripts
+
+scripts[] = livability/js/lib/jquery.royalslider.min.js
+scripts[] = livability/js/lib/jquery-draggable.js
+
+scripts[] = livability/js/lib/modernizr-2.6.2.min.js
+;scripts[] = livability/js/lib/cssrefresh.js
+scripts[] = livability/js/lib/jquery.truncate.js
+scripts[] = livability/js/master.js

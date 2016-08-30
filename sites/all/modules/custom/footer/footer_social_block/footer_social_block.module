@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ * Module file for footer_about_block.
+ */
+
+/**
+ * @defgroup footer_about_block Footer About Block
+ * @ingroup livability
+ * @{
+ * Creates a configuratble block for the footer.
+ *
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function footer_social_block_block_info() {
+  $blocks['footer_social'] = array(
+    // info: The name of the block.
+    'info' => t('Footer Social Icons'),
+    // Block caching options (per role, per user, etc.)
+    'cache' => DRUPAL_CACHE_PER_ROLE, // default
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function footer_social_block_block_view($delta = '') {
+  switch ($delta) {
+    case 'footer_social':
+      $block['content'] = array('#markup' => '<a href="http://www.facebook.com/Livability" class="white" target="_blank"><i class="fa fa-facebook"></i></a><a href="http://twitter.com/Livability" class="white" target="_blank"><i class="fa fa-twitter"></i></a><a href="http://plus.google.com/112521199452031771149" class="icon-googleplus grey" target="_blank"></a><a href="http://www.pinterest.com/livability/" class="icon-pinterest grey" target="_blank"></a>');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * @} End of "footer_about_block".
+ */

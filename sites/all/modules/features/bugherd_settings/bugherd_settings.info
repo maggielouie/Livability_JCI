@@ -1,0 +1,13 @@
+name = BugHerd Settings
+description = BugHerd Settings
+core = 7.x
+package = Livability
+version = 7.x-1.0
+project = bugherd_settings
+dependencies[] = ctools
+dependencies[] = strongarm
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[variable][] = bugherd_disable_on_admin
+features[variable][] = bugherd_project_key
+project path = sites/all/modules/liv

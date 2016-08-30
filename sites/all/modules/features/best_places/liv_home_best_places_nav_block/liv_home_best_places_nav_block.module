@@ -1,0 +1,32 @@
+<?php
+
+function liv_home_best_places_nav_block_block_info() {
+	$blocks['liv_home_best_places_nav'] = array(
+		'info' => t('Find Your Best Place'),
+		'status' => TRUE,
+		'region' => -1,
+	);
+	return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function liv_home_best_places_nav_block_block_view($delta = '') {
+	//The $delta parameter tells us which block is being requested.
+	switch ($delta) {
+		case 'liv_home_best_places_nav':
+			$output = '<h1><span>Find Your</span> Best Place to Live</h1>';
+			$output .= '<ul class="clearfix">';
+			$output .= '<li class="shadow-inset-t last"><a href="/topics"><span>More Stories<br/>by Topic</span><i class="icon-arrow-right-circle white"></i></a></li>';
+			$output .= '<li class="shadow-inset-t"><a href="/top-10"><span>Browse<br/>Top 10<br/>Lists</span><i class="icon-arrow-right-circle white"></i></a></li>';
+			$output .= '<li class="shadow-inset-t"><a href="/best-places"><span>Top 100<br/>Best Places<br/>to Live</span><i class="icon-arrow-right-circle white"></i></a></li>';
+			$output .= '<li class="shadow-inset-t"><a href="/find-city"><span>Find a<br/>City</span><i class="icon-arrow-right-circle white"></i></a></li>';
+			$output .= '</ul>';
+			$block['content']['#markup'] = $output;
+			break;
+	}
+	return $block;
+}

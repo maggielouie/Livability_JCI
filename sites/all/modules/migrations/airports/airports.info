@@ -1,0 +1,14 @@
+name = "Airport Data Migration"
+description = "Using openflights data to get airports."
+package = "Livability"
+core = 7.x
+dependencies[] = taxonomy
+dependencies[] = migrate
+dependencies[] = list
+dependencies[] = number
+;dependencies[] = geo_field
+dependencies[] = migrate
+
+files[] = airports.module
+files[] = airports.inc
+files[] = airportsJSON.inc

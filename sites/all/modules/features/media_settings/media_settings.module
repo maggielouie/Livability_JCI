@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Code for the Media Settings feature.
+ */
+
+include_once 'media_settings.features.inc';
+
+/**
+ * Implements hook_form_FORM_ID_alter()
+ */
+
+function media_settings_form_file_entity_add_upload_alter(&$form, &$form_state, $form_id) {
+    if (!isset($form['field_byline']['und'][0]['#format'])) {
+        $form['field_byline']['und'][0]['#format'] = 'photo_byline';
+    }
+}

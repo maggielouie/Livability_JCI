@@ -1,0 +1,109 @@
+<?php
+/**
+ * @file
+ * Code for the Liv Blog feature.
+ */
+
+include_once 'liv_blog.features.inc';
+
+// We want links for the Blog Category terms to go to the blog/cat page
+
+function liv_blog_entity_info_alter(&$entity_info) {
+  $entity_info['taxonomy_term']['uri callback'] = 'liv_blog_taxonomy_term_uri';
+}
+
+function liv_blog_taxonomy_term_uri($term) {
+  if($term->vocabulary_machine_name == 'blog_category' && isset($term->name)) {
+    return array('path' => 'blog/' . strtolower(str_replace(' ', '-', $term->name)));
+  }
+  else {
+    return array(
+    'path' => 'taxonomy/term/' . $term->tid,
+    );
+  }
+}
+
+// Add custom Show More Posts ajax
+
+/**
+ * Implements hook_menu().
+ */
+function liv_blog_menu() {
+  $items['liv_blog/views/ajax'] = array(
+    'title' => 'Liv Blog',
+    'page callback' => 'liv_blog_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback, load next row (slide) by ajax.
+ */
+function liv_blog_ajax() {
+  $view = views_get_view('blog');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['cat']) && $_REQUEST['cat'] != '') {
+    $view->args[] = $_REQUEST['cat'];
+  }
+  $view->execute('page');
+  $view->preview();
+  
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $thisrow = $index+$offset+1;
+    $eo = ($thisrow % 2 == 0) ? 'even' : 'odd';
+    $rows[] = '<li class="views-row views-row-' . $thisrow . ' views-row-' . $eo . '">' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+
+function liv_blog_preprocess_page(&$vars, $hook) {
+  if (arg(0) == 'blog') {
+    drupal_add_js(drupal_get_path('module', 'liv_blog') . '/js/add_more.js');
+  }
+}
+
+function liv_blog_preprocess_views_view_rss(&$vars) {
+  if ($vars['view']->name == 'blog' && $vars['view']->current_display == 'feed_1') {
+    $vars['namespaces'] .= ' xmlns:media="http://search.yahoo.com/mrss/"';
+  }
+}
+
+function liv_blog_preprocess_views_view_row_rss(&$vars) {
+  if ($vars['view']->name == 'blog' && $vars['view']->current_display == 'feed_1') {
+    $view     = &$vars['view'];
+    $options  = &$vars['options'];
+    $item     = &$vars['row'];
+    if (!isset($view->row_index)) {
+      $view->row_index = 0;
+    }
+    $vars['title'] = check_plain($item->title);
+    $vars['link'] = check_url($item->link);
+    $vars['description'] = check_plain($item->description);
+    $vars['item_elements'] = empty($item->elements) ? '' : format_xml_elements($item->elements);
+    if (isset($view->result[$view->row_index]->field_field_image[0])) {
+      $image = image_style_url($view->result[$view->row_index]->field_field_image[0]['rendered']['#image_style'], $view->result[$view->row_index]->field_field_image[0]['rendered']['#item']['uri']);
+      $vars['item_elements'] .= "<media:content url=\"$image\" medium=\"image\" />";
+    }
+    if (!empty($view->result[$view->row_index]->field_body[0]['raw']['safe_summary'])) {
+      $post = $view->result[$view->row_index]->field_body[0]['raw']['safe_summary'];
+    }
+    else {
+      $post = substr(strip_tags($view->result[$view->row_index]->field_body[0]['raw']['safe_value'],'<p><strong><em><i><b>'), 0, 600).'&hellip;';
+      $post = _filter_htmlcorrector($post);
+    }
+    $vars['item_elements'] .= "<content:encoded><![CDATA[ " . $post . " ]]></content:encoded>\r\n";
+  }
+}

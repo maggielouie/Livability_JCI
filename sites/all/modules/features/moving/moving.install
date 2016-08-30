@@ -1,0 +1,34 @@
+<?php
+/**
+ * @file
+ *
+ * Install file for Moving feature.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function moving_install() {
+  moving_update_7000();
+}
+
+/**
+ * Update relocate link and add moving sub-links.
+ */
+function moving_update_7001() {
+  // Update Relocate link.
+  $sql = 'UPDATE {menu_links} SET link_title = :link_title, router_path = :link_path, link_path = :link_path, hidden = 0 WHERE mlid = 1578';
+  db_query($sql, array(':link_path' => 'moving', ':link_title' => 'Moving'));
+
+  // Add new link for Moving sub-links.
+  $sql = "INSERT INTO {menu_links} (menu_name, mlid, plid, link_path, router_path, link_title, options, module, hidden, external, has_children, expanded, weight, depth, customized, p1, p2, p3, p4, p5, p6, p7, p8, p9, updated)
+VALUES
+	(:menu_name, NULL, 1578, :link_path, :link_path, :link_title, :options, :module, 0, 0, 0, 0, -50, 2, 1, 1578, 2678, 0, 0, 0, 0, 0, 0, 0, 0);";
+  db_query($sql, array(
+    ':menu_name' => 'main-menu',
+    ':link_path' => '<view>',
+    ':link_title' => 'Moving',
+    ':options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:0:"";}s:10:"menu_views";a:4:{s:4:"mlid";s:4:"2678";s:4:"type";s:4:"view";s:13:"original_path";s:6:"moving";s:4:"view";a:4:{s:4:"name";s:16:"moving_menu_list";s:7:"display";s:5:"block";s:9:"arguments";s:0:"";s:8:"settings";a:8:{s:15:"wrapper_classes";s:10:"menu-views";s:10:"breadcrumb";i:1;s:16:"breadcrumb_title";s:0:"";s:15:"breadcrumb_path";s:7:"<front>";s:5:"title";i:0;s:13:"title_wrapper";s:0:"";s:13:"title_classes";s:0:"";s:14:"title_override";s:0:"";}}}}',
+    ':module' => 'menu',
+  ));
+}

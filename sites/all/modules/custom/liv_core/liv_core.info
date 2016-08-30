@@ -1,0 +1,10 @@
+name = Livability Core
+description = Livability Core Module overrides.
+core = 7.x
+package = Livability
+
+; Information added by Drupal.org packaging script on 2015-06-15
+version = "7.x-1.0"
+core = "7.x"
+project = "liv_core"
+datestamp = "1434368594"

@@ -1,0 +1,6 @@
+name = Legacy Url Handling
+description = Redirecting v5 (and earlier) URLs to new counterpart
+core = 7.x
+package = Livability
+version = 7.x-1.0
+project = legacy_url_handling

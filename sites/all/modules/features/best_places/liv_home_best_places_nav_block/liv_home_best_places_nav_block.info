@@ -1,0 +1,6 @@
+name = Best Places Nav Block
+description = A block for the homepage to nav Best Places landing pages
+package = Livability
+core = 7.x
+dependencies[] = block
+

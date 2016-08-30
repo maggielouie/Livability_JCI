@@ -1,0 +1,61 @@
+// Colors
+$white: #fff;
+$black: #3c3c3c;
+$grey: #838383;
+$greyDark: #666666;
+$greyDarkest: #474747;
+$greyLight: #bdbdbd;
+$greyLightest: #e8e8e8;
+$green: #7cc242;
+$greenLight: #88C754;
+$orange: #fcae17;
+$pink: #ff6766;
+$red: #ed3c43;
+$red: #d46469;
+
+$blue: #009bd5;
+$blueLight: #00aee4;
+$blueDark: #006699;
+$blueLightest: #a3def1;
+$footerColor: #6d6e71;
+
+// Font
+$fontBase: 16;
+$lineBase: 21;
+
+// Spacing
+$spacing: 20;
+$spacingTiny: $spacing*.25+px;
+$spacingSmall:  $spacing*.5+px;
+$spacingMedium: $spacing*.75+px;
+$spacingDefault: $spacing+px;
+$spacingLarge: $spacing*2+px;
+$spacingBig: $spacing*3+px;
+$spacingHuge: $spacing*4+px;
+
+@import "compass/css3";
+
+@mixin inline-block() {
+    display: inline-block;
+    vertical-align: baseline;  
+    zoom: 1;
+    *display: inline;
+    *vertical-align: auto;
+}
+
+@function calculate-rem($size) {
+    $remSize: $size / $fontBase;
+    @return #{$remSize}rem;
+}
+
+// Use pixels for $size and $line variables
+@mixin font-size($size, $line: $size) {
+    font-size: $size+px; //Fallback in px
+    font-size: calculate-rem($size);
+    line-height: $line+px; //Fallback in px
+    line-height: calculate-rem($line);
+}
+
+.icon-arrow-left-circle, .icon-arrow-right-circle, .icon-arrow-up-circle, .icon-arrow-down-circle {
+    @include font-size (20);
+}

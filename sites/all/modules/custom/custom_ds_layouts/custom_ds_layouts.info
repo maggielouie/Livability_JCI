@@ -1,0 +1,4 @@
+name = "Custom Display Suite Layouts"
+description = "Provides custom Display Suite layouts."
+core = 7.x
+package = Livability

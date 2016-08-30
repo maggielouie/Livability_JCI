@@ -1,0 +1,5 @@
+name = "JCI DFP Extras"
+description = "JCI DFP Extras provides with extensive targeting options"
+core = 7.x
+package = JCI
+dependencies[] = jci_dfp

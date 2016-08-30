@@ -1,0 +1,318 @@
+<?php
+/**
+ * @file
+ * Code for the Best Places feature.
+ */
+
+include_once 'best_places.features.inc';
+
+function best_places_form_best_places_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['title']['#title'] = 'Title (Web Headline)';
+  $form['title']['#description'] = '65  Maximum recommended characters - including spaces';
+  $form['title']['#size'] = 120;
+  $form['field_deck']['und'][0]['value']['#type'] = 'textarea';
+  $form['field_short_description']['und'][0]['value']['#type'] = 'textarea';
+  $form['field_meta_description']['und'][0]['value']['#type'] = 'textarea';
+  /*
+  $form['extra_save']['submit'] = $form['actions']['submit'];
+  $form['extra_save']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 1em; right: 0';
+  */
+}
+
+function best_places_preprocess_page(&$vars, $hook) {
+  // Top 10 pages.
+  if (arg(0) == 'top-10') {
+    drupal_add_js(drupal_get_path('module', 'best_places') . '/js/add_more.js');
+  }
+  // Top 10 Category page.
+  if (arg(0) == 'top-10' && arg(1) != NULL && arg(2) == NULL) {
+    $term = taxonomy_get_term_by_name(str_replace('-', ' ', arg(1)));
+    if (!empty($term)) {
+      $term = current($term);
+      $crumbs = array();
+      $crumbs[] = l(t('Home'), '<front>');
+      $crumbs[] = l(t('Top 10 Lists'), 'top-10');
+      drupal_set_breadcrumb($crumbs);
+      $vars['category'] = $term->name;
+      drupal_set_title($term->name);
+    }
+  }
+  // Best Places page.
+  if (arg(0) == 'best-places' && arg(1) == NULL) {
+    drupal_add_js(drupal_get_path('module', 'best_places') . '/js/add_more.js');
+  }
+}
+
+function best_places_node_view($node, $view_mode) {
+  if ($node->type == 'best_places') {
+    switch($view_mode) {
+      case 'full':
+        if (isset($node->field_year['und'][0]['value'])) {
+          $node->content['field_year'][0]['#markup'] = date('Y', strtotime($node->field_year['und'][0]['value']));
+        }
+        break;
+      case 'related':
+        if (isset($node->field_bp_category['und'][0]['tid'])) {
+          $tax = taxonomy_term_load($node->field_bp_category['und'][0]['tid']);
+          $node->content['title'][0]['#markup'] = '<h2>' . l($tax->name, 'node/'.$node->nid) . '</h2>';
+        }
+        break;
+    }
+  }
+}
+
+
+function best_places_item_first($nid) {
+  $node = node_load($nid);
+  $first = entity_load('field_collection_item',array($node->field_list_item['und'][0]['value']));
+  if (isset($first[$node->field_list_item['und'][0]['value']]->field_city['und'])) {
+    $nextcity = node_load($first[$node->field_list_item['und'][0]['value']]->field_city['und'][0]['target_id']);
+    $nextstate = node_load($nextcity->field_state['und'][0]['target_id']);
+    $nextstate_name = strtolower($nextstate->field_state_code['und'][0]['value']);
+    $nextcity_name = city_cleaner($nextcity->title);
+    $path = drupal_get_path_alias('node/'.$node->nid);
+    $text = "View the list ";
+    $link = '<a href="/' . $path . '/' . $nextstate_name . '/' . $nextcity_name .'" class="button-green next">'.$text.'<i class="icon-arrow-right-double white"></i></a>';
+  }
+  else {
+    $link = 'Whoops! First item has no city';
+  }
+  return $link;
+}
+
+function best_places_abbreviate_state($state) {
+  return strtolower(array_search($state,locality::$states));
+}
+
+function city_cleaner($string) {
+    /*TODO this was a bad idea(thanks nels) short circuit this with return pathauto_cleanstring($string);
+        after moving best places view into the module we can account for stripped characters
+        like coeur-d'alene for example will be coeur-dalene after switching to pathauto_cleanstring
+        not sure yet but when looking for a match in the list via the module layer we can "guess" better than the
+        current view which requires an *exact* name match(barring only converting dashes back to spaces)
+    */
+//  $string = trim(str_replace('.', '', $string));
+  $string = str_replace(' ', '-', $string);
+  $string = strtolower($string);
+  return $string;
+}
+
+function best_places_views_pre_render(&$view) {
+  //@todo....what is the next link supposed to be for #1 in the list?
+  if ($view->name == 'best_places' && $view->current_display == 'page') {
+    if (isset($view->result[0]->item_id)) {
+      $current = $view->result[0]->item_id;
+      $listitems = $view->result[0]->field_field_list_item;
+      $viewpath = $view->display['page']->display_options['path'];
+      $viewpath = str_replace('/%', '', $viewpath);
+      $baselink = '/'.$viewpath.'/'.$view->args[0].'/'.$view->args[1].'/'.$view->args[2].'/';
+      $thisfound = FALSE;
+      $total = count($listitems);
+      for ($i = 0; $i < $total; $i++) {
+        if (!$thisfound && $listitems[$i]['raw']['value'] != $current) {
+          if (isset($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city'][0])) {
+            $prevname = $listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city'][0]['#markup'];
+            // Get state name.
+            $nid = $listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#object']->field_city[LANGUAGE_NONE][0]['entity']->field_state[LANGUAGE_NONE][0]['target_id'];
+            $prevname_state = db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetchColumn();
+          }
+        }
+        elseif (isset($listitems[$i]) && $listitems[$i]['raw']['value'] == $current) {
+          $thisfound = TRUE;
+          $view->list_position = $total - $i;
+          if (isset($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#items'][0]['target_id'])) {
+            $currentcitynode = node_load($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#items'][0]['target_id']);
+            $currentcity = $currentcitynode->title;
+            $view->current_city = $currentcitynode->title;
+            $view->current_city_path = drupal_get_path_alias('node/'.$currentcitynode->nid);
+            if (isset($currentcitynode->field_state['und'][0])) {
+              $currentstatenode = node_load($currentcitynode->field_state['und'][0]['target_id']);
+              $currentstate = $currentstatenode->field_state_code['und'][0]['value'];
+              $view->current_state = $currentstatenode->field_state_code['und'][0]['value'];
+            }
+          }
+        }
+        else {
+          if (isset($listitems[$i]) && isset($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city'][0])) {
+            $nextname = $listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city'][0]['#markup'];
+            // Get state name.
+            $nid = $listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#object']->field_city[LANGUAGE_NONE][0]['entity']->field_state[LANGUAGE_NONE][0]['target_id'];
+            $nextname_state = db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetchColumn();
+          }
+          break;
+        }
+      }
+      $pageroutput = '<span class="list-nav">';
+      if (isset($prevname)) {
+        $pageroutput .= '<a href="' . $baselink . best_places_abbreviate_state(ucwords(strtolower($prevname_state))) . '/' . city_cleaner($prevname) .'" class="button-green prev" title="'.$prevname.'">Prev  <i class="icon-arrow-left-double white"></i></a>';
+      }
+      else {
+        $pageroutput .= '<a href="' . $baselink .'" class="button-green prev" title="About the list">Prev <i class="icon-arrow-left-double white"></i></a>';
+      }
+      if (isset($nextname)) {
+        $pageroutput .= '<a href="' . $baselink . best_places_abbreviate_state(ucwords(strtolower($nextname_state))) . '/' . city_cleaner($nextname) .'" class="button-green next" title="'.$nextname.'">Next  <i class="icon-arrow-right-double white"></i></a>';
+      }
+      $pageroutput .= '</span>';
+      $view->pager = $pageroutput;
+    }
+  }
+}
+
+function best_places_views_post_render(&$view) {
+  // Best Places Page and Top 10 Page.
+  if ($view->name == 'best_places' && ($view->current_display == 'page' || $view->current_display == 'page_2')) {
+    if (isset($view->result[0]->item_id)) {
+      $crumbs = array();
+      $crumbs[] = l(t('Livability.com'), '<front>');
+      $crumbs[] = l(t('Best Places to Live'), 'best-places');
+      $viewpath = 'top-10';
+      $baselink = $viewpath.'/'.$view->args[0].'/'.$view->args[1].'/';
+      $crumbs[] = l($view->result[0]->field_field_bp_category[0]['raw']['taxonomy_term']->name, $baselink);
+      $current = $view->result[0]->item_id;
+      $listitems = $view->result[0]->field_field_list_item;
+      $currentcity = 'Whoops, City not set';
+      $total = count($listitems);
+      for ($i = 0; $i < $total; $i++) {
+        if (isset($listitems[$i]) && $listitems[$i]['raw']['value'] == $current) {
+          if (isset($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#items'][0]['target_id'])) {
+            $currentcitynode = node_load($listitems[$i]['rendered']['entity']['field_collection_item'][$listitems[$i]['raw']['value']]['field_city']['#items'][0]['target_id']);
+            $currentcity = $currentcitynode->title;
+            if (isset($currentcitynode->field_state['und'][0])) {
+              $currentstatenode = node_load($currentcitynode->field_state['und'][0]['target_id']);
+              $currentcity .= ', '. $currentstatenode->field_state_code['und'][0]['value'];
+            }
+          }
+          break;
+        }
+      }
+      $crumbs[] = '<span>'.$currentcity.'</span>';
+      $view->build_info['breadcrumb'] = $crumbs;
+      drupal_set_breadcrumb($crumbs);
+    }
+  }
+}
+
+function best_places_alias($node) {
+  $node->path['alias'] = best_places_alias_maker($node);
+}
+
+function best_places_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'best_places') {
+    $node = $context['data']['node'];
+    $alias = best_places_alias_maker($node);
+  }
+}
+
+function best_places_url_outbound_alter(&$path, &$options, $original_path) {
+  $pieces = explode('/', $path);
+  if (isset($pieces[0]) && $pieces[0] == 'taxonomy' && isset($pieces[2])) {
+    $thisterm = taxonomy_term_load($pieces[2]);
+    if ($thisterm->vocabulary_machine_name == 'best_places') {
+      $path = 'top-10/'.strtolower(preg_replace('/ /', '-', $thisterm->name));
+      $options['alias'] = $path;
+    }
+  }
+}
+
+function best_places_url_inbound_alter(&$path,$oldpath,$lang){
+    $pieces = explode('/',$path);
+    if($pieces[0] == 'top-10' && isset($pieces[1]) && isset($pieces[2]) && !isset($pieces[3])) {
+        $path = $pieces[0] . '/' . $pieces[1];
+    }
+}
+
+function best_places_alias_maker($node) {
+  if ($node->type == 'best_places') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $alias = 'top-10/';
+    if (isset($node->field_bp_category['und']) && !is_null($node->field_bp_category['und'])) {
+      $ourcat = taxonomy_term_load($node->field_bp_category['und'][0]['tid']);
+      $alias .= strtolower(str_replace(' ', '-', $ourcat->name)) . '/';
+    }
+    $alias .= pathauto_cleanstring($node->title) .'/';
+    $alias .= date('Y', strtotime($node->field_year['und'][0]['value']));
+    return $alias;
+  }
+}
+
+function best_places_preprocess_views_view(&$vars) {
+  if($vars['view']->name == 'best_places') {
+    $view = $vars['view'];
+    $bpcrumbs = array();
+    if (isset($view->result[0]->field_field_bp_category)) {
+      $curcat = $view->result[0]->field_field_bp_category[0]['raw']['taxonomy_term']->name;
+      $bpcrumbs[] = $curcat;
+    }
+    if (isset($view->args[2])) {
+      $curcity = ucwords(str_replace('-', ' ', $view->args[2]));
+      $bpcrumbs[] = $curcity;
+    }
+    global $bpcrumbs;
+  }
+}
+
+// Add custom Show More Posts ajax
+
+/**
+ * Implements hook_menu().
+ */
+function best_places_menu() {
+  $items['best_places/views/ajax'] = array(
+    'title' => 'Best Places',
+    'page callback' => 'best_places_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback, load next row (slide) by ajax.
+ */
+function best_places_ajax() {
+  $view = views_get_view('best_places_landing_page');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['arg']) && $_REQUEST['arg'] != '') {
+    $view->args[] = $_REQUEST['arg'];
+  }
+  $view->execute('page_1');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $rows[] = '<li>' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+
+
+function best_places_taxonomy_term_presave($term) {
+  if ($term->vocabulary_machine_name == 'best_places' && function_exists('pathauto_cleanstring')) {
+    $destination = 'top-10/'.pathauto_cleanstring($term->name);
+    $source = $term->path['alias'] ? $term->path['alias'] : $term->path['source'];
+    $redirect = new stdClass();
+    module_invoke(
+      'redirect',
+      'object_prepare',
+      $redirect,
+      array(
+        'source' => $source, // 'source/url',
+        'source_options' => array(),
+        'redirect' => $destination, // 'node/' . $node->nid,
+        'redirect_options' => array(),
+        'language' => LANGUAGE_NONE,
+      )
+    );
+    module_invoke('redirect', 'save', $redirect);
+  }
+}

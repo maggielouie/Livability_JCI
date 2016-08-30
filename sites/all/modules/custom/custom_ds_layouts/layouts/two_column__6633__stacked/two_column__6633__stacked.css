@@ -1,0 +1,25 @@
+/**
+ * @file
+ * Display Suite Two Column - 66/33 stylesheet.
+ */
+
+.ds-form {
+  width: 100%;
+
+}
+
+.ds-left {
+  /* Styles for the "left" region go here */
+  float:left;
+  width: 65%;
+}
+
+.ds-right {
+  /* Styles for the "right" region go here */
+  float: right;
+  width: 33%;
+}
+
+.ds-full-width {
+  clear: both;
+}

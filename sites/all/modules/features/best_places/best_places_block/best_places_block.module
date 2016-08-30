@@ -1,0 +1,41 @@
+<?php
+/**
+* Best Places Block
+*
+*/
+
+function best_places_block_block_info() {
+  // This example comes from node.module.
+  $blocks['best_places_block'] = array(
+    'info' => t('Best Places Sidebar block'),
+  );
+  return $blocks;
+}
+
+function best_places_block_block_view($delta = '') {
+  switch ($delta) {
+    case 'best_places_block':
+      $block['title'] = t('Best Places to Live');
+      $top100q = db_query('SELECT n.nid FROM {node} n WHERE n.type = \'top_100\' AND n.status = 1 ORDER BY n.created DESC LIMIT 1')->fetchAll();
+      $bpEFQ = new EntityFieldQuery();
+      $bpEFQ->entityCondition('entity_type','node')
+          ->entityCondition('bundle','best_places')
+          ->propertyCondition('status',NODE_PUBLISHED)
+          ->propertyOrderBy('created', 'DESC')
+          ->fieldCondition('field_image','fid','null','!=')
+          ->pager(4)
+          ->execute();
+      $content = '<li>'.l('<span class="seal-orange"><i class="icon-top10 white"></i></span>Top 100 Best Places', 'node/'.$top100q[0]->nid, array('html' => TRUE)).'</li>';
+      foreach($bpEFQ->ordered_results as $bestplace) {
+          $lenode = node_load($bestplace->entity_id);
+        $content .= '<li>'.l('<span class="center-bg circle" style="background-image: url(\''. file_create_url($lenode->field_image[LANGUAGE_NONE][0]['uri']) .'\')"></span>'.$lenode->title, 'node/'.$lenode->nid, array('html' => TRUE)) .'</li>';
+      }
+      $block['content'] = array(
+        '#markup' => '<div id="best-places-block" class="block block-best-places-block widget stay-full"><h3>Best Places to Live</h3><ul>'.$content.'</ul></div>',
+      );
+      break;
+  }
+  return $block;
+}
+
+

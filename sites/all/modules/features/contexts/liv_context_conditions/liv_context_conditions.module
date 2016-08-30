@@ -1,0 +1,137 @@
+<?php 
+/**
+ * Implements hook_context_plugins().
+ */
+function liv_context_conditions_context_plugins() {
+  $plugins = array(
+    'primary_city_set' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'liv_context_conditions') . '/context',
+        'file' => 'context_condition_primary_city.inc',
+        'class' => 'context_condition_primary_city',
+        'parent' => 'context_condition',
+      ),
+    ),
+    'promoted_city' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'liv_context_conditions') . '/context',
+        'file' => 'context_condition_promoted_city.inc',
+        'class' => 'context_condition_promoted_city',
+        'parent' => 'context_condition',
+      ),
+    ),
+    'city_section' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'liv_context_conditions') . '/context',
+        'file' => 'context_condition_city_section.inc',
+        'class' => 'context_condition_city_section',
+        'parent' => 'context_condition',
+      ),
+    ),
+    'clear_region' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'liv_context_conditions') . '/context',
+        'file' => 'clear_region.inc',
+        'class' => 'context_reaction_clear_region',
+        'parent' => 'context_reaction',
+      ),
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Implements hook_context_registry().
+ */
+function liv_context_conditions_context_registry() {
+  $registry = array(
+    'conditions' => array(
+      'primary_city_set' => array(
+        'title' => t('Primary City Assigned'),
+        'description' => t('Set this context based on whether or not the node has a Primary City assigned'),
+        'plugin' => 'primary_city_set',
+      ),
+      'promoted_city' => array(
+        'title' => t('City is Promoted'),
+        'description' => t('Set this context based on whether or not the node is Promoted'),
+        'plugin' => 'promoted_city',
+      ),
+      'city_section' => array(
+        'title' => t('City Section Page'),
+        'description' => t('Set this context when viewing a City Section'),
+        'plugin' => 'city_section',
+      ),
+    ),
+    'reactions' => array(
+      'clear_region' => array(
+        'title' => t('Clear Regions'),
+        'description' => t('Set this context to clear a region and set it\'s contents here.'),
+        'plugin' => 'clear_region',
+      ),
+    ),
+  );
+  return $registry;
+}
+
+/**
+ * Implements hook_context_page_reaction().
+ */
+function liv_context_conditions_context_page_condition() {
+    $node = menu_get_object();
+    $plugin = context_get_plugin('condition', 'primary_city_set');
+    if ($plugin) {
+      $plugin->execute($node);
+    }
+    $plugin = context_get_plugin('condition', 'promoted_city');
+    if ($plugin) {
+      $plugin->execute($node);
+    }
+    $plugin = context_get_plugin('condition', 'city_section');
+    if ($plugin) {
+      $plugin->execute($node);
+    }
+}
+
+function liv_context_conditions_page_build(&$page) {
+
+}
+/*
+* This function puts the Clear Region reaction at the
+* top of the array and re-sets the context cache.
+* The intent was to force operational order, but it 
+* does not do that.  Will be removed in future comit.
+*/
+/*
+function liv_context_conditions_flush_caches(){
+  $reactions = context_reactions();
+  $rc = 0;
+  $clearregion = null;
+  foreach ($reactions as $name => $settings) {
+    if ($name == 'clear_region' && $rc == 0) {
+      break;
+    }
+    else {
+      if (isset($reactions['clear_region'])) {
+        $clearregion = $reactions['clear_region'];
+        unset($reactions['clear_region']);
+        $neworder = array();
+        $neworder['clear_region'] = $clearregion;
+        $neworder = array_merge($neworder, $reactions);
+        $conditions = context_conditions();
+        $registry = array('conditions' => $conditions, 'reactions' => $neworder);
+        drupal_alter('context_registry', $registry);
+        context_cache_set('registry', $registry);
+        break;
+      }
+    }
+    $rc ++;
+  }
+}
+*/
+
+function liv_context_conditions_page_alter(&$page) {
+  $plugin = context_get_plugin('reaction', 'clear_region');
+  if ($plugin) { 
+    $plugin->execute($page);
+  }
+}

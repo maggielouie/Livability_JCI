@@ -1,0 +1,96 @@
+<?php
+/**
+ * @file
+ * Code for the Gallery feature.
+ */
+
+include_once 'gallery.features.inc';
+
+function gallery_form_gallery_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'][] = 'gallery_form_validate';
+}
+
+function gallery_form_validate($node, $form) {
+  if ($node['field_gallery_city']['und']['#value'] == $node['field_gallery_city']['und']['#default_value'] ) {
+    $errors = &drupal_static('form_set_error', array());
+    $removed_messages = array();
+    if (isset($errors['field_gallery_city][und'])) {
+      $removed_messages[] = $errors['field_gallery_city][und'];
+      unset($errors['field_gallery_city][und']);
+    }
+    $_SESSION['messages']['error'] = array_diff($_SESSION['messages']['error'], $removed_messages);
+    if (empty($_SESSION['messages']['error'])) {
+      unset($_SESSION['messages']['error']);
+    }
+    if (empty($errors)) {
+      form_clear_error();
+    }
+  }
+}
+
+function gallery_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'gallery') {
+    $node = $context['data']['node'];
+    $alias = gallery_alias_maker($node);
+  }
+}
+
+function gallery_alias_maker($node) {
+  if ($node->type == 'gallery') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $alias = '';
+    if (isset($node->field_gallery_city['und']) && !is_null($node->field_gallery_city['und'])) {
+      $place = node_load($node->field_gallery_city['und'][0]['target_id']);
+      $state = node_load($place->field_state['und'][0]['target_id']);
+      $alias .= pathauto_cleanstring($state->field_state_code['und'][0]['value']) .'/';
+      $alias .= pathauto_cleanstring($place->title) .'/';
+    }
+    $alias .= 'photos'; //pathauto_cleanstring($node->title);
+    return $alias;
+  }
+}
+
+function gallery_preprocess_page(&$vars, $hook) {
+  // breadcrumb
+  if (isset($vars['node']) && (is_object($vars['node']))) {
+    if ($vars['node']->type == 'gallery') {
+      $crumbs = array();
+      $crumbs[] = l(t('Livability.com'), '<front>');
+      $node = $vars['node'];
+      if (isset($node->field_gallery_city['und']) && !is_null($node->field_gallery_city['und'])) {
+        $place = node_load($node->field_gallery_city['und'][0]['target_id']);
+        $state = node_load($place->field_state['und'][0]['target_id']);
+        $vars['cityname'] = $place->title;
+        $vars['cityurl'] = url('node/' . $node->field_gallery_city['und'][0]['target_id']);
+        $vars['state'] = $state->field_state_code['und'][0]['value'];
+        $crumbs[] = l($state->field_state_code['und'][0]['value'], 'node/'.$state->nid);
+        $crumbs[] = l($place->title, 'node/'.$place->nid);
+        $countyquery = 'SELECT title FROM {node} n WHERE n.nid = :d';
+        if (isset($place->field_county['und'])) {
+          $countyname = db_query($countyquery,  array(':d' => $place->field_county['und'][0]['target_id']))->fetchAll();
+        }
+        $metroareaquery = 'SELECT title FROM {node} n WHERE n.nid = :primecity';
+        if (isset($place->field_city['und'])) {
+          $metroname = db_query($metroareaquery, array(':primecity' => $place->field_city['und'][0]['target_id']))->fetchALL();
+        }
+        if (isset($metroname[0])) {
+          $vars['metroname'] = $metroname[0]->title;
+        }
+        else { $vars['metroname'] = FALSE; }
+        if (isset($countyname[0])) {
+          $vars['countyname'] = $countyname[0]->title .' County';
+        }
+        else { $vars['countyname'] = FALSE; }
+      }
+      drupal_set_title('Photos of ' . $place->title . ', ' . $state->field_state_code['und'][0]['value']);
+      drupal_set_breadcrumb($crumbs);
+    }
+  }
+}
+
+function gallery_preprocess_html(&$vars, $hook) {
+  // ideally, this would only load when needed. 
+  if (arg(2) !== 'edit' && arg(1) !== 'admin') {
+    drupal_add_js(drupal_get_path('module', 'gallery') . '/js/gallery.js');
+  }
+}

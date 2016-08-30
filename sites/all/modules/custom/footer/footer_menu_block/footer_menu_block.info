@@ -1,0 +1,6 @@
+name = Footer Menu Block
+description = A configurable block for menus in the footer
+package = Livability
+core = 7.x
+dependencies[] = block
+

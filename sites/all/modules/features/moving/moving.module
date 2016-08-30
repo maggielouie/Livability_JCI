@@ -1,0 +1,82 @@
+<?php
+/**
+ * @file
+ * Code for the Moving feature.
+ */
+
+include_once 'moving.features.inc';
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function moving_preprocess_page(&$vars, $hook) {
+  if (arg(0) == 'moving') {
+    drupal_add_js(drupal_get_path('module', 'moving') . '/js/add_more.js');
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function moving_menu() {
+  $items['moving/views/ajax'] = array(
+    'title' => 'Moving',
+    'page callback' => 'moving_ajax',
+    'delivery callback' => 'drupal_json_output',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback, load next row (slide) by ajax.
+ */
+function moving_ajax() {
+  $view = views_get_view('moving');
+  $offset = 0;
+  if (isset($_REQUEST['offset'])) {
+    $offset = $_REQUEST['offset'];
+  }
+  $view->offset = $offset;
+  if (isset($_REQUEST['cat']) && $_REQUEST['cat'] != '') {
+    $view->args[] = $_REQUEST['cat'];
+  }
+  $view->execute('page');
+  $view->preview();
+
+  // Render only view row results.
+  $renderer = $view->style_plugin->row_plugin;
+  foreach ($view->result as $index => $row) {
+    $view->row_index = $index;
+    $renderer = $view->style_plugin->row_plugin;
+    $rows[] = '<li class="one-third">' . $renderer->render($row) . '</li>';
+  }
+
+  drupal_json_output($rows);
+}
+
+/**
+ * Get Moving Icon Class
+ *
+ * @param string $machineName
+ *  Taxonomy term machine name.
+ *
+ * @return string
+ *  Icon class.
+ */
+function moving_get_icon($machineName) {
+  $icon = $machineName;
+  if ($machineName == 'moving-tips') {
+    $icon = 'truck';
+  }
+  elseif ($machineName == 'how-to-guides') {
+    $icon = 'how-to-guides';
+  }
+  elseif ($machineName == 'moving-checklists') {
+    $icon = 'checklist';
+  }
+
+  return $icon;
+}

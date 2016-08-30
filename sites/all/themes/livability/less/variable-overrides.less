@@ -1,0 +1,64 @@
+/**
+ * Variable Overrides.
+ *
+ * Modify this file to override the Bootstrap Framework variables. You can copy
+ * these variables directly from ../bootstrap/less/variables.less to this file.
+ */
+
+// Set the proper directory for the Bootstrap Glyphicon font.
+@icon-font-path: '../fonts/';
+
+//
+// Custom Variables
+// --------------------------------------------------
+
+.container-fluid {
+  max-width: 1400px;
+}
+
+@emInPx: 16;    // 16px per em (global default)
+
+.convertEm(@selector, @amt) when (isem(@amt))
+{
+    @{selector}: @amt;
+}
+.convertEm(@selector, @amt, @emInPx: @emInPx) when (ispixel(@amt))
+{
+    @{selector}: unit((@amt / @emInPx), em);
+}
+
+@grid-float-breakpoint-max: @screen-md-min !important;
+
+// Primary Colors
+@liv_white: #ffffff;
+@liv_green: #7cc244;
+@liv_gray: #636466;
+
+// Secondary Colors
+@liv_pink: #f16469;
+@liv_red: #d6281a;
+@liv_orange: #faa819;
+@liv_green_dark: #00ae4d;
+@liv_blue_light: #a4ddef;
+@liv_blue_dark: #00afe2;
+@liv_gray_light: #bcbec0;
+
+//Menu
+@liv_menu_1: #505151;
+@liv_menu_2: #383838;
+@liv_menu_3: #323232;
+@liv_menu_border: darken(@liv_white, 20%);
+
+.white {
+  color: @liv_white;
+}
+.green-text {
+  color: @liv_green;
+}
+
+a {
+  color: @liv_blue_dark;
+  &:hover {
+    text-decoration: none !important;
+  }
+}

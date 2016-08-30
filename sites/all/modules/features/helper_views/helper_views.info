@@ -1,0 +1,12 @@
+name = Helper Views
+description = Views that are required by content types (selection field references, etc).
+core = 7.x
+package = Livability
+version = 7.x-1.00
+project = helper_views
+dependencies[] = entityreference
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = place_reference
+features_exclude[dependencies][ctools] = ctools

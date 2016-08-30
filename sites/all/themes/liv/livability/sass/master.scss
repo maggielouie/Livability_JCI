@@ -1,0 +1,5418 @@
+@import "variables";
+@import "compass";
+
+// Standards
+body {
+	font-family: "HelveticaNeue", "Helvetica", "Arial";
+	@include font-size (14, 20);
+	color:$black;
+	background: $greyLightest;
+}
+
+body.icons {
+	[class^="icon-"], [class*=" icon-"] {
+		width:60px;
+		font-size: 32px;
+		text-align:center;
+		float:left;
+		padding-bottom:10px;
+	}
+	.glyph {
+		display:block;
+		clear:both;
+	}
+}
+
+img {
+	width:100%;
+	display:block;
+  height:auto;
+}
+.article-content .file-image{
+  float: left;
+}
+.content-wrap {
+	.media-element-container  {
+		overflow: hidden;
+	}
+}
+h1 {
+	color:$green;
+	@include font-size (24,38);
+	font-weight:bold;
+}
+
+p {
+	@include font-size (14, 24);
+	padding-bottom:10px;
+}
+
+a {
+	color:$blue;
+	text-decoration:none;
+}
+
+a:hover {
+	text-decoration:underline;
+}
+
+sup {
+	vertical-align: super;
+	font-size:0.75em;
+	line-height: 1em;
+}
+
+hr {
+	border-top:#e1e1e1 1px solid;
+	margin: 0 0 25px
+}
+
+
+input[type="text"], input[type="email"], select[name="submitted[state]"] {
+	padding:15px;
+	margin:0;
+	@include font-size(14, 16);
+	color:#a3a3a3;
+	@include box-shadow(rgba(0,0,0, 0.3) 1px 1px 1px -1px inset);
+	@include border-radius (2px);
+	border: 1px solid rgba(73,73,73,0.5);
+	height: 4em;
+}
+
+input[type="text"].grey-input {
+	background: #e7e7e7;
+	border:none;
+	@include box-shadow(none);
+}
+
+input[type="submit"] {
+	-webkit-appearance: none;
+	border: 0;
+}
+
+select {
+	margin-left:3px;
+	border-radius: 5px;
+	padding:5px;
+	margin-top:-2px;
+}
+input[type="checkbox"] {
+	margin-left:10px;
+	margin-right:3px;
+}
+
+/* Layout */
+.content {
+	max-width:1400px;
+	min-width:320px;
+	margin:0 auto;
+	background: $white;
+	position:relative;
+}
+
+.mobile-only{
+		display:none !important;
+}
+
+.desktop-only {
+		display:block;
+}
+
+.three-q {
+	width: 77.1%;
+	float:left;
+}
+
+.one-q {
+	width: 25%;
+	float:left;
+}
+
+.l-275 {
+    float: left;
+	width: 275px;
+}
+
+.r-275-full {
+	width: 100%;
+	padding-left: 275px;
+	display:block;
+}
+.node-type-article {
+	.article-content {
+		table {
+			width: 100%;
+			td {
+				vertical-align: top;
+				padding: 10px;
+			}
+			&.cols_2 td {
+				width: 50%;
+			}
+			&.cols_3 td {
+				width: 33%;
+			}
+			&.cols_4 td {
+				width: 25%;
+			}
+		}
+		
+		&.content-wrap {
+			padding-left: 0 !important;
+		}
+	}
+}
+a.placeholder-embedded {
+	width: 100%;
+  height: 179px;
+  overflow: hidden;
+  display: block;
+}
+
+.l-300-full {
+	width: 100%;
+	padding-right:300px;
+	.column-content {
+		border-right: 1px solid #c9c9c9;
+		border-left: 1px solid #c9c9c9;
+	}
+}
+body.node-type-state .l-300-full {
+  .column-content {
+    padding-bottom: 0;
+  }
+}
+
+.home {
+	.hero-slider {
+		margin-top:20px;
+	}
+}
+
+.home .l-300-full {
+	.column-content {
+		border-left: none;
+	}
+}
+
+.r-300 {
+	position:absolute;
+	right:0;
+	top:0;
+	width:300px;
+}
+
+.left-nav {
+	position:absolute;
+	top:0;
+	width: 175px;
+	z-index:15;
+	ul {
+		width:100%;
+        z-index: 1;
+		li {
+			border-bottom:1px solid #e7e7e7;
+				&:hover, &.active {
+					a {
+						color:$white;
+						text-decoration:none;
+					}
+					i {
+						color:$white;
+					}
+				}
+				&:hover {
+					background: $green;
+					border-top:1px solid #c9c9c9;
+					margin-top:-1px;
+				}
+				&.active {
+					background: $green;
+
+
+
+				}
+			a {
+
+				@include font-size (13, 42);
+				color:#ababab;
+				padding: 0 12px 0 45px;
+				position:relative;
+				display:block;
+				i {
+					@include font-size (20, 42);
+					color:#989898;
+					width:25px;
+					text-align:center;
+					position:absolute;
+					left:10px;
+					top:0;
+				}
+
+			}
+		}
+		ul.level-1 {
+			background:$white !important;
+			overflow:hidden;
+			max-height:0;
+			@include transition-property(max-height);
+			@include transition-duration(0.5s);
+			@include transition-delay(0.0s);
+			a {
+				padding: 0 12px;
+			}
+			li {
+				border-bottom:none;
+				margin-top:0;
+				&:hover {
+					background:transparent;
+					border-top:1px transparent;
+				}
+				&.active {
+					background:none;
+					a {
+						color:$green;
+						&:after {
+							content: "\f105";
+							font-family: livability;
+							position:absolute;
+							left:20px;
+							top:0px;
+						}
+					}
+				}
+				&:first-child {
+					padding-top:5px;
+				}
+				&:last-child {
+					border-bottom:none;
+					padding-bottom:5px;
+				}
+				a {
+					@include font-size(13,24);
+					color:#ababab;
+					padding-left:30px;
+
+					&:hover {
+						color:$green;
+					}
+				}
+
+			}
+		}
+		li:hover ul.level-1, li.active .level-1 {
+			display:block;
+			max-height:200px;
+			@include transition-delay(0.2s);
+		}
+	}
+}
+
+.left-nav-full {
+	width:100%;
+	padding-left:175px;
+	position:relative;
+
+}
+
+.column-content {
+	padding:0 0 20px;
+	-webkit-backface-visibility: hidden;	// Fix laggy touch actions
+}
+
+.one-third {
+	width: 32%;
+	margin-right:2%;
+	margin-bottom:18px;
+	float:left;
+	&:nth-child(3n+0) {
+		margin-right:0;
+	}
+}
+
+.two-third {
+	width: 66%;
+	margin-right:2%;
+	margin-bottom:18px;
+	float:left;
+}
+
+.one-fourth {
+	width:23.5%;
+	margin-right:2%;
+	margin-bottom:18px;
+	float:left;
+	&:nth-child(4n+0) {
+		margin-right:0;
+	}
+}
+
+.half {
+	width:49%;
+	margin-right:2%;
+	float:left;
+	&:nth-child(even) {
+		margin-right:0;
+	}
+}
+
+.last {
+	margin-right:0 !important;
+	border-right:none;
+}
+
+.center-txt {
+	text-align:center;
+}
+
+.center-bg {
+	background-position: center center !important;
+	@include background-size (cover !important) ;
+	background:no-repeat;
+	display:block;
+	text-indent: -2000px;
+}
+
+.padded {
+	width:100%;
+	padding-left: 30px;
+	padding-right: 30px;
+	display:block;
+}
+body.page-blog .view-blog.padded {
+	padding-left: 0 !important;
+	padding-right: 20px !important;
+}
+
+/* Ad Containers */
+
+.ad88 {
+	margin: 0 auto;
+	height:100%;
+	width:100%;
+	max-width: 88px;
+	min-width: 88px;
+	display:block;
+	overflow:hidden;
+	img {
+		width:88px;
+		margin:0 auto;
+	}
+}
+
+.ad120 {
+	margin: 0 auto;
+	height:100%;
+	width:100%;
+	max-width: 120px;
+	min-width: 120px;
+	display:block;
+	overflow:hidden;
+	img {
+		width:120px;
+		margin:0 auto;
+	}
+}
+
+.ad180 {
+	margin: 0 auto;
+	height:100%;
+	width:100%;
+	max-width: 180px;
+	min-width: 180px;
+	display:block;
+	overflow:hidden;
+	img {
+		width:180px;
+		margin:0 auto;
+	}
+}
+
+
+.ad300 {
+	margin: 0 auto 0;
+	padding:20px 0 0 0;
+	height:100%;
+	width:100%;
+	max-width: 300px;
+	min-width: 300px;
+	display:block;
+	overflow:hidden;
+	img {
+		width:300px;
+		margin:0 auto;
+	}
+}
+.ad728 {
+	margin: 0 auto 0;
+	padding:20px 0 0 0;
+	height:100%;
+	width:100%;
+	max-width: 728px;
+	min-width:728px;
+	display:block;
+	overflow:hidden;
+	img {
+		width:728px;
+		margin:0 auto;
+	}
+}
+
+
+
+/* Reusable elements */
+fieldset, .unit, input.liga {
+	display:none;
+}
+
+.js-expand {
+	position:relative;
+	i {
+		cursor:pointer;
+		top:2px;
+		padding:0 10px 0;
+	}
+	i.expand {
+		display:initial;
+	}
+	i.expanded {
+		display:none;
+	}
+}
+
+.js-expanded {
+	i {
+		cursor:pointer;
+		top:2px;
+		padding:0 10px 0;
+	}
+	i.expand {
+		display:none;
+	}
+	i.expanded {
+		display:initial;
+	}
+}
+
+.heading, .view-related-articles h3 {
+	color:#575757;
+	@include font-size (24, 24);
+	padding-bottom:25px;
+	padding-top:10px;
+	display:block;
+	text-transform:uppercase;
+}
+
+.widget h3, .widget .view-related-articles h3 {
+	background: $blue;
+	color:$white;
+	text-align:center;
+	text-transform:uppercase;
+	@include font-size (20,22);  //54
+	padding: 16px 15px;
+	font-weight:normal;
+}
+
+ul.bullet {
+	li {
+		padding-left: 12px;
+		background: url('/sites/all/themes/liv/livability/images/bullet-grey-square.png') no-repeat;
+		background-position:0 5px;
+	}
+}
+
+.white {
+	color:$white;
+}
+
+.grey {
+	color:#bcbcbc;
+}
+
+.black {
+	color:$black;
+}
+
+.green {
+	color:$green !important;
+}
+
+.red {
+	color: $red !important;
+}
+
+.blue {
+	color:$blue !important;
+}
+
+.orange {
+	color:$orange !important;
+}
+
+.red-fill {
+	background:$red;
+	padding:10px 15px;
+}
+
+.grey-bg {
+	background: url("/sites/all/themes/liv/livability/images/articles-bg.png");
+}
+
+.white-bg {
+	background: $white;
+}
+
+.bg-diag {
+	background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+	display:block;
+}
+
+.shadow-inset-lr {
+	@include box-shadow(rgba(0,0,0,0.2) -15px 0px 15px -15px inset, rgba(0,0,0, 0.2) 15px 0px 15px -15px inset);
+}
+
+.shadow-inset-t {
+	@include box-shadow(rgba(0, 0, 0, 0.6) 0px 12px 6px -12px inset);
+}
+
+.shadow-inset-tb {
+	@include box-shadow(rgba(0, 0, 0, 0.5) 0px 12px 6px -12px inset, rgba(0, 0, 0, 0.6) 0px -12px 6px -12px inset);
+}
+
+.shadow-inset-b {
+	@include box-shadow(rgba(0, 0, 0, 0.5) 0px -12px 6px -12px inset);
+}
+
+.shadow-right {
+	border-right: 1px solid #c9c9c9;
+	@include box-shadow(rgba(0,0,0, 0.2) 15px 0px 15px -15px);
+}
+
+.shadow-lr {
+	@include box-shadow(rgba(0,0,0, 0.2)0px 7px 15px 0px);
+	border-right: 1px solid #c9c9c9;
+	border-left: 1px solid #c9c9c9;
+}
+
+.shadow-lrb {
+	@include box-shadow(rgba(0,0,0, 0.2)0px 0px 15px 0px);
+	border-right: 1px solid #c9c9c9;
+	border-left: 1px solid #c9c9c9;
+	border-bottom: 1px solid #c9c9c9;
+	z-index:11;
+	position:relative;
+}
+
+.shadow-top {
+	border-top: 1px solid #c9c9c9;
+	@include box-shadow(rgba(0,0,0, 0.2) 0px 0px 8px 0px);
+}
+
+.shadow-bottom {
+	@include box-shadow(rgba(0,0,0, 0.3) 0px 4px 3px -2px);
+}
+
+.button-orange {
+	background: $orange;
+	padding:17px;
+	color: $white;
+	text-decoration:none;
+	display:inline-block;
+	text-transform: uppercase;
+	@include font-size(16,14);
+	position:relative;
+	padding-right:56px;
+	.raquo-white {
+		margin-left: 26px;
+		top:16px;
+		position:absolute;
+	}
+}
+
+.button-pink {
+	background: $pink;
+	color:$white;
+	text-transform:uppercase;
+	text-decoration:none;
+	text-align:center;
+	@include font-size (16,13);
+	padding: 15px;
+	@include border-radius (3px);
+	font-weight:bold;
+	position:relative;
+
+	&:hover {
+		text-decoration:none;
+	}
+}
+
+.button-grey {
+	background: $greyLightest;
+	border: 1px solid $greyLight;
+	padding: 10px 18px;
+	color:$greyDark;
+	@include font-size(10);
+	display:inline-block;
+}
+
+.button-green {
+	background: $green;
+	padding:15px;
+	color: $white;
+	text-decoration:none;
+	display:inline-block;
+	text-transform: uppercase;
+	@include font-size(16,16);
+	@include border-radius (1px);
+	margin-left:15px;
+	position:relative;
+	cursor:pointer;
+	&.next {
+		padding-right:50px;
+		i {
+			@include font-size(32);
+			position:absolute;
+			right:15px;
+			top:6px;
+		}
+	}
+	&.prev  {
+		padding-left:50px;
+		i {
+			@include font-size(32);
+			position:absolute;
+			left:15px;
+			top:6px;
+		}
+	}
+	.raquo-white {
+		margin-left: 26px;
+		top:16px;
+		position:absolute;
+	}
+
+	&:hover {
+		background: $greenLight;
+	}
+}
+
+.button-blue {
+	display:inline-block;
+	padding: 12px 35px 10px;
+	font-weight:bold;
+	color:$white;
+	@include border-radius (3px);
+	@include font-size (16);
+	background: $blueDark;
+}
+
+.fluid-width-video-wrapper {
+	width: 100%;
+	position: relative;
+	padding: 0;
+	overflow:hidden;
+	padding-top: 56.224489795918366%;
+}
+
+.fluid-width-video-wrapper iframe, .fluid-width-video-wrapper object, .fluid-width-video-wrapper embed {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.icon-pin.fill-white{
+	@include font-size (47);
+	color:$green;
+	z-index:2;
+	&:after {
+		width:24px;
+		height:24px;
+		position:absolute;
+		background:$white;
+		display:block;
+		content: " ";
+		border-radius: 50%;
+		top:4px;
+		left:5px;
+		z-index:-1;
+	}
+}
+
+.summary-generic {
+	padding: 75px 100px;
+	p {
+		text-align:center;
+		@include font-size (20, 32);
+	}
+}
+
+.city-banner {
+	margin-top:-20px;
+	position:relative;
+}
+
+.section {
+	padding:60px 30px;
+	h2 {
+		@include font-size (38, 45);
+		text-align:center;
+		font-weight:bold;
+		margin-bottom:20px;
+	}
+}
+
+.widget {
+	margin:20px 0 0;
+	display:block;
+}
+
+.circle {
+	@include border-radius (50%);
+	@include box-shadow (rgba(0, 0, 0, .2) 0px 0px 7px 0px );
+	display:block;
+}
+
+.circle-42 {
+	float:left;
+	width:42px;
+	height:42px;
+	background-size: 42px 42px;
+	margin-right:10px;
+}
+
+.circle-65 {
+	float:left;
+	width:65px;
+	height:65px;
+	background-size: 65px 65px;
+	margin-right:10px;
+}
+
+.circle-stroke {
+	height:54px;
+	width:54px;
+	float:left;
+	margin-right:10px;
+	@include border-radius (50%);
+	border: 3px solid;
+	position:relative;
+	i {
+		@include font-size (24, 54);
+		text-align:center;
+		position:absolute;
+		top:-3px;
+		left:-3px;
+		width:54px;
+		height:54px;
+		display:block;
+		font-weight:bold;
+	}
+}
+.blue-stroke {
+	border-color: $blue;
+	i {
+		color:$blue;
+	}
+}
+.red-stroke {
+	border-color: $red;
+	i {
+		color: $red;
+	}
+}
+.thumb-95 {
+	float:left;
+	width:95px;
+	height: 70px;
+	background-size: 95px 95px;
+	margin-right:10px;
+}
+
+.info {
+	background:$greyDark;
+	display:inline-block;
+	width: 12px;
+	height:12px;
+	color:$white;
+	text-align:center;
+	@include font-size (9,12);
+	border-radius: 100%;
+	margin-left:5px;
+	margin-right:5px;
+	top:-2px;
+	position:relative;
+	&:hover {
+		text-decoration:none;
+		background: $greyDarkest;
+
+	}
+}
+
+.interact {
+	padding-top:17px;
+	display:block;
+	@include font-size (13, 14);
+	a {
+		position:relative;
+		padding-left: 20px;
+		margin-right:20px;
+		color: $greyDark !important;
+		i {
+			position: absolute;
+			left:0;
+		}
+		&:hover {
+			i {
+				color: $greyDarkest;
+			}
+		}
+	}
+	a.last {
+		margin-right:0 !important;
+	}
+}
+
+.circle-icon {
+	position:absolute;
+	margin:0 50%;
+	left: -29px;
+	bottom: -34px;
+	span {
+		position:relative;
+		i {
+			height:58px;
+			width:58px;
+			position:absolute;
+			text-align:center;
+			width:100%;
+			@include font-size (28, 56);
+		}
+	}
+}
+
+.sticker-orange-horizontal, .sticker-green-horizontal, .sticker-blue-horizontal {
+	width:58px;
+	height:58px;
+	background-image: url('/sites/all/themes/liv/livability/images/sticker-orange-horizontal.png');
+	background-size: 58px 58px;
+	background-repeat:none;
+	display:inline-block;
+	@include border-radius (50%);
+	@include box-shadow(rgba(0,0,0,0.2) 1px 1px 2px 0px);
+	&.oneq {
+		background-position: 0 -10px;
+	}
+}
+
+.sticker-green-horizontal {
+	background-image: url('/sites/all/themes/liv/livability/images/sticker-green-horizontal.png');
+}
+
+.sticker-blue-horizontal {
+	background-image: url('/sites/all/themes/liv/livability/images/sticker-blue-horizontal.png');
+}
+
+.sticker-orange-vertical {
+	width:58px;
+	height:58px;
+	background-image: url('/sites/all/themes/liv/livability/images/sticker-orange-vertical.png');
+	background-size: 58px 58px;
+	background-repeat:none;
+	display:inline-block;
+	@include border-radius (50%);
+	@include box-shadow(rgba(0,0,0,0.2) 1px 1px 2px 0px);
+}
+
+.seal-orange {
+	position:relative;
+	i {
+		@include font-size (18, 62);
+		text-align:center;
+		width:62px;
+		display:block;
+	}
+}
+
+.left {
+	float:left;
+}
+
+.right {
+	float:right;
+}
+
+.social-full {
+	float:right;
+	//padding-top:15px;
+	ul {
+		float:right;
+		li {
+			float:left;
+			margin-right:5px;
+			a {
+				&:hover {
+					text-decoration:none;
+				}
+				display:block;
+				width: 50px;
+				height: 62px;
+				color:$white;
+				text-align:center;
+				@include font-size (18,20);
+
+			}
+		}
+	}
+	li.facebook {
+		background:#507cbe;
+	}
+	li.twitter {
+		background:#63cdf1;
+	}
+	li.gplus {
+		background:#4d4f54;
+	}
+	li.pinterest {
+		background:#f16261;
+	}
+	li.addthis {
+		background:#f46c45;
+	}
+	i {
+		font-style: normal;
+	}
+	.metric {
+		color:$white;
+		display:block;
+		text-align:center;
+		height:31px;
+		@include font-size (9, 32);
+		background:rgba(255,255,255,0.5);
+	}
+	.logo {
+		i {
+			display:block;
+			margin:7px auto;
+		}
+	}
+}
+
+.quote {
+	i.open {
+      background-image: url('/sites/all/themes/liv/livability/images/liv_small_left_quotes.png');
+      background-repeat: no-repeat;
+      height:75px;
+	}
+    i.close {
+      background-image: url('/sites/all/themes/liv/livability/images/liv_right_close_quotes.png');
+      background-repeat: no-repeat;
+      background-position: right;
+      height:75px;
+    }
+    padding: 20px 10px 15px;
+	font-family: Georgia;
+	font-style: italic;
+	@include font-size(18, 28);
+	p {
+		@include font-size(18, 28);
+	}
+	.author {
+		@include font-size(12, 18);
+		font-style:normal;
+		display: inline-block;
+	}
+	i {
+		margin-left: -5px;
+    	@include font-size (60,64);
+    	padding-bottom:20px;
+    	display:block;
+	}
+}
+
+.hero-image {
+	width:100%;
+	height:505px;
+	max-height:505px;
+}
+
+.comments {
+	.summary {
+		border-top: 1px solid $greyLightest;
+		border-bottom: 1px solid $greyLightest;
+		margin:20px 0;
+		display:block;
+
+		.title {
+			color: $green;
+			@include font-size (24, 58);
+			float:left;
+			padding-right:100px;
+			position:relative;
+			padding-left:42px;
+			.count {
+				font-weight:bold;
+			}
+			i {
+				position:absolute;
+				top:12px;
+				left:0;
+			}
+		}
+		.description {
+			padding:11px 0;
+			display:block;
+			@include font-size (11, 18);
+		}
+	}
+	.facebook-comments {
+		margin-bottom:20px;
+	}
+}
+
+.page-header {
+	padding-bottom:25px;
+	.right {
+		padding-right:20px;
+	}
+}
+
+.place-banner {
+	.page-header {
+		height: 453px;
+		.breadcrumbs li, .breadcrumbs li a, .breadcrumbs li span, .city-pin h1 {
+			color: $white;
+		}
+		#content-header {
+			background: rgba(0,0,0,.4);
+			padding-bottom: 20px;
+		}
+	}
+	.page-hero-slider {
+		margin-top: 20px;
+	}
+}
+
+ul.pagination, .pages {
+  display:block;
+  width:auto;
+  li {
+    float:left;
+    clear:none;
+    padding:0 !important;
+    margin-right:5px;
+      min-height:0;
+    a {
+      height:30px;
+      padding:0 10px;
+      background:#cecccc;
+      display:block;
+      color:$white;
+      @include font-size (14, 30);
+      font-weight:bold;
+      &:hover {
+          text-decoration:none;
+      }
+    }
+    &.active a{
+        background: $greyDark ;
+    }
+    &:hover a {
+        background: $grey
+    }
+  }
+}
+
+/* Content */
+header nav, .nav-container nav {
+	margin-left: 250px;
+	ul {
+		margin-left: 1px;
+	}
+	li {
+		border-right:1px solid #616162;
+		a {
+			color:$white;
+			line-height:60px;
+			height:60px;
+			display:block;
+			text-transform: uppercase;
+			text-decoration:none;
+			padding: 0 20px;
+			position:relative;
+			&:hover {
+				text-decoration:none;
+			}
+			i {
+				margin-left:12px;
+				top:2px;
+				position:relative;
+				font-size:18px;
+			}
+		}
+
+		&:hover {
+			background: url(/sites/all/themes/liv/livability/images/header-bg.png) 0 240px;
+			@include box-shadow(rgba(0,0,0,0.2) -4px 0px 4px -2px inset, rgba(0,0,0, 0.2) 4px 0px 4px -2px inset);
+			margin-left:-1px;
+			border-left: 1px solid transparent;
+			border-right: 1px solid transparent;
+		}
+		.level-1 {
+			background: url(/sites/all/themes/liv/livability/images/header-bg-hover.png) 0 0;
+			display:none;
+			position:fixed;
+			margin-left:-1px;
+			@include box-shadow(rgba(0,0,0, 0.2) 0px 4px 4px -2px inset, rgba(0,0,0, 0.2) 0px 2px 4px 0);
+			li {
+				margin-left: 0px;
+				border-left:none;
+				border-right: none;
+				display:block;
+				float:none;
+				&:hover {
+					@include box-shadow (none);
+					background-position: 0 120px;
+					a {
+						color: $white;
+					}
+				}
+				a {
+					color:#959696;
+				}
+			}
+			li:first-child {
+				&:hover {
+					@include box-shadow(rgba(0,0,0, 0.2) 0px 4px 4px -2px inset);
+				}
+			}
+		}
+	}
+}
+
+header {
+	nav li:hover {
+		.level-1 {
+			display:block;
+		}
+	}
+	@include font-size(13, 36);
+	min-height:60px;
+	background: url(/sites/all/themes/liv/livability/images/header-bg.png) 0 0;
+	z-index: 20;
+	position:relative;
+	border-bottom: 1px solid #646566;
+	@include box-shadow(rgba(0, 0, 0, 0.5) 0px -1px 4px -2px inset, rgba(0, 0, 0, 0.2) 0px -3px 2px 5px );
+	.content {
+		background:transparent;
+		background: url(/sites/all/themes/liv/livability/images/header-bg.png) 0 0;
+	}
+	.logo-container {
+		height:77px;
+		display: block;
+		position:absolute;
+		background: $green;
+		//border-bottom:1px solid rgba(124,194,66,.5);
+		.logo {
+			background: url(/sites/all/themes/liv/livability/images/logo.png) no-repeat center 6px;
+			background-size: 214px 47px;
+			display:block;
+			width:220px;
+			height: 61px;
+			position:relative;
+			text-indent: -20000px;
+			border-bottom:1px solid #77bd3e;
+			@include box-shadow(rgba(0, 0, 0, 0.12) 0px 9px 7px 0px );
+		}
+	}
+
+	li, nav, .social, .search, .mobile-menu-button{
+		float:left;
+
+	}
+
+	.social {
+		margin-right:15px;
+		a {
+			display:block;
+			padding:21px 11px 0 11px;
+			font-size:18px;
+		}
+	}
+	.search  {
+		border-left: 1px solid #616162;
+
+		.icon-search {
+			padding:20px;
+			font-size:20px;
+			display:block;
+			width:60px;
+			&:hover {
+				text-decoration:none;
+			}
+			&.js-expanded {
+				background: url(/sites/all/themes/liv/livability/images/header-bg.png) 0 240px;
+				@include box-shadow(rgba(0,0,0,0.2) -4px 0px 4px -2px inset, rgba(0,0,0, 0.2) 4px 0px 4px -2px inset);
+				margin-left:-1px;
+				border-left: 1px solid transparent;
+				border-right: 1px solid transparent;
+				width:61px;
+			}
+		}
+	}
+	.search-dropdown {
+		position:absolute;
+		opacity:0;
+		@include transition(0.2s ease-in-out);
+		right:0;
+		z-index:-1;
+		top:-16px;
+		background: url(/sites/all/themes/liv/livability/images/header-bg-hover.png) 0 0;
+		padding:15px;
+		@include box-shadow(rgba(0,0,0, 0.3) 0px 0px 5px 0px);
+		input[type=text] {
+			border-radius:0;
+			border:none;
+			width:440px;
+			display:block;
+			float:left;
+		}
+	}
+	.search-dropdown.active {
+		top:60px;
+		display:block;
+		opacity: 1;
+	}
+}
+.view-global-search {
+	.view-empty {
+		background: transparent url(/sites/all/themes/liv/livability/images/search-bg-noresults.png) no-repeat 0 100%;
+	  padding-bottom: 115px;
+
+		h2 {
+			font-size: 1.8em;
+		  margin: 1.5em 0 .3em;
+		}
+		p {
+			font-size: 1.1em;
+		}
+		ul {
+			list-style-type: disc;
+		  margin: 1.2em;
+		  li {
+		  	margin: 0 !important;
+		  	a {
+		  		text-decoration: underline;
+		  	}
+		  }
+		}
+	}
+	.search-results {
+		.search-result {
+			overflow: hidden;
+
+			h2 {
+				font-size: 18px;
+			  margin: .5em 0 .3em;
+			}
+			.search-snippet-info {
+				.more {
+					a {
+						color: $greyLight;
+					}
+				}
+			}
+			.search-snippet-title-wrapper {
+				overflow: hidden;
+				.search-snippet-title {
+					float: left;
+					margin-right: 1em;
+				}
+				.search-snippet-type {
+					float: left;
+					color: $greyLight;
+					text-transform: uppercase;
+					margin-top: .7em;
+				}
+			}
+			.search-submitted {
+				color: $greyLight;
+				margin-top: 0.5em;
+				.author-name {
+					padding-right: 1em;
+					border-right: 1px solid $greyLight;
+					margin-right: 1em;
+				}
+				.date {
+					text-transform: uppercase;
+				}
+			}
+		}
+	}
+}
+.view-search-result-suggestion {
+	margin: 3em 0 1em;
+	overflow: hidden;
+	.view-content {
+		overflow: hidden;
+		.city-pin {
+			float: none !important;
+			i {
+				font-size: 1.8em;
+				padding-bottom: 0;
+			}
+			a {
+				h2 {
+					color: $blue;
+					font-size: 1.8em;
+					div {
+						display: inline;
+					}
+				}
+			}
+		}
+		.related-image {
+			float: left;
+			width: 200px;
+			margin-right: 1em;
+		}
+		.more {
+			a {
+				color: $greyLight;
+			}
+		}
+	}
+	
+	.view-footer  {
+		border-top: 2px solid $greyLightest;
+	  margin-top: 2em;
+	  padding-top: .5em;
+
+	  p {
+	  	font-size: 16px;
+	  }
+	}
+}
+
+article, .blog-index {
+	position:relative;
+	color: $greyDark;
+	padding-bottom:20px;
+	.full {
+		width:100%;
+		margin:0;
+		display:block;
+	}
+
+	a {
+		color: $blue;
+	}
+	h1 {
+		@include font-size (38, 42);
+		color: $greyDark;
+		padding: 20px 0 15px;
+		font-weight:normal;
+	}
+	.synopsis {
+		padding-bottom:20px;
+		display:block;
+		p {
+			@include font-size (17, 28);
+			font-weight:normal;
+		}
+		.author {
+			@include font-size (14, 18);
+		}
+	}
+	.social-full {
+		float:left;
+	}
+	.featured-image {
+		display:block;
+		position:relative;
+		margin-bottom:35px;
+		.center-bg {
+			height:505px;
+		}
+		.list-nav {
+			display:block;
+			position:absolute;
+			top:0;
+			margin-top:-55px;
+			width:100%;
+			.button-green {
+				margin-left:0;
+				position:absolute;
+				&.next {
+					right:0;
+				}
+				&.prev {
+					right:115px;
+				}
+				&:hover {
+					text-decoration:none;
+				}
+			}
+		}
+	}
+	.highlights, .quote {
+		width:200px;
+		display:block;
+		margin:0 auto;
+	}
+	.highlights {
+		border-bottom: 1px solid $greyLightest;
+		margin-bottom:20px;
+		h4 {
+			text-transform: uppercase;
+			color: $greyDarkest;
+			@include font-size (14, 18);
+			padding-bottom:15px;
+			font-weight:bold;
+		}
+		li {
+			@include font-size (12, 16);
+			padding-bottom: 15px;
+		}
+	}
+	.quote {
+		border-top: 1px solid $greyLightest;
+		border-bottom: 1px solid $greyLightest;
+		margin-top: 20px;
+		margin-bottom:20px;
+	}
+	.article-content {
+		padding-right:3.6%;
+		p {
+			padding-bottom:25px;
+			@include font-size (14, 22);
+		}
+	}
+
+	.article-author {
+		border-top: 1px solid $greyLightest;
+		border-bottom:1px solid $greyLightest;
+		padding: 20px 0 20px;
+		display:block;
+		clear:both;
+		margin: 0 0 20px;
+		position:relative;
+		.article-author-container {
+			width:100%;
+			display:block;
+			padding-right:310px;
+		}
+		.headshot {
+			width: 100px;
+			height:100px;
+			position:absolute;
+			left:10px;
+			top:50%;
+			margin-top:-50px;
+			background-size: cover;
+		}
+		.bio {
+			.name {
+				@include font-size(15,18);
+				font-weight:bold;
+
+			}
+			.title {
+				color: $greyDarkest;
+			}
+
+			margin-left: 135px;
+
+
+			display:block;
+			float:left;
+
+			@include font-size(12, 20);
+		}
+		.ad300 {
+			padding:0;
+		}
+	}
+
+	.article-links {
+		background: $greyLightest;
+		display:block;
+		padding: 30px 0 30px;
+		@include font-size(14, 18);
+		a {
+			color: $blueDark;
+			font-weight:bold;
+		}
+		.title {
+			color: $greyDarkest;
+			margin-bottom:15px;
+			display:block;
+			@include font-size(24, 28);
+		}
+		ul li {
+			margin-bottom:10px;
+			margin-right:35px;
+		}
+	}
+}
+
+.top-10-nav {
+	display:block;
+
+	.social-full {
+		padding-top:0;
+		padding-bottom:25px;
+	}
+	.top-10-no {
+		display:inline-block;
+		width:60px;
+		height:60px;
+		color:$white;
+		background:$green;
+		@include font-size (24, 60);
+		text-align:center;
+		margin-right:10px;
+		float:left;
+		margin-left:0;
+	}
+	.city-pin {
+		h1,h2 {
+			@include font-size (36,60);
+		}
+	}
+}
+
+.city-stats {
+	text-align:left;
+	@include font-size (12, 20);
+
+	dt, dd {
+		display:inline;
+		padding-bottom:7px;
+	}
+
+	dt {
+		min-width:140px;
+		display:inline-block;
+		font-weight:bold;
+	}
+
+	dd:after {
+		content: '\A';
+		white-space: pre;
+	}
+}
+
+.top-100 {
+	p {
+		@include font-size (12,20);
+	}
+	.top-100-key {
+		@include font-size (10, 20);
+		display:block;
+		.city-score {
+			@include font-size (13.5,20);
+			background: $blue;
+			display:inline-block;
+			color:$white;
+			padding: 2px 8px;
+		}
+	}
+	.top-100-tabs {
+		margin-top:20px;
+		float:left;
+		clear:both;
+		li {
+			background: $white;
+			border-top: 1px solid $grey;
+			border-left: 1px solid $grey;
+			border-right: 1px solid $grey;
+			float:left;
+			margin-right:5px;
+			padding:12px 15px;
+			@include font-size (14);
+			a {
+				color: $grey;
+			}
+		}
+		li.active {
+			background:$grey;
+			a {
+				color:$white;
+			}
+		}
+	}
+	.top-100-links {
+		float:left;
+
+		margin-left:15px;
+		margin-top:20px;
+		li {
+			display: inline-block;
+			padding: 9px 0;
+			a {
+				border-right: 1px solid $grey;
+				padding: 0 5px;
+				@include font-size (12);
+			}
+		}
+	  li.active {
+		span {
+		  border-right: 1px solid $grey;
+		  padding-right: 5px;
+		}
+	  }
+		li:last-child {
+			span, a {
+				border-right:none;
+			  	padding-left: 5px;
+			}
+		}
+	}
+
+	.top-100-content {
+		border-top: 10px solid $grey;
+		display:block;
+		clear:both;
+		position:relative;
+		li.top-100-city {
+			margin-bottom:20px;
+			border:1px solid #d6d6d6;
+			background: $greyLightest;
+			min-height:215px;
+			padding-left:405px;
+			padding-top:22px;
+			padding-bottom:20px;
+			padding-right:20px;
+			display:block;
+			position:relative;
+			.city-image {
+				width:325px;
+				position:absolute;
+				height:100%;
+				left:0;
+				top:0;
+				background: $greyLightest;
+			}
+
+			.city-rank-container {
+				position:absolute;
+				left: 325px;
+				top:0;
+				.city-rank {
+					display:block;
+					background: $green;
+					width:60px;
+					height:60px;
+					@include font-size (24, 60);
+					color:$white;
+					text-align:center;
+				}
+				.city-score {
+					@include font-size (16,30);
+					background: $blue;
+					display:block;
+					width:60px;
+					height:30px;
+					color:$white;
+					text-align:center;
+				}
+			}
+			h2 {
+				@include font-size (24);
+				padding-bottom:10px;
+				span {
+					@include font-size (16);
+				}
+			}
+			.description {
+				padding-right:15px;
+			}
+			.city-stats {
+				position:absolute;
+				right:30px;
+				top:70px;
+				@include font-size (11);
+				h4 {
+					font-weight: bold;
+					margin-bottom: 7px;
+					@include font-size (12);
+				}
+			}
+            .city-pop {
+              font-size: 0.8rem;
+            }
+            .city-info {
+              margin-top: 10px;
+            }
+		}
+		.ranking-info {
+			p {
+				@include font-size (10);
+			}
+		}
+		.pagination {
+			margin-top:10px;
+		}
+	  .section {
+		padding: 20px 30px;
+	  }
+	}
+}
+
+
+
+.state-stats {
+	background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+	position:relative;
+	height: 485px;
+	padding-top:135px;
+	ul.infograph {
+		border:none;
+		padding:0;
+		z-index:10;
+		position:relative;
+		li.one-third {
+			background:$white;
+			border-right: 1px solid $greyLightest;
+
+		}
+	}
+}
+
+.usa-map-blue {
+	position:absolute;
+	top:30px;
+	left:50%;
+	margin-left: -348px;
+	width:696px;
+	height:426px;
+	background: url(/sites/all/themes/liv/livability/images/usa-map-blue.png);
+	z-index:5;
+}
+
+.state-city-list {
+	.filter {
+		padding-top:20px;
+		padding-bottom:20px;
+		border-bottom: 1px solid #cccccc;
+		border-top: 1px solid #cccccc;
+		margin-top:20px;
+		@include font-size (12);
+		div {
+			display:inline-block;
+		}
+		strong {
+			font-style: italic;
+		}
+	}
+	ul.city-list {
+		padding-right:315px;
+		position:relative;
+		li {
+			padding: 20px 20px;
+			color:$grey;
+			border-bottom: 1px solid $greyLightest;
+			border-right: 1px solid $greyLightest;
+			display:block;
+			cursor:pointer;
+			&:after {
+				content: " ";
+				display:block;
+				height:0;
+				clear:both;
+				visibility: hidden;
+			}
+			&:last-child {
+				border-bottom:none;
+			}
+			.city-info {
+				position:relative;
+				display:block;
+				padding-right:30px;
+				padding-left: 50px;
+			}
+			.icon-pin {
+				display:inline-block;
+				width:40px;
+				height:40px;
+				text-align:center;
+				color:$grey;
+				@include font-size (30,40);
+				position:absolute;
+				left:0;
+				top:-3px;
+			}
+
+			.widget {
+				margin-top:10px;
+			}
+			.city-state {
+				@include font-size (18);
+				padding-bottom:3px;
+				display:block;
+			}
+			dl {
+				span {
+					float:left;
+					padding-right:16px;
+				}
+				width:100%;
+				dd, dt {
+					display:inline;
+					@include font-size (11,14);
+				}
+				dt {
+					padding-right:4px;
+					&:first-child {
+						margin-left:0;
+					}
+				}
+				dd {
+					color:$black;
+					&:last-child {
+						border-right:none;
+						padding-right:0;
+					}
+				}
+			}
+			dl:after, dl:before {
+			    clear: both;
+			    float: none;
+			    visibility: hidden;
+			    display: table;
+			    font-size: 0;
+			    content:" ";
+			    clear: both;
+			    height: 0;
+			}
+			.icon-arrow-right-double {
+				display:none;
+				position:absolute;
+				right:-21px;
+				top:0px;
+				background:white;
+				border: 1px solid $greyLightest;
+				border-right:none;
+				width:26px;
+				padding-left:3px;
+				height:40px;
+				@include font-size (18, 36);
+				text-align:center;
+			}
+
+			.city-details {
+				display:none;
+				position:absolute;
+				right:0;
+				width:315px;
+				top:0;
+				padding:10px;
+				cursor:default;
+				.map {
+					border:1px solid #bcbdb8;
+				}
+				h2 {
+					@include font-size (20);
+					color: $greyDark;
+					font-weight:bold;
+					padding: 20px 0;
+					span {
+						color:$green;
+						font-weight:bold;
+					}
+				}
+				dl {
+					margin-top:20px;
+					dt {
+						min-width:70px;
+						clear:both;
+						margin-left:0;
+						float:left;
+						@include font-size (12,18);
+					}
+					dd {
+						border-right:none;
+						float:left;
+						@include font-size (12,18);
+					}
+				}
+
+				li {
+					padding:0;
+					border-bottom:none;
+					cursor:default;
+					border-right:none;
+					&:hover {
+						background:none;
+						box-shadow:none;
+					}
+				}
+
+				/* Thumbnails resizing on smaller screens */
+				.rsDefault .rsThumb {
+					width: 59px;
+					height: 59px;
+					&:hover {
+						&:after {
+							margin-left:-16px;
+							margin-top:-10px;
+						}
+					}
+				}
+				.rsDefault .rsThumbsHor {
+					height: 59px;
+				}
+				.rsDefault .rsThumbsVer {
+					width: 59px;
+				}
+
+				.rsDefault .rsThumbsArrowIcn {
+					height:59px;
+				}
+				.rsDefault.rsWithThumbsHor .rsThumbsArrowIcn:after  {
+					height:59px;
+					line-height:56px;
+				}
+
+				.rsDefault .rsThumbsArrowIcn , .rsDefault .rsThumbsArrow, .rsDefault.rsWithThumbsHor .rsThumbsArrowIcn:after{
+					width:30px;
+					@include font-size(25,59);
+				}
+
+
+
+			}
+		}
+		li:hover {
+			background: #f8f8f8;
+			@include box-shadow(rgba(0,0,0, 0.2) 15px 0px 15px -15px inset);
+
+		}
+		li.active-city {
+			background: #f1f1f1;
+			@include box-shadow(rgba(0,0,0, 0.2) 15px 0px 15px -15px inset);
+			.city-details {
+				display:block;
+			}
+			.icon-arrow-right-double {
+				display:block;
+			}
+			.icon-pin {
+				color:$green;
+			}
+		}
+	}
+}
+
+.blog-index {
+	margin-top:20px;
+	ul {
+		padding-top:20px;
+		li {
+			background: white;
+			margin-bottom:20px;
+			overflow:hidden;
+			padding:15px;
+		}
+		li:last-child {
+			margin-bottom:0;
+		}
+	}
+	.featured-image {
+		margin-bottom:10px;
+	}
+	h1 {
+		@include font-size (24,28);
+		a {
+			color:$black;
+			text-transform:uppercase;
+
+		}
+	}
+	.blog-details{
+		display:block;
+		padding: 20px 20px 20px 20px;
+	}
+	.blog-category {
+		position:relative;
+		display:block;
+		text-transform:uppercase;
+		padding-left:70px;
+		height:58px;
+		margin-top:0px;
+		@include font-size (18,58);
+		.circle-icon {
+			margin:0 0;
+			left:0;
+			top:0px;
+			bottom:0;
+		}
+		.sticker-orange-horizontal {
+			left:0;
+		}
+		a {
+			color:$grey;
+		}
+	}
+	.author {
+		@include font-size (14);
+		color:$greyDark;
+		padding-bottom:20px;
+		display:block;
+
+	}
+	p {
+		@include font-size (14,22);
+	}
+}
+
+.show-more {
+	display:block;
+	width:100%;
+	text-align:center;
+	background: $grey;
+	a {
+		color:$white;
+		width:100%;
+		text-transform:uppercase;
+		@include font-size (16);
+		padding: 10px 0;
+		display:block;
+		&:hover {
+			i {
+				text-decoration:none;
+			}
+		}
+		i {
+			@include font-size (22,16);
+			position:absolute;
+			margin-left:10px;
+
+		}
+	}
+}
+.left-nav-full .card-large {
+	margin: 0 40px;
+}
+.card-large {
+	border: 1px solid #e8e8e8;
+	display:block;
+	position:relative;
+	margin-top:15px;
+	margin-bottom:20px;
+	background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+	clear: both;
+
+	.card-arrow {
+		position:absolute;
+		top:-12px;
+		left:50%;
+		margin-left:-10px;
+		background: url('/sites/all/themes/liv/livability/images/arrow-top.png') no-repeat top left;
+		width:21px;
+		height:12px;
+
+	}
+	.card-content {
+		display:block;
+		background:$white;
+		margin-left: 55px;
+		@include box-shadow(rgba(0,0,0, 0.3) 8px 0px 8px -8px inset);
+		padding:25px 25px 25px 35px;
+		.icon-pin {
+			position:absolute;
+			left: 39px;
+		}
+		h2 {
+			padding-right:325px;
+		}
+		h2 {
+			color:$green;
+			margin-bottom:25px;
+			@include font-size (48,46);
+			span {
+				color:$grey;
+				display:block;
+				padding-top:10px;
+				@include font-size (14);
+			}
+		}
+		.city-pin {
+			padding-right:325px;
+			width:100%;
+			h1,h2 {
+				margin-left:0;
+				white-space:normal;
+			}
+			.county-area{
+				margin-left:0;
+			}
+		}
+		.weather {
+			padding-left:180px;
+			position:absolute;
+			top:25px;
+			right:25px;
+			width:315px;
+			color:$blue;
+			.condition {
+				position:absolute;
+				left:5px;
+				top:-5px;
+				display:block;
+				i:before {
+					color: $blue;
+					@include font-size (60,48);
+				}
+			}
+			.condition-description {
+				text-transform: uppercase;
+				border-left:1px solid $blue;
+				display:inline-block;
+				padding-left:10px;
+				margin-top:1px;
+				width:150px;
+
+			}
+			.temp {
+				color:$blue;
+				margin-bottom:25px;
+				@include font-size (48,46);
+				position:absolute;
+				right:135px;
+				padding-right:30px;
+				padding-left: 60px;
+			}
+			.temp-toggle {
+				position: absolute;
+				right:25px;
+
+				top:2px;
+				a {
+					position:absolute;
+					width:15px;
+					@include font-size (14,18);
+					//color:$grey;
+					text-align:center;
+					height:19px;
+				}
+				.fahrenheit {
+					border-bottom:1px solid $blue;
+				}
+				.celsius {
+					top: 19px;
+				}
+				.active {
+					font-weight:bold;
+				}
+			}
+		}
+
+		.card-stats {
+			float:left;
+			width:315px;
+			position:absolute;
+			margin-top:15px;
+			right:0;
+			dt {
+				min-width:0;
+			}
+		}
+		h4 {
+				@include font-size (16);
+				padding-bottom:15px;
+			}
+		.card-description {
+			width:100%;
+			padding-right: 315px;
+			margin-top:15px;
+			float:left;
+			p {
+				@include font-size (12,20);
+				a {
+					color:$red;
+				}
+			}
+
+			.card-nearby {
+				@include font-size (12,20);
+				a {
+					display:inline-block;
+					width:120px;
+					color:$grey;
+					text-decoration:underline;
+				}
+			}
+		}
+
+		.one-third {
+			clear:both;
+		}
+		.two-third {
+			padding-left:25px;
+		}
+
+	}
+	&:before {
+			content: "";
+			width:50%;
+			position:absolute;
+			bottom:-17px;
+			height: 16px;
+			width:495px;
+			background: url(/sites/all/themes/liv/livability/images/shadow-fold-left-large.png);
+
+		}
+	&:after {
+		content: "";
+		width:50%;
+		position:absolute;
+		bottom:-17px;
+		height: 16px;
+		right:0;
+		width:495px;
+		background: url(/sites/all/themes/liv/livability/images/shadow-fold-right-large.png);
+
+	}
+}
+
+footer {
+	position:relative;
+	z-index:11;
+	color:$footerColor;
+	a {
+		color: $footerColor;
+	}
+	background: $greyLightest;
+	.content {
+		background: transparent;
+		padding: 45px 4.5%;
+	}
+
+	.learn-more {
+		float:left;
+		width: 58%;
+		padding-right:8%;
+		.heading {
+			text-transform: uppercase;
+			@include font-size (24,32);
+			padding-bottom:20px;
+			display:block;
+		}
+		p {
+			@include font-size (14,26);
+			text-align: justify;
+		}
+	}
+	.site-links {
+		float:left;
+		width:42%;
+		ul {
+			width:50%;
+			border-left: 1px solid #d2d2d2;
+			li {
+				@include font-size (14, 36);
+				a {
+					margin-left:50px;
+				}
+			}
+		}
+
+	}
+	.social-footer {
+		display:block;
+		clear:both;
+		float:right;
+		padding-bottom:15px;
+		@include font-size (18,25);
+		a {
+			padding:5px;
+			&:hover {
+				text-decoration:none;
+				color: $greyDark
+			}
+		}
+	}
+	.logos {
+		display:block;
+		clear:both;
+		border-top: 1px solid #d2d2d2;
+		border-bottom: 1px solid #d2d2d2;
+		margin-bottom:15px;
+		ul li {
+			width:12.5%;
+			float:left;
+			padding: 30px 0;
+		}
+	}
+	.policy {
+		float:right;
+	}
+}
+
+/* Content Containers */
+.main {
+	position:relative;
+	z-index:10;
+}
+
+.city-pin, .blog-pin, .topic-pin, .best-pin {
+	float:left;
+	clear:both;
+
+	a:hover {
+		text-decoration: none;
+	}
+	i {
+		@include font-size (40, 40);
+		float:left;
+		//padding-top:5px;
+		padding-bottom:20px;
+		padding-right: 10px;
+	}
+	h1,h2 {
+		@include font-size (36, 40);
+		font-weight:bold;
+		color:$greyDark;
+		padding:0;
+		white-space:nowrap;
+	}
+	h1 span,h2 span {
+		margin-left:50px;
+		display:block;
+	}
+}
+
+.banner-image {
+  .city-pin {
+    h2 {
+      color: #FFFFFF;
+    }
+  }
+}
+
+.topic-pin, .best-pin {
+  .county-area {
+    margin-left:75px;
+    display:block;
+    position: relative;
+    top: -8px;
+  }
+}
+.page-best-places,
+.page-moving,
+.page-top-10 {
+	.best-pin,
+    .topic-pin {
+		.county-area {
+			top: 10px;
+			float: none !important;
+		}
+	}
+}
+
+.page-topics, .page-moving {
+	.topic-pin {
+		.county-area {
+			width: 75%;
+			margin-top: 10px;
+		}
+	}
+}
+
+.blog-pin {
+	i {
+		@include font-size (38,40);
+	}
+}
+
+.blog-pin.no-pin {
+	h1,h2 {
+		margin-left:0;
+	}
+}
+
+.topic-pin, .best-pin {
+	span {
+		margin-left: 0;
+		display: inline-block;
+		vertical-align: middle;
+	}
+	i {
+		@include font-size (32,34);
+		padding: 14px 14px;
+	}
+	h1,h2 {
+		display: inline-block;
+		vertical-align: middle;
+		margin-left: 10px;
+	}
+}
+
+.breadcrumbs {
+	padding-top:20px;
+	padding-bottom:15px;
+	display:block;
+	@include font-size(12,20);
+	li {
+		float:left;
+		color: $grey;
+		a, span {
+			color: $grey;
+		}
+		&:after {
+			content: ">";
+			padding:0 5px 0 3px;
+		}
+		span {
+			font-weight:bold;
+		}
+	}
+	li:last-child {
+		&:after {
+			display:none;
+		}
+	}
+}
+
+.hero-slider {
+	width: 100%;
+	height:500px;
+	position: relative;
+	direction: ltr;
+	.rsSlide {
+		width:100.1%;
+	}
+
+	.button-pink {
+		@include border-radius (0);
+		margin-top:15px;
+		padding: 17px 56px 17px 16px;
+		display:block;
+		width:170px;
+		.raquo-white {
+			margin-left: 26px;
+			top:16px;
+			position:absolute;
+		}
+	}
+
+	.summary {
+		padding:45px;
+		position:absolute;
+		top:0;
+		width:100%;
+		h2 {
+			@include font-size(20, 20);
+			font-weight:500;
+			padding-bottom:12px;
+			a {
+				color:$white;
+				text-decoration:none;
+				i {
+					@include font-size(14, 40);
+					font-weight:200;
+					display:block;
+					color: #fcae17;
+				}
+			}
+		}
+		p {
+			@include font-size(14, 25);
+			color:$white;
+			margin:0;
+			width:96%;
+			.button-orange {
+				display:block;
+				width:170px;
+				margin-top:15px;
+
+			}
+		}
+	}
+
+	 .rsBullets {
+	 	display:none;
+	 }
+}
+.hero-slider > * {
+	float: left;
+}
+
+.page-hero-slider{
+	width: 100%;
+	height:500px;
+	position: relative;
+	direction: ltr;
+	.rsSlide {
+		width:100.1%;
+	}
+	.rsArrowLeft {
+		bottom:120px;
+	}
+	.rsArrowRight {
+		bottom:166px;
+	}
+	.rsBullets {
+		display:none;
+	}
+	position:relative;
+	.hero-details {
+		position:absolute;
+		text-indent:0;
+		bottom:0;
+		left:0;
+		width:100%;
+		background: rgba(0,0,0,.7);
+		color:$white;
+		padding:20px 30px;
+		.topic {
+			color: $orange;
+			@include font-size (12, 18);
+		}
+		.summary {
+			display:block;
+
+			@include font-size (14, 22);
+			h2 {
+				font-weight:bold;
+				display:inline;
+			}
+			p {
+				display:inline;
+				@include font-size (14,22);
+			}
+			a {
+				color:$pink;
+			}
+		}
+	}
+}
+
+
+.best-places {
+	background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+
+	height:100px;
+	h1 {
+		float:left;
+		width:37%;
+		color:$green;
+		font-weight:normal;
+		font-style: italic;
+		padding-left:3%;
+		padding-top:1.1%;
+		@include font-size (36,38) ;
+		span {
+			@include font-size (20, 30);
+			color:#696969;
+			font-style:normal;
+			display:block;
+		}
+	}
+	ul {
+		float:right;
+		width: 63%;
+		height:100%;
+		li {
+			float:right;
+			width: 25%;
+			height:100%;
+			background: $green;
+			border-right: 3px solid $white;
+			&:hover {
+				background: $grey;
+			}
+			a {
+				@include font-size (16,18);
+				width:100%;
+				height:100%;
+				display:block;
+				color:$white;
+				text-decoration:none;
+				text-transform: uppercase;
+				position:relative;
+				span {
+					width:100%;
+					display:inline-block;
+					padding: 20px 0 0 10%;
+
+				}
+				i {
+					position:absolute;
+					right:0;
+					margin-right:7.5%;
+					bottom:0;
+					margin-bottom:5%;
+					font-size:32px;
+				}
+
+			}
+		}
+		li.last{
+			border-right:none;
+		}
+	}
+}
+.three-wide {
+	margin-top:30px;
+	padding-top:20px;
+	padding-bottom:10px;
+	li {
+		background:$white;
+		position:relative;
+	}
+}
+.articles {
+	margin-top:20px;
+	padding-top:20px;
+	li {
+		background:$white;
+		overflow:hidden;
+		.featured-image {
+			width:100%;
+			height:210px;
+			max-height:210px;
+
+		}
+		.image-icon {
+			position:relative;
+			display:block;
+			margin-bottom:19px;
+		}
+
+		.summary {
+			display:block;
+			padding:28px 30px 30px;
+			h2 a {
+				color:$black;
+				height:4.75em;
+				overflow:hidden;
+				display:block;
+				@include font-size (20, 24);
+				font-weight:bold;
+				text-transform:uppercase;
+				span {
+					font-weight:normal;
+				}
+			}
+			.date {
+				display:block;
+				font-style: italic;
+				padding:3px 0 14px;
+			}
+			p {
+				font-family: Georgia;
+				font-weight:normal;
+				@include font-size (14,20);
+				color:$greyDark;
+				height:80px;
+				overflow:hidden;
+				padding-bottom:0;
+			}
+
+		}
+
+	}
+	li.last {
+		margin-right:0;
+	}
+}
+
+
+.city-details {
+	display:block;
+	padding-top:20px;
+	.city-map-small {
+		float:left;
+		width: 25%;
+		overflow:hidden;
+		img {
+			width:205px;
+			border-top:5px solid $green;
+		}
+	}
+	.city-summary {
+		float:left;
+		width:75%;
+		padding-left:20px;
+		h1,h2 {
+			color: $green;
+			@include font-size (24,32);
+			font-weight:bold;
+		}
+		p {
+			@include font-size (14, 26);
+			padding-top:10px;
+		}
+	}
+}
+.city-gallery {
+	#gallery {
+		width:100%;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		user-select: none;
+		opacity:0;
+	}
+}
+
+.city-detailed-stats {
+	margin-top:30px;
+	padding-top:20px;
+	padding-bottom:10px;
+	h4 {
+		@include font-size (18,18);
+		text-transform: uppercase;
+		min-height:68px;
+		span {
+			text-transform: none;
+			display:block;
+			color:$grey;
+			font-weight:normal;
+			@include font-size (12, 20)
+		}
+	}
+	.compare-national {
+			display:block;
+			color:$grey;
+			@include font-size (13,16);
+			padding: 30px 0 0px;
+			border-bottom:1px solid $greyLightest;
+			margin-bottom:25px;
+			min-height:90px;
+		}
+	.donut-graph-large {
+		margin-bottom:30px;
+		margin-top:-40px;
+	}
+	.main-stat {
+		margin-top:30px;
+		display:block;
+	}
+	.compare-groups {
+		padding:30px 0;
+		display:block;
+		clear:both;
+		min-height:101px;
+	}
+	ul.detailed-stats {
+		li {
+			padding:30px 20px;
+			background:$white;
+			li {
+				padding:0;
+				min-height:0;
+			}
+			p {
+				padding-bottom:0;
+				display:block;
+				clear:both;
+			}
+		}
+	}
+}
+
+.infograph {
+	.small-value {
+		@include font-size (14,16);
+		display:block;
+		font-weight:bold;
+		sup {
+			font-weight:bold;
+		}
+		span {
+			@include font-size (14,28);
+			font-weight:bold;
+		}
+	}
+	.medium-value {
+		@include font-size (24,26);
+		display:block;
+		font-weight:bold;
+		sup {
+			font-weight:bold;
+		}
+		span {
+			@include font-size (14,28);
+			font-weight:bold;
+		}
+	}
+	.large-value {
+		@include font-size (48,50);
+		font-weight:bold;
+		display:inline-block;
+		position:relative;
+		span {
+			display:block;
+			@include font-size (12,12);
+			text-transform:uppercase;
+			text-align: center;
+		}
+	}
+	.green-bg {
+		background: $green;
+		color: $white;
+		padding: 0.5em;
+		text-align: center;
+	}
+	.blue-bg {
+		background: $blue;
+		color: $white;
+		padding: 0.5em;
+		text-align: center;
+	}
+	.grey-bg {
+		background: $grey;
+		color: $white;
+		padding: 0.5em;
+		text-align: center;
+	}
+	.change {
+		display:block;
+		position:relative;
+		padding-left:0;
+
+		i {
+			position:relative;
+			padding-right:5px;
+			width:20px;
+			display:inline-block;
+			&:before {
+				position:absolute;
+				top:-16px;
+				left:0;
+			}
+			@include font-size (20, 20);
+		}
+	}
+	.description {
+		@include font-size(13,15);
+		display:inline-block;
+		//width:58%;
+		padding-left:3px;
+		vertical-align: top;
+		margin-top:10px;
+		text-transform: uppercase;
+		position:relative;
+		&.two-third {
+		  margin-right: 0;
+		  text-transform: none;
+		}
+	}
+	.description-small {
+		display:block;
+		color:$grey;
+		clear:both;
+		padding-top:10px;
+		@include font-size(13,14);
+		strong {
+			color: $black;
+		}
+	}
+
+	.fill-bar {
+		display:block;
+		width:100%;
+		height:10px;
+		@include border-radius (10px);
+		background:$greyLightest;
+		margin:10px 0;
+	}
+
+	input.donut-graph {
+		width:85px;
+		height:85px;
+		@include border-radius (50%);
+		@include box-shadow (none);
+		text-align:center;
+		border: 3px solid $greyLightest;
+		@include font-size(22,85);
+		font-weight:bold;
+		padding:0;
+		color:$black;
+		display:block;
+		margin:0 auto;
+		-webkit-appearance: none;
+	}
+
+	input.donut-graph-large {
+		width:175px;
+		height:175px;
+		@include border-radius (50%);
+		@include box-shadow (none);
+		text-align:center;
+		border: 19px solid $greyLightest;
+		@include font-size(40,70);
+		font-weight:bold;
+		padding:0;
+		color:$black;
+		display:block;
+		margin-left: auto;
+		margin-right:auto;
+		-webkit-appearance: none;
+	}
+
+	input.donut-graph-small {
+		width:64px;
+		height:64px;
+		@include border-radius (50%);
+		@include box-shadow (none);
+		text-align:center;
+		border: 3px solid $greyLightest;
+		@include font-size(18,64);
+		font-weight:bold;
+		padding:0;
+		color:$black;
+		display:block;
+		margin:0 auto;
+		-webkit-appearance: none;
+	}
+
+	label {
+		text-transform: uppercase;
+		text-align:center;
+		@include font-size (11,11);
+		padding-top:8px;
+		display:block;
+		margin-left:-2px;
+	}
+	h4 {
+		@include font-size (16,16);
+		padding-bottom:15px;
+	}
+	h5 {
+		@include font-size (12, 14);
+		padding-top: 15px;
+		padding-bottom:5px;
+		&:first-child {
+			padding-top:0;
+		}
+	}
+
+	li.one-sixth {
+		width: 16.66%;
+		float:left;
+		@include font-size (12,14);
+		text-align:center;
+	}
+	sup {
+		position: relative;
+		top: -0.75em;
+		font-size: 0.25em;
+	}
+
+	.heading {
+		@include font-size (20,20);
+		padding-top: 15px;
+		padding-bottom: .25em;
+	}
+	p {
+		line-height: 1.25em;
+	}
+}
+.disclaimer {
+	color:#cccccc;
+	display:block;
+	text-align:right;
+	@include font-size (12, 10);
+	padding-top:10px;
+}
+
+ul.infograph {
+	border: 1px solid #cccccc;
+	margin-top:10px;
+	li.one-third {
+		border-right: 3px solid #cccccc;
+		width:33.33%;
+		margin-right:0;
+		li.one-third {
+			border-right:none;
+		}
+	}
+
+	li.one-third:nth-child(3n+0), li.last, li:last-child {
+		border-right:none;
+	}
+
+	li.two-third {
+		width:66.67%;
+		margin-left:0;
+		//padding:30px;
+		margin-right:0;
+		border-right: 3px solid #cccccc;
+		li.one-third {
+			border-right:none;
+			margin:20px 0;
+			padding:0;
+		}
+		&:last-child {
+			border-right:none;
+		}
+	}
+	li.one-fourth {
+		width:25%;
+		margin:0;
+		padding:0;
+		margin-bottom:0;
+	}
+	li.half {
+		width:50%;
+		border-right: 3px solid #cccccc;
+		margin-right:0;
+		&:nth-child(2n+0) {
+			border-right:none;
+		}
+	}
+	li {
+		margin-top:5px;
+		margin-bottom:5px;
+		padding:20px 20px 20px 20px;
+	}
+}
+.data-source {
+  font-size:0.9rem;
+  color:#999;
+  padding-top:3px;
+}
+.photo-strip-container {
+	.heading {
+		padding-left: 3.7%;
+	}
+	padding-top:20px;
+	padding-bottom:10px;
+	display:block;
+	overflow:hidden;
+	.photo-gallery-container {
+		display:block;
+		position:relative;
+		height:113px;
+	}
+	.rsDefault .rsThumb.rsNavSelected {
+		background:transparent;
+	}
+	.rsDefault .rsThumb.rsNavSelected:hover {
+		background: $green;
+		img {
+			opacity:.3;
+		}
+	}
+	.rsDefault .rsThumb.rsNavSelected img {
+		opacity:1;
+	}
+}
+
+
+.city-topics {
+	padding-top:30px;
+	padding-bottom:10px;
+	display:block;
+	.presented-by {
+		position:absolute;
+		top:20px;
+		right:15px;
+		@include font-size (9, 11);
+		text-transform:uppercase;
+		color:$grey;
+	}
+	ul {
+		li {
+			background: url(/sites/all/themes/liv/livability/images/diagonal.png) #ffffff;
+			float:left;
+			border:1px solid #cccccc;
+			margin-bottom:25px;
+			position:relative;
+			z-index:1;
+			.circle-icon {
+				top:20px;
+				left:22px;
+				margin:0;
+				z-index:2;
+			}
+
+			.topic-content {
+				background:$white;
+				display:block;
+				margin-left: 50px;
+				border-left: 1px solid #cccccc;
+				@include box-shadow(rgba(0,0,0, 0.2) 5px 0px 5px -5px inset);
+				padding:35px 20px 20px 35px;
+				@include font-size (12, 16);
+				h2 {
+					color:$orange;
+					text-transform: uppercase;
+					@include font-size (21, 26);
+					font-weight:bold;
+					a {
+						color:$orange;
+						text-transform: uppercase;
+						@include font-size (21, 26);
+						font-weight:bold;
+					}
+				}
+				.in-city-state {
+					@include font-size (11,13);
+				}
+				p {
+					padding-top:25px;
+
+				}
+				.topic-links {
+					display:block;
+					border-top:1px solid #cccccc;
+					margin-top:25px;
+					padding-top:23px;
+				}
+			}
+		}
+		li:before {
+			content: "";
+			width:50%;
+			position:absolute;
+			bottom:-11px;
+			height: 10px;
+			width:143px;
+			background: url(/sites/all/themes/liv/livability/images/shadow-fold-left.png);
+
+		}
+		li:after {
+			content: "";
+			width:50%;
+			position:absolute;
+			bottom:-11px;
+			height: 10px;
+			right:0;
+			width:143px;
+			background: url(/sites/all/themes/liv/livability/images/shadow-fold-right.png);
+
+		}
+	}
+}
+
+.city-real-estate {
+	padding-top:30px;
+	position:relative;
+	h2 {
+		text-transform:uppercase;
+		@include font-size (24, 28);
+		padding-bottom:15px;
+		border-bottom:1px solid #cccccc;
+		margin-bottom:20px;
+		position:relative;
+		padding-right: 155px;
+        text-align: left;
+	}
+	.powered-by {
+		position:absolute;
+		right:0;
+		bottom:5px;
+		@include font-size (10, 12);
+		color:$grey;
+		text-transform: uppercase;
+		display:inline;
+		img {
+			width:auto;
+		}
+	}
+	img {
+		display:inline;
+		width:100%;
+	}
+}
+
+.city-topic-summary {
+	> h1 {
+		padding: 20px 0 15px;
+	}
+	.infograph {
+		h1 {
+			margin: 20px 0 5px 0;
+		}
+	}
+}
+
+.city-population-summary {
+	.change {
+		padding:10px 0px 20px 30px;
+	}
+	ul.infograph li.two-third {
+		padding-bottom:57px;
+	}
+}
+
+.locations-nearby {
+	color:$greyDark;
+	padding-top:30px;
+	margin-top:20px;
+	overflow:hidden;
+	.pagination {
+		position:absolute;
+		bottom:18px;
+		left:18px;
+	}
+
+	.locations-nearby-container {
+		background:$white;
+		display:block;
+		margin:0 0 30px;
+		position:relative;
+        min-height:691px;
+	}
+	.location-listings {
+		padding-bottom:75px;
+		display:block;
+		width:50%;
+		ul {
+			width:100%;
+		}
+		li {
+			padding: 20px 30px 25px 52px;
+			@include font-size (12, 15);
+			border-left:1px solid $white;
+			cursor:pointer;
+			&.active {
+				background: #F3F3F3;
+				border-left:1px solid $greyLightest;
+				.location-details {
+					display:block;
+				}
+			}
+            .school-rating{
+              background-image: url("../images/Liv_Schools_GS_ratings_icons.png");
+              background-repeat: no-repeat;
+              background-position: left top;
+              &.public{
+                width:53px;
+                height:53px;
+                float:left;
+                &.rating-1{
+                  background-position: 0 0;
+                }
+                &.rating-2{
+                  background-position-x:-53px;
+                  background-position-y:0;
+                }
+                &.rating-3{
+                  background-position-x:-108px;
+                  background-position-y:0;
+                }
+                &.rating-4{
+                  background-position-x:-163px;
+                  background-position-y:0;
+                }
+                &.rating-5{
+                  background-position-x:-217px;
+                  background-position-y:0;
+                }
+                &.rating-6{
+                  background-position-x:0;
+                  background-position-y:-53px;
+                }
+                &.rating-7{
+                  background-position-x:-53px;
+                  background-position-y:-53px;
+                }
+                &.rating-8{
+                  background-position-x:-108px;
+                  background-position-y:-53px;
+                }
+                &.rating-9{
+                  background-position-x: -163px;
+                  background-position-y: -53px;
+                }
+                &.rating-10{
+                  background-position-x: -217px;
+                  background-position-y: -53px;
+                }
+                &.rating-na{
+                  background-position-x: 0;
+                  background-position-y: -228px;
+                  width: 50px;
+                  height: 41px;
+              }
+              }
+            }
+			.icon-pin {
+				position:absolute;
+				left:15px;
+				@include font-size(32,32);
+			}
+			h5 {
+				@include font-size(14,16);
+				padding-bottom:5px;
+				text-transform:uppercase;
+				font-weight:bold;
+			}
+			.summary {
+				padding:3px 0 5px;
+				span {
+					text-transform: uppercase;
+					display:inline-block;
+					padding-right:8px;
+					margin-right: 3px;
+					border-right:1px solid $greyDark;
+
+				}
+				span:last-child {
+					border-right:none;
+				}
+			}
+			.address {
+				display:block;
+				padding:3px 0 9px;
+			}
+			.call-directions {
+				a {
+					color:$greyDark;
+					padding-right:20px;
+					padding-left:23px;
+					position:relative;
+					i {
+						position:absolute;
+						color:#bcbcbc;
+						left:0;
+						top:-1px;
+						@include font-size (18,18);
+						&.icon-phone {
+							top:-2px;
+						}
+					}
+					&:hover i {
+						color: $greyDarkest;
+					}
+				}
+			}
+		}
+	}
+
+	.location-details {
+		display:none;
+		border-left:1px solid $greyLightest;
+		position:absolute;
+        overflow-y: scroll;
+		right:0px;
+		top:0;
+		width:50%;
+		height:690px;
+		cursor: auto;
+		h1 {
+			padding-left:10px;
+		}
+		h5 {
+			padding-left:10px;
+		}
+		li {
+			cursor: auto;
+			width:auto;
+			margin:0 20px;
+			padding: 15px 0;
+			border-bottom:1px solid $greyLightest;
+			border-left:none;
+			@include font-size (12, 15);
+			&:last-child {
+				border-bottom:none;
+			}
+			h4 {
+				padding-bottom:5px;
+			}
+			p {
+				@include font-size (12, 15);
+				padding-bottom:10px;
+			}
+			.donut-graph-container {
+				width:auto;
+				display:inline-block;
+			}
+			.compare {
+				display:inline-block;
+				vertical-align:top;
+				padding-top:13px;
+				width:auto;
+				li {
+					padding:10px 0 0px 30px;
+					margin:0;
+					position:relative;
+					border-bottom:none;
+
+					i {
+						@include font-size (20, 20);
+						position:absolute;
+						top:6px;
+						left:10px;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+.promote-your-city-page {
+	text-align:center;
+
+
+	.hero {
+		background: url('/sites/all/themes/liv/livability/images/promote-hero.jpg');
+		background-position: center center !important;
+		@include background-size (cover !important) ;
+		height:520px;
+		padding:0 25px;
+
+		h1 {
+			color:white;
+			@include text-shadow (rgba(0,0,0, 0.75) 2px 2px 2px);
+			@include font-size(48,58);
+			font-weight:normal;
+			padding-top:145px;
+		}
+		.white-border-link {
+			border: 2px solid $white;
+			@include border-radius(3px);
+			padding:10px 29px;
+			color:$white;
+			margin-top:55px;
+			display:inline-block;
+			font-weight:bold;
+			&:hover {
+				text-decoration:none;
+				background:white;
+				color:$black;
+
+			}
+		}
+	}
+
+	.market-your-city {
+		padding-left:10%;
+		padding-right:10%;
+	}
+
+	.benefits {
+		.seal-orange i {
+			@include font-size (24,62);
+		}
+		padding-left:100px;
+		padding-right:100px;
+		padding-bottom:80px;
+
+		h3 {
+			font-weight:bold;
+			padding-top:20px;
+			@include font-size (16, 22);
+		}
+		.one-q {
+			padding: 20px 38px 0;
+		}
+
+	}
+	.quotes {
+		background:$green;
+		padding-bottom:55px;
+		i {
+			color:#bee1a1;
+			@include font-size (45);
+			display:block;
+			padding-bottom:30px;
+		}
+		.quotes-slider {
+			color:$white;
+			height:235px;
+
+			p {
+				@include font-size (20, 36);
+				padding: 0 5%;
+			}
+			.author {
+				@include font-size (16, 20);
+				padding: 0 100px;
+				padding-top:45px;
+				span {
+					display:block;
+					padding-top:4px;
+					@include font-size (14,18);
+				}
+			}
+			.rsBullet.rsNavSelected span {
+				background:$white;
+			}
+			.rsBullet {
+				padding: 0 11px 15px;
+			}
+			.rsBullet span {
+				background:transparent;
+				height:14px;
+				width:14px;
+				border-color:$white;
+			}
+		}
+	}
+
+	.tiers {
+		max-width:1020px;
+		margin:0 auto;
+		h2 {
+			margin-bottom:85px;
+		}
+		em {
+			color: $greyLight;
+			display:block;
+			clear:both;
+			padding-top:20px;
+		}
+		.one-third {
+			position:relative;
+			width:33.3%;
+			margin-right:0;
+			padding-top:100px;
+			height:480px;
+			z-index:9;
+			border-left: 0;
+			border-right: 0;
+			p {
+				@include font-size (16, 36);
+			}
+			&.tall {
+				background: $white;
+				position:relative;
+				margin-top:-20px;
+				height:520px;
+				z-index:10;
+				.circle-icon {
+					border-left: 1px solid #d7d7d7;
+					border-right: 1px solid #d7d7d7;
+				}
+			}
+			.circle-icon {
+				bottom:auto;
+				top:0;
+				height: 58px;
+
+				span {
+					margin: 28px auto 0;
+					display:block;
+					position:relative;
+					i {
+						position:relative;
+					}
+				}
+				left:0;
+				background: #000000;
+				margin:0;
+				width:100%;
+			}
+
+			.cost {
+				color:$white;
+				display:block;
+				position:absolute;
+				bottom:0;
+				width:100%;
+				height:58px;
+				@include font-size (21, 58);
+
+			}
+			&.green-section{
+				strong {
+					color:$green;
+				}
+				.cost {
+					background: $green;
+				}
+			}
+			&.blue-section{
+				strong {
+					color:$blue;
+				}
+				.cost {
+					background: $blue;
+				}
+			}
+			&.orange-section{
+				strong {
+					color:$orange;
+				}
+				.cost {
+					background: $orange;
+				}
+			}
+		}
+	}
+	.logos {
+		padding:20px 0;
+		ul li {
+			width:12.5%;
+			float:left;
+			padding: 30px 0;
+		}
+	}
+	.get-started {
+		background:$blue;
+		color:$white;
+		text-align:left;
+		padding-left:10%;
+		padding-right:10%;
+		p {
+			padding-right:40px;
+		}
+		h2 {
+			margin-bottom:5px;
+		}
+		h3 {
+			margin-bottom:30px;
+			text-align:center;
+		}
+		input[type="text"] {
+			width:46%;
+			margin: 0 2%;
+			float:left;
+			margin-bottom:20px;
+		}
+		input[type="checkbox"], input[type="submit"] {
+			margin-left:2%;
+
+		}
+		input[type="checkbox"], label {
+			padding-bottom:20px;
+			display:inline-block;
+		}
+	}
+
+}
+
+.about-us {
+	.about-us-hero {
+		background: url('/sites/all/themes/liv/livability/images/about-us-hero.jpg');
+		background-position: center center !important;
+		@include background-size (cover !important) ;
+		height:450px;
+		.breadcrumbs {
+			li, li span {
+				color: white;
+			}
+			a {
+				color: white;
+			}
+		}
+		.about-us-hero-content {
+			text-align:center;
+			padding-top:123px;
+			img {
+				width:auto;
+				margin:0 auto;
+
+			}
+			h1{
+				@include font-size (36, 50);
+				color:white;
+				@include text-shadow (rgba(0,0,0, 0.75) 2px 2px 2px);
+			}
+		}
+	}
+	.facts-stats {
+		padding-bottom:280px;
+		padding-top:45px;
+		position:relative;
+		h2 {
+			z-index:2;
+			position:relative;
+			margin-bottom:170px;
+		}
+		.map-bg {
+			background: url('/sites/all/themes/liv/livability/images/map-blue.png');
+			z-index:1;
+			background-position: center center !important;
+			@include background-size (cover !important) ;
+			position:absolute;
+			width:100%;
+			width:961px;
+			height:588px;
+			left:50%;
+			margin-left: -480px;
+			top:65px;
+		}
+		.infograph {
+			position:relative;
+			z-index:2;
+			max-width:1210px;
+			margin: 0 auto;
+			background:$white;
+			.one-q {
+				border-right: 3px solid #cccccc;
+				&.last, &:last-child {
+					border-right:none;
+				}
+			}
+		}
+	}
+	.leadership {
+		.leaders {
+			li {
+				text-align:center;
+				.circle {
+					width:255px;
+					height:255px;
+					margin:10px auto 20px;;
+				}
+				&:last-child {
+					margin-right:0;
+				}
+				.name {
+					display:block;
+					@include font-size (16, 24);
+					font-weight:bold;
+				}
+				.title {
+					display:block;
+					@include font-size (13,18);
+					color:$greyLight;
+				}
+			}
+
+		}
+	}
+	.partners {
+		ul {
+			margin-top:55px;
+			display:block;
+			li {
+				width: 14.66%;
+				margin: 0 1%;
+				background: $grey;
+				height:100px;
+				float:left;
+				margin-bottom:20px;
+			}
+		}
+	}
+	.about {
+		.logos {
+			max-width:960px;
+			margin:0 auto;
+			img {
+				//width:auto;
+				max-width: 253px;
+				margin:40px auto 0;
+			}
+		}
+	}
+}
+
+.generic-content {
+	.generic-content-hero {
+		background: #f4f4f4;
+
+		h1 {
+			@include font-size (36);
+			text-align: center;
+			color:$black;
+			padding-top:25px;
+		}
+		.subhead {
+			padding-top:15px;
+			text-align:center;
+			@include font-size (18);
+			padding-bottom:65px;
+		}
+	}
+
+	article {
+		max-width:1000px;
+		padding: 50px 0;
+		margin:0 auto;
+		h2 {
+			@include font-size (24,30);
+			padding-top:10px;
+			padding-bottom:25px;
+		}
+		p {
+			@include font-size (14, 18);
+			padding-bottom:25px;
+		}
+		ul {
+			margin: 0 0 25px;
+		}
+		li {
+			padding-bottom:5px;
+			list-style: disc;
+			list-style-position:outside;
+			margin-left:20px;
+		}
+
+	}
+}
+
+
+.find {
+	.find-hero {
+		background: url('/sites/all/themes/liv/livability/images/find-hero.jpg');
+		background-position: center center !important;
+		@include background-size (cover !important) ;
+		height:520px;
+		.breadcrumbs {
+			li, li span {
+				color: white;
+			}
+			a {
+				color: white;
+			}
+		}
+		.find-hero-content {
+			text-align:center;
+			padding-top:83px;
+			h1, p{
+				color:white;
+				@include text-shadow (rgba(0,0,0, 0.75) 2px 2px 2px);
+			}
+			h1 {
+				@include font-size(48);
+				font-weight:bold;
+				padding-bottom:10px;
+			}
+			p {
+				@include font-size(18,25);
+				padding-bottom:20px;
+			}
+			form {
+				display:inline-block;
+				position:relative;
+				input {
+					width:515px;
+					padding:18px 40px 18px 15px;
+					border: 1px solid rgba(73,73,73,.4);
+					border-radius:3px;
+				}
+				i {
+					position:absolute;
+					top:0px;
+					right:15px;
+					@include font-size (20,55)
+				}
+			}
+		}
+	}
+	.states {
+		.ad {
+			padding-bottom: 2em;
+		}
+		h1 {
+			text-align:center;
+			color:#5e5e5e;
+			@include font-size(36,40);
+			padding-top:10px;
+			span {
+				color:$green;
+				font-weight:bold;
+			}
+			padding: 10px 0 35px;
+		}
+		background:#f6f6f6;
+		padding:30px;
+
+		ul {
+			width:70%;
+			margin:0 auto 2em;
+			@include column-count(5);
+			a {
+				@include font-size (14,24);
+				color:#5e5e5e;
+				i {
+					/* position:absolute; */
+					display: inline-block;
+					left:0;
+					text-align:right;
+					padding-right:4px;
+					width:30px;
+					@include font-size (20,26);
+
+					color:transparent;
+				}
+				&:hover {
+					color:$green;
+					text-decoration:none;
+					i {
+						color:$green;
+					}
+				}
+			}
+		}
+	}
+	#map {
+		background: url(/sites/all/themes/liv/livability/images/us-map-bg.png);
+		background-position: center center !important;
+		@include background-size (cover !important) ;
+		width:70%;
+		margin:20px auto;
+	}
+	tspan {
+		font-size:10px;
+		font-family: "HelveticaNeue", "Helvetica", "Arial";
+		font-weight:normal;
+		&:hover {
+			fill:white;
+		}
+	};
+
+	.most-popular {
+		background-image: url(/sites/all/themes/liv/livability/images/popular-cities-bg.jpg);
+		background-position: top center !important;
+		background-color: #f6f6f6;
+		background-repeat:no-repeat;
+		padding-bottom:30px;
+		h2 {
+			color:white;
+				@include text-shadow (rgba(0,0,0, 0.75) 2px 2px 2px);
+				@include font-size(36);
+				font-weight:bold;
+				padding: 40px 0 33px;
+				text-align:center;
+		}
+		ul.top-three {
+			margin-bottom:35px;
+			li {
+				.no {
+					width: 172px;
+					height:172px;
+					position:relative;
+					@include font-size (40, 170);
+					border-width: 2px;
+					margin:0 auto 20px;
+					display:block;
+					// needs latest Compass, add '@import "compass"' to your scss
+					background-color: rgb(246,246,246); // Old browsers
+					@include filter-gradient(#f6f6f6, #f6f6f6, vertical); // IE6-9
+					@include background-image(linear-gradient(top,  rgba(246,246,246,1) 0%,rgba(255,255,255,1) 50%,rgba(228,228,228,1) 50%,rgba(246,246,246,1) 58%,rgba(246,246,246,1) 100%));
+
+				}
+				.no:before {
+					content: "#";
+				}
+				.city, .state {
+					text-align:center;
+					padding:0 0 5px;
+					display:block;
+				}
+			}
+		}
+		ul {
+			width:80%;
+			margin:0 auto;
+			@include column-count(3);
+
+			li {
+				padding-bottom:20px;
+				position:relative;
+				.no {
+					border-radius:50%;
+					border-width: 1px;
+					border-color: $grey;
+					border-style: solid;
+					width:43px;
+					height:43px;
+					text-align:center;
+					color:$grey;
+					display:inline-block;
+					@include font-size (24,41);
+
+					position:absolute;
+					font-weight:bold;
+					margin-left:1px;
+				}
+				&:nth-child(n+7) .no {
+					text-indent: -3px;
+					letter-spacing: -2px;
+					padding-left:0px;
+				}
+				a {
+					&:hover {
+						text-decoration:none;
+						.no, .city {
+							color:$green;
+						}
+						.no {
+							border-color:$green;
+						}
+
+					}
+
+					color:$grey;
+					.city {
+						@include font-size (20);
+						font-weight:bold;
+						display:block;
+						padding-left:50px;
+						padding-top:5px;
+						padding-bottom:2px;
+					}
+					.state {
+						color:$greyLight;
+						@include font-size (14);
+						display:block;
+						padding-left:50px;
+
+					}
+				}
+			}
+		}
+	}
+}
+html.touch .more-stories ul li a span {
+	color:$white !important;
+	font-size:9px !important;
+}
+.more-stories {
+	.summary {
+		padding:14px 0 0 !important;
+	}
+	display:block;
+	background:$pink !important;
+	font-weight:normal;
+	color:$white;
+	ul {
+		width: 242px;
+		margin: -43px auto 0;
+		li {
+
+			margin: 5px 0 0;
+			width:80px;
+			display:block;
+			float:left;
+			background:$pink;
+			font-size:12px;
+			text-align:center;
+
+			a {
+				width:60px;
+				margin:0 auto;
+				display:block;
+				color: $white;
+				&:hover {
+					color: $pink;
+
+					text-decoration:none;
+					i {
+						color:$pink;
+						background:$white;
+					}
+					span {
+						color:$white;
+					}
+				}
+				i {
+					@include border-radius (50%);
+					border: 2px solid white;
+					display:block;
+					@include font-size (26, 56);
+					width:60px;
+					height:60px;
+				}
+				i.text {
+					@include font-size (13, 56);
+					font-style:normal;
+				}
+				span {
+					@include font-size (10, 12);
+					padding-top:4px;
+					display:block;
+					margin-left: -5px;
+					color:$pink;
+				}
+			}
+		}
+	}
+	.more {
+		position:absolute;
+		top:0;
+		display:block;
+		margin: 25px 0;
+		padding: 0 10%;
+		width: 100%;
+		a {
+			@include font-size (34, 38);
+			color:$white;
+			display:block;
+		}
+	}
+}
+
+.top-100-banner a {
+	height: 151px;
+	width:92.2%;
+	margin:30px 3.9% 0;
+	position:relative;
+	.top-100-txt {
+		height:37px;
+		max-width:431px;
+		margin:0 auto;
+	}
+	.exclusive {
+		top:0;
+		position:absolute;
+		left:0;
+		width:100%;
+		height:20px;
+		padding: 0 20px;
+		color:$pink;
+		display:block;
+		text-indent:0;
+		.right {
+			float:right;
+		}
+	}
+
+}
+
+.promote-your-city {
+	padding-top:20px;
+	span.bg-diag {
+		background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+		display:block;
+	}
+	span.banner {
+
+		height:130px;
+		width:100%;
+		position:relative;
+		padding-top:20px;
+		background-repeat: no-repeat;
+		span {
+			position:absolute;
+			display:block;
+			width:100%;
+			height:100%;
+			top:0;
+			text-align:center;
+			@include font-size (14,16);
+			color:$grey;
+			text-indent:0;
+			text-transform: uppercase;
+			padding-top:15px;
+			a {
+				display:inline;
+				color:$pink;
+				font-weight:bold;
+			}
+		}
+	}
+}
+.best-of.four {
+	ul {
+		border-top:none;
+		padding: 25px 0 35px;
+	}
+	ul li {
+		width:25%;
+		.seal-orange {
+		}
+	}
+}
+.best-of {
+	padding: 30px 5.7% 10px;
+	ul {
+		border-bottom:1px solid #e6e6e6;
+		border-top:1px solid #e6e6e6;
+		padding:35px 0;
+
+	}
+	ul li {
+		width:33.33%;
+		float:left;
+		position:relative;
+		margin-top: 10px;
+		margin-bottom: 10px;
+		.circle {
+			margin: 0 auto;
+			width:265px;
+			height:265px;
+		}
+
+		.fill-overlay {
+			position:absolute;
+			top:0;
+			display:block;
+			opacity:1;
+			background: rgba(0,0,0,.3);
+			@include transition-property(background);
+			@include transition-duration(.3s);
+		}
+
+		.left {
+			width:100%;
+		}
+		a {
+			&:hover {
+				h2 {
+					@include text-shadow (rgba(0,0,0, 1) 1px 1px 5px);
+					text-decoration:none;
+				}
+				.fill-overlay {
+					background: rgba(0,0,0,.1);
+
+				}
+
+			}
+		}
+		h2 {
+			position:absolute;
+			color:$white;
+			top:62px;
+			left:75px;
+			width:150px;
+			height:270px;
+			@include transition-property(text-shadow);
+			@include transition-duration(.3s);
+			@include text-shadow (rgba(0,0,0, 1) 1px 1px 1px);
+			@include font-size (22,24);
+			text-transform: uppercase;
+			font-weight:bold;
+			span {
+				font-weight:normal;
+				font-style: italic;
+				@include font-size (24, 36);
+				text-transform: capitalize;
+			}
+			i {
+				margin-top:10px;
+				display:block;
+				@include font-size (32,32);
+				position:absolute;
+			}
+
+		}
+		.interact {
+			padding-top:25px;
+			margin:0;
+			text-align:center;
+		}
+		&.last {
+			border-bottom:0;
+		}
+		.seal-orange {
+			position:absolute;
+			top:205px;
+			left:194px;
+			i {
+				@include font-size (18, 62);
+				text-align:center;
+				text-indent:0;
+				width:62px;
+				display:block;
+			}
+		}
+	}
+}
+
+.page-best-places,
+.page-top-10 {
+	.best-of {
+		ul {
+			li {
+				margin-bottom: 4em;
+			}
+		}
+	}
+}
+
+.page-best-places {
+  h1 {
+	padding: 0 0 15px;
+  }
+}
+
+.left-nav-full .best-of {
+	.circle {
+		width:245px;
+		height:245px;
+	}
+	h2 {
+		@include font-size (25,25);
+	}
+	.seal-orange {
+		top:185px;
+		left: 193px;
+		top:65%;
+		left:71%;
+	}
+}
+
+.moving-soon-container {
+	display:block;
+	color: $grey;
+	background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+	input {
+		width:88%;
+		margin:0 auto 10px auto;
+		display:block;
+	}
+
+	p {
+		padding:15px 30px;
+		text-align:center;
+
+	}
+	.links {
+		display:block;
+		padding:16px 6%;
+		a {
+			color:$grey;
+			font-weight:bold;
+			margin-right: 8%;
+			position:relative;
+			padding-left:22px;
+			i {
+				top:-2px;
+				left:0;
+				position:absolute;
+			}
+			@include font-size (12, 15);
+
+			&.button-pink {
+				@include font-size (16,13);
+				width:100%;
+			}
+		}
+		a.last {
+			margin-right:0;
+		}
+		.button-pink {
+			color:$white;
+			display:block;
+			margin-bottom:20px;
+			margin-right:0;
+		}
+	}
+}
+
+.moving-soon-large {
+	padding-top:20px;
+
+	.moving-soon-container {
+		padding:0 0 20px 0;
+		position:relative;
+		.circle-icon {
+			bottom: auto;
+			top:35px;
+			margin:0;
+			left:15px;
+			i {
+				@include font-size (28,58);
+				@include transform (rotate(-19deg), false);
+			}
+		}
+		p {
+			padding:15px 16%;
+			font-style: italic;
+		}
+	}
+	.input-container {
+
+		display:block;
+		width:75%;
+		margin:0 auto;
+		input {
+			width:46%;
+			margin: 10px 2% !important;
+			float:left;
+			margin:0;
+		}
+		input.datepicker {
+			width:20%;
+		}
+		a.button-pink {
+			width:24%;
+			float:left;
+			margin-top:10px;
+			padding:16px;
+			@include font-size(14,16);
+		}
+	}
+
+	h3 {
+		background: $green;
+	}
+}
+
+.estimate-hero {
+	.map {
+		iframe {
+			height:200px;
+		}
+	}
+	.moving-params {
+		ul {
+			li {
+				width: 29%;
+
+				&.date {
+					width:25%;
+				}
+				&.house {
+					width:17%;
+				}
+				float:left;
+				height:130px;
+				padding: 20px 22px;
+				position:relative;
+				color:$greyDark;
+				i {
+					@include font-size (32);
+					position:absolute;
+					left:20px;
+					top:23px;
+				}
+				i.icon-calendar {
+					@include font-size (30);
+				}
+				h2 {
+					@include font-size (24,28);
+					padding-left:30px;
+				}
+				h3 {
+					@include font-size(12,18);
+					text-transform: uppercase;
+					padding-left:30px;
+
+				}
+				.stacked {
+					float:left;
+					h3 {
+						padding-left:0;
+
+					}
+				}
+
+				.day, .rooms {
+					@include font-size (40);
+					float:left;
+					padding-right:10px;
+				}
+				.day {
+					padding-left:35px;
+				}
+				.change {
+					color:$greyDark;
+
+					@include font-size(12);
+					padding-top:10px;
+					text-decoration:underline;
+					position:absolute;
+					bottom:18px;
+					left:52px;
+				}
+				&.origin {
+					i, h2 {
+						color:$pink;
+					}
+				}
+				&.destination {
+					i, h2 {
+						color:$green;
+					}
+				}
+
+				&:after {
+					content: "\f105";
+					font-family: livability;
+					@include font-size (65);
+					color: $greyLight;
+					position:absolute;
+					right:0px;
+					top:30px;
+				}
+				&:last-child {
+					&:after {
+						display:none;
+					}
+				}
+			}
+		}
+	}
+	.get-quote {
+		background: url(/sites/all/themes/liv/livability/images/diagonal.png);
+		margin-bottom:40px;
+		border-bottom: 1px solid #dadada;
+		.one-third {
+			margin-bottom:0;
+
+			&:last-child {
+				margin-right:0;
+			}
+		}
+		.quote-params {
+			margin-top: 13px;
+			margin-bottom:13px;
+			ul {
+				margin: 0 0;
+				li {
+					@include font-size (14, 24 );
+					position:relative;
+					padding:1px 0 2px;
+					padding-left: 48px;
+					i {
+						position:absolute;
+						left:20px;
+						display: inline-block;
+					}
+				}
+			}
+			border-right: 1px solid #dadada;
+
+		}
+		.estimate {
+			text-align:center;
+
+			.total {
+				padding-top:30px;
+				display:block;
+				color:$pink;
+				@include font-size (48,55);
+				font-weight:bold;
+			}
+			.legend {
+				@include font-size (14);
+				display:block;
+			}
+		}
+		.custom-quote {
+			float:right;
+
+			@include font-size (30, 44);
+
+			i {
+				margin-left: 30px;
+				@include font-size(28);
+			}
+			a {
+				color:$white;
+				height:135px;
+				background: $pink;
+				display:block;
+				width:100%;
+				padding: 22px 27px;
+				&:hover {
+					text-decoration:none;
+					background: #FC9696;
+					color: $white;
+				}
+			}
+		}
+	}
+}
+
+.signup {
+	overflow:hidden;
+	margin:50px 20px;
+
+	.signup-container {
+		margin:0 auto;
+		max-width: 520px;
+		padding: 0 20px;
+		position:relative;
+
+
+		z-index:1;
+
+		h2 {
+			color:$green;
+			@include font-size (30);
+			font-weight:bold;
+			text-align:center;
+			padding-bottom:15px;
+		}
+		p {
+			text-align:center;
+			@include font-size (13,24);
+			padding-bottom:15px;
+		}
+		form {
+			margin:0 auto;
+			background:$white;
+			padding:0 15px;
+			input[type="text"] {
+				width:67%;
+				margin-right:2%;
+			}
+			input[type="submit"] {
+				width:30%;
+				margin-left:0;
+			}
+		}
+	&:before, &:after {
+		content: "";
+		width:249px;
+		height:105px;
+		position:absolute;
+		//background-size: 249px 105px;
+
+	}
+
+	&:before {
+		background-image: url("/images/city-left.png");
+		left:-269px;
+		margin-left:15%;
+		bottom:3px;
+		z-index:-1;
+	}
+	&:after {
+		background-image: url("/images/city-right.png");
+		right: -269px;
+		margin-right:20%;
+		bottom:3px;
+		z-index:-1;
+	}
+
+
+	}
+
+
+
+}
+
+.popular-cities, .cities-nearby {
+	display:block;
+	color: $grey;
+	ul {
+		border-top: 1px solid $white;
+		li {
+			border-top: 1px solid $white;
+			border-bottom: 1px solid #e6e6e6;
+			font-style: italic;
+
+			position:relative;
+			@include font-size (15, 75);
+			a {
+				display:block;
+				color: #8b8b8b;
+				border-bottom: 1px solid white;
+			}
+			i {
+				padding: 0 15px 0 0 ;
+				position:absolute;
+				right:0;
+				@include font-size (32, 75);
+				opacity: 0;
+			}
+			a:hover {
+				background:$blueLightest;
+				color:white;
+				text-decoration:none;
+				i {
+					opacity:1;
+					background: $blueLightest
+				}
+			}
+			.number {
+				background: $blueLightest;
+				@include font-size (30, inherit);
+				float:left;
+				width: 75px;
+				color:$white;
+				text-align:center;
+				margin-right:10px;
+			}
+		}
+	}
+}
+
+.livability-partners {
+	ul li {
+		border-bottom:none !important;
+		padding:20px 0 10px 0 !important;
+		clear: left;
+	}
+	.partner-logo {
+		width:50%;
+		float:left;
+		img {
+			width:auto;
+			max-height:36px;
+		}
+
+	}
+	.partner-info {
+		@include font-size (10,13);
+		float:left;
+		width:50%;
+		padding-left:10px;
+	}
+}
+
+.weather {
+	.right-now {
+		display:block;
+		position:relative;
+
+		.date {
+			position:absolute;
+			left:30px;
+			top:28px;
+		}
+		.temp {
+			@include font-size (60,60);
+		}
+		.condition {
+			[class^="weather-"], [class*=" weather-"] {
+				font-size:80px;
+			}
+		}
+		.temp-toggle {
+			position: absolute;
+			right:25px;
+			top:15px;
+			a {
+				position:absolute;
+				width:15px;
+				@include font-size (11,18);
+				color:$grey;
+				text-align:center;
+				height:20px;
+			}
+			.fahrenheit {
+				border-bottom:1px solid $grey;
+			}
+			.celsius {
+				top: 20px;
+			}
+			.active {
+				font-weight:bold;
+			}
+		}
+	}
+}
+
+.weather.widget {
+	.right-now {
+		height:126px;
+		background: $blueLight;
+		color: $white;
+		.temp-toggle {
+			.fahrenheit {
+				border-bottom:1px solid $white;
+			}
+			 a {
+			color:$white;
+			}
+		}
+	}
+	.condition {
+		position:absolute;
+		top:35px;
+		left: 125px;
+		[class^="weather-"], [class*=" weather-"] {
+			font-size:80px;
+			&:before, &:after {
+				color: $white !important;
+
+			}
+		}
+	}
+	.temp {
+		top: 48px;
+		position:absolute;
+		left:30px;
+	}
+	.forecast {
+		[class^="weather-"], [class*=" weather-"] {
+			font-size:40px;
+			&:before,&:after {
+				color:$blue !important;
+			}
+		}
+		ul li {
+			.day, .temp, .condition {
+				position:relative;
+				color:$grey;
+			}
+
+			.day {
+				width:147px;
+			}
+			.temp {
+				float:right;
+				width:115px;
+				top:0;
+				left:auto;
+			}
+			.condition {
+				float:right;
+				width:41px;
+				margin-top:-10px;
+				top:0;
+				left:auto;
+			}
+		}
+	}
+}
+
+.weather.large-forecast {
+	border:1px solid $greyLightest;
+	padding: 35px 30px;
+	.right-now {
+		.temp, .condition, .condition-text {
+			float:left;
+		}
+		.temp {
+			@include font-size (75)
+		}
+		.condition {
+			width:96px;
+			height:50px;
+			position:relative;
+			margin-top:0px;
+			margin-left:-5px;
+		}
+		.condition-text {
+			padding-top:25px;
+			color:$grey;
+		}
+	}
+	.forecast-chart {
+		img {
+			width:100%;
+		}
+	}
+	.forecast {
+		ul {
+			margin-top:10px;
+			li {
+				width: 14.28%;
+				float:left;
+				border-right: 1px solid $greyLightest;
+				padding:10px 0px 20px;
+				&:last-child {
+					border-right:none;
+				}
+			}
+		}
+		.day, .condition {
+			display:block;
+			color:$grey;
+			text-align:center;
+		}
+		.condition {
+			@include font-size (56);
+			text-align:center;
+			padding-top:5px;
+			width:60px;
+
+			position:relative;
+			height:65px;
+			display:block;
+			i {
+				@include font-size (56);
+				width:56px;
+				height:56px;
+				margin:0 auto;
+				left:0;
+				position:absolute;
+			}
+		}
+		.temp-high {
+			font-weight:bold;
+			padding-left:20px;
+		}
+		.temp-low {
+			padding-right:20px;
+		}
+		.temp-high, .temp-low {
+			float:left;
+			width:50%;
+			text-align:center;
+			height:20px;
+			color:$grey;
+			span {
+				display:block;
+				@include font-size(10);
+				padding-top:3px;
+				position:relative;
+				left:-3px;
+			}
+		}
+	}
+
+}
+
+.city-weather-summary {
+	.forecast-chart {
+		display:block;
+		clear:both;
+	}
+}
+
+.city-weather-detailed {
+	padding-top:20px;
+	margin-top:20px;
+	h4 {
+		padding: 20px 20px 15px 20px;
+		text-transform: uppercase;
+		@include font-size (16,16);
+	}
+	.radar {
+		background: $greyDarkest;
+		min-height: 435px;
+		display:block;
+	}
+
+	.forecast-details {
+		ul {
+			padding:0 20px 20px 20px;
+			li {
+				width:50%;
+				float:left;
+				position:relative;
+				&:nth-child(odd) {
+					border-right:1px solid $greyLightest;
+				}
+				&:nth-child(3), &:nth-child(4) {
+					border-top:1px solid $greyLightest;
+				}
+				.condition {
+					width:60px;
+					margin:0 auto;
+					height:50px;
+					display:block;
+					position:relative;
+					top:-5px;
+					i {
+						@include font-size (56);
+						width:56px;
+						height:56px;
+						margin:0 auto;
+					}
+				}
+
+				.time, .metric {
+					text-align:center;
+					display:block;
+					padding: 0 0 10px 0;
+					span {
+						color: $grey;
+					}
+				}
+			}
+		}
+	}
+	.almanac {
+		dl {
+			@include font-size (12, 23);
+			padding: 0 0px 20px 20px;
+			display:block;
+			i {
+				color:$grey;
+				@include font-size (12, 23);
+			}
+			dt.label {
+				color:$blue;
+				text-transform: uppercase;
+				font-weight:bold;
+			}
+			dd, dt {
+				float:left;
+			}
+			dt {
+				min-width:93px;
+				clear:both;
+			}
+			dd {
+				min-width: 45px;
+					@include font-size (11, 23);
+				strong{
+					@include font-size (12, 23);
+				}
+			}
+		}
+	}
+}
+
+.city-accolades {
+	li {
+		border-bottom:none;
+		padding:25px 13px;
+		position:relative;
+		display:block;
+	}
+	li:nth-child(even) {
+		background: $greyLightest;
+	}
+	li:last-child {
+		border-bottom:1px solid $greyLightest;
+	}
+
+	.seal-orange {
+		position:absolute;
+		top:19px;
+	}
+	.accolade, a {
+		padding-left:70px;
+		color:$black;
+        display:block;
+        padding-right:15px;
+	}
+	.accolade {
+		color:$orange;
+		text-transform:uppercase;
+		display:block;
+		@include font-size(11,13);
+		padding-top:5px;
+	}
+	a {
+		@include font-size (20,27);
+	}
+	.icon-arrow-right {
+		position:absolute;
+		@include font-size (40, 95);
+		right:10px;
+		top:0;
+		&:hover {
+			text-decoration:none;
+		}
+	}
+}
+
+.city-accolades-small {
+	h3 {
+		background:none;
+		color:$greyDark;
+		text-transform: capitalize;
+		text-align:left;
+		padding:0;
+		margin-top:5px;
+	}
+	ul {
+		margin-top:10px;
+	}
+	li {
+		height:40px;
+		border-bottom:none;
+		padding:0;
+		background:none;
+		position:relative;
+		display:block;
+	}
+	.seal-orange-small {
+		position:absolute;
+		text-align:center;
+		i {
+			width:32px;
+			text-align:center;
+			@include font-size (13,32);
+		}
+	}
+	.accolade, a {
+		color:$greyDark;
+		@include font-size(13,32);
+
+	}
+	.accolade {
+		color:$orange;
+		font-weight:bold;
+		display:inline-block;
+		@include font-size(13,32);
+		padding-left:36px;
+	}
+	.icon-arrow-right {
+		position:absolute;
+		@include font-size (40, 95);
+		right:10px;
+		top:0;
+		&:hover {
+			text-decoration:none;
+		}
+	}
+}
+
+.city-quote {
+	padding: 20px 15px;
+	border-bottom:1px solid $greyLightest;
+	border-top:1px solid $greyLightest;
+	color:$grey;
+}
+
+.widget.standard.from-the-blog{
+	ul {
+		li {
+			h2 {
+				@include font-size (18, 23);
+			}
+		}
+	}
+}
+
+.widget.standard.related-articles {
+	ul {
+		margin: 0 10px;
+		li {
+			padding:10px 0;
+		}
+	}
+}
+
+.widget.standard {
+	display:block;
+	ul {
+		margin: 0 20px;
+		li {
+			padding: 20px 0;
+			border-bottom: 1px solid $greyLightest;
+			overflow:hidden;
+			a:hover {
+				color:$black;
+			}
+			h2 {
+				@include font-size (14, 20);
+				font-style: italic;
+				color:$black;
+				font-weight:normal;
+
+			}
+			.interact {
+				padding-top:8px;
+			}
+			p {
+/*				font-family: Georgia;
+				color:$greyDark; */
+				padding:17px 0;
+			}
+			.author {
+				display:block;
+				color: $greyDarkest;
+
+				a {
+					color:$black;
+					.name-title {
+						float:left;
+						padding-top:5px;
+						@include font-size (15,20);
+						font-weight:bold;
+						span {
+							display:block;
+							font-weight:normal;
+							@include font-size (12,16);
+						}
+					}
+					.view-author {
+						float:right;
+						color:$pink;
+						text-transform:uppercase;
+						position:relative;
+						padding: 15px 41px 15px 0;
+						@include font-size (12,16);
+						i {
+							position:absolute;
+							top:6px;
+							right:0;
+							@include font-size (32,32);
+							border: 1px solid $white;
+						}
+					}
+					&:hover {
+
+						text-decoration:none;
+						i {
+							color:$white;
+							background:$pink;
+							@include border-radius (50%,50%);
+							border:1px solid $pink;
+						}
+
+						.name-title {
+							text-decoration: underline;
+						}
+					}
+
+				}
+
+
+			}
+		}
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (min-device-pixel-ratio: 1.5), (min-resolution: 144dppx) {
+	header {
+		.logo-container {
+			.logo {
+				background: url(/sites/all/themes/liv/livability/images/logo@2x.png) no-repeat center 6px;
+				background-size: 214px 47px;
+			}
+		}
+	}
+}
+
+// Color tester
+.color-sheet-bg {
+	display:block;
+	margin-top:50px;
+	span {
+		color: $black;
+		width:80px;
+		height:80px;
+		display:block;
+		float:left;
+		border:1px solid black;
+		margin-left:-1px;
+	}
+    .white{background:$white}
+    .black{background:$black}
+    .grey{background:$grey}
+    .greyDark{background:$greyDark}
+    .greyDarkest{background:$greyDarkest}
+    .greyLight{background:$greyLight}
+    .greyLightest{background:$greyLightest}
+    .green{background:$green}
+    .orange{background:$orange}
+    .pink{background:$pink}
+    .blue{background:$blue}
+    .blueLight{background:$blueLight}
+}
+
+.color-sheet-font {
+	display:block;
+	span {
+		color: $black;
+		width:80px;
+		height:80px;
+		display:block;
+		float:left;
+		border:1px solid black;
+		margin-left:-1px;
+	}
+	.white{color:$white}
+    .black{color:$black}
+    .grey{color:$grey}
+    .greyDark{color:$greyDark}
+    .greyDarkest{color:$greyDarkest}
+    .greyLight{color:$greyLight}
+    .greyLightest{color:$greyLightest}
+    .green{color:$green}
+    .orange{color:$orange}
+    .pink{color:$pink}
+    .blue{color:$blue}
+    .blueLight{color:$blueLight}
+}
+
+.view-metro-areas,
+.view-county-city-list {
+	.views-field {
+		text-align: center;
+	}
+	table {
+		width: 80%;
+		margin: auto;
+	}
+
+	tr {
+		/*width: 75%;*/
+	}
+	td {
+		//width: 20%;
+		margin: auto;
+
+		a {
+
+			@include font-size (14,24);
+			color:#5e5e5e;
+			position:relative;
+			i {
+				/* position:absolute; */
+				display: inline-block;
+				left:0;
+				text-align:right;
+				padding-right:4px;
+				width:30px;
+				@include font-size (20,26);
+
+				color:transparent;
+			}
+			&:hover {
+				color:$green;
+				text-decoration:none;
+				i {
+					color:$green;
+				}
+			}
+		}
+	}
+}
+.view-metro-areas {
+	td {
+			width: 15%;
+		}
+}
+.view-county-city-list {
+		td {
+			width: 20%;
+		}
+}
+.node-type-county {
+	.city-details {
+		.city-summary {
+			p {
+				line-height: 20px;
+			}
+		}
+	}
+}
+
+
+.county-area {
+	float: left;
+	clear: both;
+	margin-left: 40px;
+	margin-top: -20px;
+	a {
+		color: #999999;
+	}
+}
+
+.page-metro {
+	.county-area {
+		margin-top: -15px;
+	}
+}
+
+.node-type-city {
+	.county-area {
+		margin-top: -20px;
+	}
+}
+.card-city {
+	a {
+		color: #FCAE17;
+		line-height: 36px;
+		text-decoration: underline;
+	}
+}
+
+ol.largest-schools {
+	counter-reset:li;
+	margin-left:0;
+	padding-left:0;
+	li {
+			position: relative;
+			padding: 2px;
+			margin: 0 0 6px 2em;
+			list-style: none;
+
+	}
+	li:before {
+		content:counter(li);
+		counter-increment:li;
+		position: absolute;
+		padding: 3px;
+		left: -2.25em;
+		top: -1px;
+		width: 2em;
+		margin-right: 8px;
+		color: white;
+		background: #999999;
+		border-radius: 50%;
+		text-align: center;
+	}
+	.enrollment {
+		font-size: 11px;
+		color: #999999;
+		font-style: italic;
+	}
+}

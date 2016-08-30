@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Airports feature.
+ */
+
+include_once 'liv_airports.features.inc';

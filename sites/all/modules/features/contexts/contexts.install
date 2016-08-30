@@ -1,0 +1,37 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Disable blocks that have been moved to contexts.
+ */
+function contexts_update_7000() {
+  features_revert(array('contexts' => array('context')));
+
+  db_query('UPDATE {block} SET status = 0 WHERE region = :region', array(':region' => 'footer'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'topics-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'cb0a9086718e6b2cb124994d5a308a1'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'top100_promo'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => '3cb0a9086718e6b2cb124994d5a308a1'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'related_articles-block_1'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'user_authored_content-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => '766eed186365628888ba17665e903c5f'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'taboola_endslate'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'leaderboard_bottom'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'jci-dfp-block-11'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'jci-dfp-block-12'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'jci-dfp-block-13'));
+  db_query('UPDATE {block} SET status = 0 WHERE module = :module AND delta = :delta',
+    array(':module' => 'block', ':delta' => '1')
+  );
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'popular_blog_posts-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'related_articles-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'related_blog_posts-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'from_the_blog-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'blog_contributors-block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'top100_partners'));
+  db_query('UPDATE {block} SET status = 0 WHERE module = :module', array(':module' => 'menu_block'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'popular_cities'));
+  db_query('UPDATE {block} SET status = 0 WHERE delta = :delta', array(':delta' => 'popular_articles'));
+}

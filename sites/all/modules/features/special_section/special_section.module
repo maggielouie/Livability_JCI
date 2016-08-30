@@ -1,0 +1,73 @@
+<?php
+/**
+ * @file
+ * Code for the Special Section feature.
+ */
+
+include_once 'special_section.features.inc';
+
+function special_section_pathauto_alias_alter(&$alias, array &$context) {
+  if (isset($context['data']['node']) && $context['data']['node']->type == 'special_section_article') {
+    $node = $context['data']['node'];
+    $alias = special_section_alias_maker($node, $alias);
+  }
+}
+
+function special_section_alias_maker($node, $old_alias) {
+  if ($node->type == 'special_section_article') {
+    module_load_include('inc', 'pathauto', 'pathauto');
+    $new_alias_array = explode('/', $old_alias);
+
+    $parent_nid = _special_section_parent_node($node->nid);
+    if ($parent_nid) {
+      $parent_node = node_load($parent_nid);
+      $old_alias_array = explode('/', drupal_get_path_alias('node/' . $parent_nid));
+      $ct = $new_alias_array[2]; // Remember this value separately because it will be overwritten
+      $new_alias_array[2] = $old_alias_array[2];
+      $new_alias_array[3] = $ct;
+    }
+    $alias = implode('/', $new_alias_array);
+
+	return $alias;
+  }
+}
+
+
+/**
+ * Returns the parent node this entity is connected to.
+ * @param $nid
+ *  The child node ID
+ * @return
+ *  The parent node ID
+ */
+function _special_section_parent_node($nid) {
+  $parent_nid = db_query("SELECT entity_id FROM {field_data_field_ss_articles} WHERE field_ss_articles_target_id = :nid ", array(':nid' => $nid))->fetchField();
+  return $parent_nid? $parent_nid : FALSE;
+}
+/**
+ * Returns the delta of this node
+ * @param $nid
+ *  The child node ID
+ * @param $parent_nid
+ *  The parent node ID
+ * @return
+ *  The delta number
+ */
+function _special_section_current_delta($nid, $parent_nid) {
+  $delta = db_query("SELECT delta FROM {field_data_field_ss_articles} WHERE field_ss_articles_target_id = :nid AND entity_id = :parent_nid", array(':nid' => $nid, ':parent_nid' => $parent_nid))->fetchField();
+  return $delta? $delta : FALSE;
+}
+
+/**
+ * Returns the node with a previous or next delta number
+ * @param $parent_nid
+ *  The parent node ID
+ * @param $delta
+ *  The delta number we want
+ * @return
+ *  The previous/next NID
+ */
+function _special_section_nid_delta($parent_nid, $delta) {
+  $nid = db_query("SELECT field_ss_articles_target_id FROM {field_data_field_ss_articles} WHERE entity_id = :parent_nid AND delta = :delta", array(':delta' => $delta, ':parent_nid' => $parent_nid))->fetchField();
+  return $nid? $nid : FALSE;
+}

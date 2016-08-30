@@ -1,0 +1,13 @@
+name = Hide Profile
+description = Gives users an option to disallow access to their user profile.
+core = 7.x
+package = Other
+version = 7.x-1.x-dev
+project = hide_profile
+dependencies[] = features
+dependencies[] = list
+configure = admin/config/people/hide-profile
+datestamp = 1380581870
+features[features_api][] = api:2
+features[field_base][] = field_hide_profile
+features[field_instance][] = user-user-field_hide_profile

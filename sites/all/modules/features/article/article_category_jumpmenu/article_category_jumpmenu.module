@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Code for the Article Category JumpMenu feature.
+ */
+
+include_once 'article_category_jumpmenu.features.inc';
+
+// function article_category_jumpmenu_views_pre_render
+function article_category_jumpmenu_views_post_execute(&$view) {
+
+}

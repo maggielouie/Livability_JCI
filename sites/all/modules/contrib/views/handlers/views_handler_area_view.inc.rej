@@ -1,0 +1,30 @@
+--- views_handler_area_view.inc
++++ views_handler_area_view.inc
+@@ -78,13 +85,25 @@ class views_handler_area_view extends views_handler_area {
+       }
+       else {
+         if (!empty($this->options['inherit_arguments']) && !empty($this->view->args)) {
+-          return $view->preview($display_id, $this->view->args);
++          $output = $view->preview($display_id, $this->view->args);
+         }
+         else {
+-          return $view->preview($display_id);
++          $output = $view->preview($display_id);
+         }
++        $this->is_empty = $view->display_handler->output_is_empty();
++        return $output;
+       }
+     }
+     return '';
+   }
++
++  public function is_empty() {
++    if (isset($this->is_empty)) {
++      return $this->is_empty;
++    }
++    else {
++      return parent::is_empty();
++    }
++  }
++
+ }

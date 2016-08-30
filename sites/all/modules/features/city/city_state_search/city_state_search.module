@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the City State Search feature.
+ */
+
+include_once 'city_state_search.features.inc';

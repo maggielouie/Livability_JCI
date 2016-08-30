@@ -1,0 +1,198 @@
+<?php
+
+function partner_icon_block_block_info() {
+  $blocks['partner_icons'] = array(
+    'info' => t('Partner Icons'),
+    'status' => TRUE,
+    'region' => -1,
+  );
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ *
+ * This hook declares configuration options for blocks provided by this module.
+ */
+function partner_icon_block_block_configure($delta = '') {
+  // The $delta parameter tells us which block is being configured.
+  // In this example, we'll allow the administrator to customize
+  // the text of the 'configurable text string' block defined in this module.
+  $form = array();
+  if ($delta == 'partner_icons') {
+    $form['icon_fieldset'] = array (
+      '#type' => 'fieldset',
+      '#title' => t('Partner Icons'),
+      '#prefix' => '<div id="partner-icon-fieldset-wrapper">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+    );
+/*
+    if (empty($form_state['num_icons'])) {
+      $form_state['num_icons'] = 1;
+      // not really passed here
+    }
+*/
+    $iconcount = variable_get('partner_icon_count', '1');
+
+    for ($i = 0; $i < $iconcount; $i++) {
+      //Parent container
+      $form['icon_fieldset'][$i] = array(
+        '#prefix' => '<div>',
+        '#suffix' => '</div>',
+      );
+      $form['icon_fieldset'][$i]['icon_image'] = array(
+        '#name' => 'partner_icon_image',
+        '#type' => 'media',
+        '#title' => t('Partner Logo'),
+        '#description' => t('Allowed extensions: gif png jpg jpeg.'),
+        '#default_value' => variable_get('icon_image_'.$i, ''),
+        '#upload_validators' => array(
+          'file_validate_extensions' => array('gif png jpg jpeg'),
+        ),
+      );
+    }
+    
+    $form['icon_fieldset']['add_icon'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add another'),
+      '#submit' => array('partner_icon_add_more_add_one'),
+      '#ajax' => array(
+        'callback' => 'partner_icon_add_more_callback',
+        'wrapper' => 'partner-icon-fieldset-wrapper',
+      ),
+    );
+
+    
+   if ($iconcount > 1) {
+     $form['icon_fieldset']['remove_icon'] = array(
+       '#type' => 'submit',
+       '#value' => t('Remove'),
+       '#submit' => array('partner_icon_add_more_remove_one'),
+       '#ajax' => array(
+         'callback' => 'partner_icon_add_more_callback',
+         'wrapper' => 'partner-icon-fieldset-wrapper',
+       ),
+     );
+   }
+
+   return $form;
+  }
+}
+
+function partner_icon_add_more_callback($form, $form_state) {
+  return $form['icon_fieldset'];
+}
+
+function partner_icon_add_more_add_one($form, &$form_state) {
+  $form_state['num_icons']++;
+  $form_state['rebuild'] = TRUE;
+}
+
+function partner_icon_add_more_remove_one($form, &$form_state) {
+  if ($form_state['num_icons'] > 1) {
+    $form_state['num_icons']--;
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+function partner_icon_block_block_save($delta = '', $edit = array()) {
+  // We need to save settings from the configuration form.
+  // We need to check $delta to make sure we are saving the right block.
+  if ($delta == 'partner_icons') {
+    $count = 0;
+    foreach($edit['icon_fieldset'] as $i => $image) {
+      if (is_numeric($i)) {
+        variable_del('icon_image_'.$i);
+        if($image['icon_image'] !== 0) {
+          variable_set('icon_image_'.$count, $image['icon_image']);
+          $count++;
+        }
+      }
+    }
+    variable_set('partner_icon_count', $count);
+  }
+  return;
+}
+
+function partner_icon_block_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['module']) && $form['module']['#value'] ==  'partner_icon_block' && $form_id == 'block_admin_configure') {
+    if ($form_state['rebuild'] == TRUE) {
+      $form['icon_fieldset'] = array (
+        '#type' => 'fieldset',
+        '#title' => t('Partner Icons'),
+        '#prefix' => '<div id="partner-icon-fieldset-wrapper">',
+        '#suffix' => '</div>',
+        '#tree' => TRUE,
+      );
+      if (empty($form_state['num_icons'])) {
+        $form_state['num_icons'] = 1;
+      }
+    
+      for ($i = 0; $i <= $form_state['num_icons']; $i++) {
+        //Parent container
+        $form['icon_fieldset'][$i] = array(
+          '#prefix' => '<div>',
+          '#suffix' => '</div>'
+        );
+        $form['icon_fieldset'][$i]['icon_image'] = array(
+          '#name' => 'partner_icon_image',
+          '#type' => 'media',
+          '#title' => t('Partner Logo'),
+          '#description' => t('Allowed extensions: gif png jpg jpeg.'),
+          '#default_value' => variable_get('icon_image_'.$i, ''),
+          '#upload_validators' => array(
+            'file_validate_extensions' => array('gif png jpg jpeg'),
+          ),
+        );
+      }
+    
+      $form['icon_fieldset']['add_icon'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add another'),
+        '#submit' => array('partner_icon_add_more_add_one'),
+        '#ajax' => array(
+          'callback' => 'partner_icon_add_more_callback',
+          'wrapper' => 'partner-icon-fieldset-wrapper',
+        ),
+      );
+
+      if ($form_state['num_icons'] > 1) {
+        $form['icon_fieldset']['remove_icon'] = array(
+          '#type' => 'submit',
+          '#value' => t('Remove'),
+          '#submit' => array('partner_icon_add_more_remove_one'),
+          '#ajax' => array(
+            'callback' => 'partner_icon_add_more_callback',
+            'wrapper' => 'partner-icon-fieldset-wrapper',
+          ),
+        );
+      }
+    } 
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function partner_icon_block_block_view($delta = '') {
+  //The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'partner_icons':
+      $output = '<span class="logos clearfix"><ul>';
+      $iconcount = variable_get('partner_icon_count', '0');
+      for ($i = 0; $i < $iconcount; $i++) {
+        $iconentity = variable_get('icon_image_'.$i);
+        $iconmedia = entity_object_load($iconentity, 'file');
+        $output .= '<li><img src="'.image_style_url('148px_wide', $iconmedia->uri).'"';
+        $output .= $iconmedia->field_file_image_alt_text ? ' alt="'.$iconmedia->field_file_image_alt_text['und'][0]['value'].'" /></li>' : ' /></li>';
+      }
+      $output .= '</ul></span>';
+      $block['content']['#markup'] = $output;
+      break;
+  }
+  return $block;
+}

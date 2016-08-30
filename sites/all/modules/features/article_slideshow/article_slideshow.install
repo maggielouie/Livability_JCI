@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Increased module weight to 1.
+ */
+function article_slideshow_update_7100() {
+    db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'article_slideshow', '=')
+    ->execute();
+}

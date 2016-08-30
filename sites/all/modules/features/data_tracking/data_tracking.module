@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Data Tracking feature.
+ */
+
+include_once 'data_tracking.features.inc';

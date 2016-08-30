@@ -1,0 +1,963 @@
+@import "variables";
+
+.top-100 {
+	table {
+		color: #333;
+		width: 100%;
+		th {
+			background-color: #ccc;
+			border-left: 1px solid $grey;
+			border-right: 1px solid $grey;
+			@include font-size (11, 16);
+			padding: 20px 0px;
+			width: 80px;
+            position: relative;
+			&.rank {
+			  width: 60px;
+			}
+			&.city {
+			  width: 168px;
+			}
+			a {
+			  color: #333;
+			}
+			.tooltip {
+				background-color: $grey;
+				width: 16px;
+				height: 16px;
+				text-align: center;
+				color: $white;
+				display: inline-block;
+				@include border-radius (8px);
+				.tip {
+					display: none;
+				}
+				&:hover {
+					.tip {
+						display: flex;
+						flex-direction: column;
+						@include box-shadow(rgba(50,50,50, 0.75) 1px 1px 5px 1px inset);
+						@include font-size (10, 14);
+						color: #666;
+						background-color: $white;
+						width: 150px;
+						padding: 10px;
+						text-align: left;
+						z-index: 999;
+						position: absolute;
+					}
+				}
+			}
+          .table-label {
+            margin: 15px 10px;
+          }
+          .table-head-bottom {
+            width: 100%;
+            height: 15px;
+            position: absolute;
+            bottom: 0;
+            background: #838383;
+          }
+          .table-arrow {
+            width: 15px;
+            height: 15px;
+            position: absolute;
+            bottom: -1px;
+            left: 40px;
+            z-index: 1;
+            img {
+              width: 13px;
+              height: 13px;
+            }
+          }
+
+
+		}
+		tbody {
+			border-top: 1px solid #333;
+			border-bottom: 1px solid #333;
+		}
+		tr {
+			border-bottom: 1px solid #ccc;
+			padding: 0.1em 0.6em;
+			background-color: #fff;
+			&.odd {
+				background-color: #eee;
+			}
+		}
+		td {
+			text-align: center;
+			padding: 10px 5px;
+			border: 1px solid #c8c8c8;
+			vertical-align: middle;
+			@include font-size (16, 20);
+			width: 80px;
+			&.rank {
+				width: 60px;
+			}
+			&.city {
+			  width: 168px;
+			  text-align: left;
+			}
+			.city {
+				a {
+					color: #333;
+				}
+			}
+			.state {
+				a {
+					color: #666;
+					@include font-size (14, 20);
+				}
+			}
+		}
+
+		.city-rank {
+			display:inline-block;
+			background: $green;
+			width:60px;
+			height:60px;
+			@include font-size (24, 60);
+			color:$white;
+			text-align:center;
+		}
+		.city-score {
+			@include font-size (16,30);
+			background: $blue;
+			display: inline-block;
+			width:60px;
+			height:30px;
+			color:$white;
+			text-align:center;
+		}
+	}
+	.top-100-content {
+		h2 {
+			@include font-size (28,40);
+			font-weight: 500;
+			margin: .5em 0;
+		}
+		li {
+			&.top-100-city {
+				h2 {
+					@include font-size (24, 24);
+					margin: 0;
+				}
+				.city-image {
+					overflow: hidden;
+				}
+			}
+		}
+	}
+}
+
+.best-of {
+	.view-header {
+		width: 94%;
+		margin: 0 auto;
+		h2 {
+			color: $greyDarkest;
+			font-weight: 600;
+			@include font-size (30,36);
+			text-transform: uppercase;
+		}
+	}
+}
+
+.page-top-10, .node-type-best-places, .page-best-places-top-100 {
+	article {
+		h1 {
+			padding: 0;
+		}
+		h2 {
+			a {
+				color: $green;
+			}
+		}
+	}
+}
+
+.node-type-top-cities-list,
+.node-type-top-100 {
+	article {
+		h1 {
+		}
+		h2 {
+			a {
+				color: $blue;
+			}
+			span {
+				a {
+					color: $green;
+				}
+			}
+		}
+	  .top-10-nav {
+		padding: 5px 0;
+	  }
+	  .field-name-field-deck {
+		padding-bottom: 10px;
+	  }
+	}
+	.view-footer {
+		clear: both;
+		margin-top: 4em;
+		display: block;
+	}
+}
+
+.page-best-places-top-100 {
+	.rankings {
+		.section {
+			padding: 25px;
+			@include font-size (12,18);
+			&.even {
+				background-color: #efefef;
+				border: 1px solid #cdcdcd;
+				.js-more {
+					background-color: #efefef;
+					padding: 4px 0 0 8px;
+				}
+			}
+			&.odd {
+				background-color: #fff;
+				.js-more {
+					background-color: #fff;
+					padding: 4px 0 0 8px;
+				}
+			}
+			h2 {
+				color: #666;
+				font-weight: 500;
+				@include font-size (18,20);
+				text-align: left;
+				margin: 0;
+			}
+			.control {
+				height: 1.5em;
+				width: 1.5em;
+				display: inline-block;
+				@include border-radius (100px);
+				@include font-size (18,26);
+				background: $blue;
+				color: $white;
+				text-align: center;
+				margin-right: 1em;
+				margin-bottom: 1em;
+			}
+			.control:before {
+/*				content: "\f106"; */
+			}
+
+			.ctools-collapsed {
+				.control:before {
+					content: "\f107";
+				}
+			}
+			.ctools-collapsed {
+				.control {
+					background: $greyDark;
+				}
+			}
+			.ctools-toggle {
+			    display: none;
+			}
+		}
+	}
+	.advisory-board {
+		.section {
+			h2 {
+				margin-top:0 !important;
+			}
+		}
+	}
+    .top-100-links {
+    	li {
+    		&.active {
+    			span {
+    				padding: 0 5px;
+    				@include font-size (12,12);
+    				font-weight: 600;
+    				border-right: 1px solid #838383;
+    			}
+    		}
+    		&:last-child {
+    			&.active {
+	    			span {
+						border:none;
+					}
+    			}
+    		}
+    	}
+    }
+}
+
+.article-content {
+	ul {
+		list-style-type: disc;
+		margin-left: 1em;
+	}
+}
+
+.tabs {
+	ul {
+		margin-top: 1em;
+		li {
+			float: left;
+			margin-left: 1em;
+		}
+	}
+}
+
+.item-list {
+	ul {
+		&.pagination, &.pages {
+			li {
+				margin: 0 5px 0 0;
+			}
+		}
+	}
+}
+
+article {
+	span {
+		&.year {
+			@include font-size (20,20);
+		}
+	}
+	h2 {
+		@include font-size (20,22);
+		a {
+			color: $greyDarkest;
+		}
+	}
+	.hero-slider {
+		margin-bottom: 35px;
+	}
+	.media-element-container {
+		@include font-size (11,14);
+		margin-bottom: 1.5em;
+		color: $grey;
+		font-style: italic;
+		img {
+			padding-bottom: 5px;
+		}
+		.caption:after {
+			content: ' ';
+		}
+		.credit {
+		}
+	}
+}
+
+p.credit {
+	@include font-size (11,14);
+	color: $grey;
+	font-style: italic;
+}
+
+.featured-image {
+	p.credit {
+		margin: 1em 1em 0;
+	}
+}
+
+.hero-slider {
+	.summary {
+		background: rgba(0,0,0,.5);
+		top: auto;
+		bottom: 0;
+		padding: 20px 45px;
+		min-height: 120px;
+		h3 {
+			color: $white;
+			@include font-size (20,20);
+			background: none;
+			text-align: left;
+			padding: 0;
+		}
+		p.credit {
+			@include font-size (10,12);
+			color: $greyLight;
+		}
+	}
+}
+
+footer {
+	.site-links {
+		ul {
+			li {
+				&.promote-your-city {
+					padding-top: 0;
+				}
+			}
+		}
+	}
+}
+
+.block-jci-dfp {
+	text-align: center;
+}
+
+.page-user {
+	.padded {
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+	h1 {
+		color: $greyDarkest;
+	}
+	h2 {
+		@include font-size (22,22);
+		text-transform: uppercase;
+		color: $greyDark;
+		margin: 10px 0;
+	}
+	.headshot {
+		background-size: cover;
+		height: 162px;
+		width: 162px;
+		float: left;
+		margin-right: 2em;
+	}
+	.bio {
+		display: table;
+	}
+	.column-content {
+		padding-top: 10px;
+	}
+	.author {
+		.social {
+			@include font-size (20,20);
+			li {
+				float: left;
+				margin-right: 6px;
+				img {
+					width: auto;
+				}
+			}
+		}
+	}
+}
+
+.element-invisible {
+	display: none;
+}
+
+input.form-submit:hover {
+	text-decoration: underline;
+}
+
+#search-block-form {
+	div {
+		div {
+			display:inline;
+		}
+	}
+	.form-item, .form-actions {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+}
+
+#search-form {
+	div {
+		div {
+			div {
+				display: inline;
+			}
+		}
+	}
+}
+
+.search-results {
+  list-style-type: none;
+	.title {
+		background: none;
+		text-align: left;
+		display: inline;
+		padding-left: 0;
+		font-size: 1.2em;
+		margin-right: 1em;
+	}
+	.search-snippet-info {
+		padding-left: 0;
+		margin-top: .6em;
+	}
+	p {
+		padding-bottom: 0;
+	}
+	li {
+		clear: left;
+		margin: 1em 0 2em;
+	}
+}
+
+.search-snippet {
+	img {
+		width: auto;
+		float: left;
+		margin-right: 20px;
+		margin-top: 7px;
+	}
+}
+
+
+.node-type-digital-magazine {
+	.column-content {
+		padding-top: 10px;
+	}
+	.sponsor {
+		float: right;
+		text-transform: uppercase;
+		@include font-size (11,12);
+		color: $greyLight;
+		margin-left: 30px;
+	}
+}
+
+.digital-magazine.widget {
+  padding-bottom: .4em;
+  h3 {
+    margin-bottom: 1em;
+  }
+  img {
+    margin: 0 auto;
+    width: inherit;
+  }
+}
+
+.rsGCaption {
+	p {
+		@include font-size (14, 21);
+		padding-bottom: 10px;
+	}
+}
+
+.featured-image {
+	p.credit {
+		margin: 1em 1em 0;
+	}
+}
+
+/* re-mapping icons for our taxonomies */
+.icon-attractions:before {
+	content: "\e637";
+}
+.icon-arts-and-entertainment:before {
+	content: "\e637";
+}
+.icon-business-and-economy:before {
+	content: "\e642";
+}
+.icon-education-and-schools:before {
+	content: "\e634";
+}
+.icon-food-and-drink:before {
+	content: "\e63f";
+}
+.icon-health-and-wellness:before {
+	content: "\e64b";
+}
+.icon-health-and-wellness:before {
+	content: "\e64b";
+}
+.icon-housing-and-real-estate:before {
+	content: "\e631";
+}
+.icon-how-to-guides:before {
+	content: "\e639";
+}
+.icon-real-estate:before {
+	content: "\e631";
+}
+.icon-schools:before {
+	content: "\e634";
+}
+.icon-shopping:before {
+	content: "\e647"; //this needs to be fixed.
+}
+.icon-sports-and-recreation:before {
+	content: "\e63e";
+}
+
+p.unpublished {
+	color: $white;
+	background: $red;
+	@include font-size (20,20);
+	padding: .5em;
+	margin-left: -30px;
+	margin-right: -30px;
+}
+
+.stateface {
+	@include font-size (42,42);
+	vertical-align: middle;
+}
+
+.view-related-articles {
+	.view-display-id-block_1 {
+		h3 {
+			background: transparent;
+			text-align: left;
+			padding-left: 0;
+			@include font-size (22,22);
+			text-transform: uppercase;
+			color: $greyDark;
+			margin: 10px 0;
+		}
+	}
+}
+
+.view-related-articles {
+	span.no-pic {
+		height: 165px;
+		display: block;
+		background: $green;
+
+	}
+}
+
+.guide {
+	color: $grey;
+	text-transform: uppercase;
+}
+
+.path {
+	a {
+		color: $grey;
+	}
+}
+
+.krumo-root {
+	img {
+		width: auto;
+	}
+}
+
+.widget {
+	li {
+		clear: left;
+	}
+}
+
+.front .panels-flexible-region-1-center,
+.front .panels-flexible-region-new-center {
+	width: 100%;
+}
+
+.front .panel-separator {
+	margin: 0;
+}
+
+.node-type-page {
+	article {
+		margin: 0 1em;
+		h2 {
+			margin: 1em 0;
+		}
+		ul {
+			list-style: disc;
+			margin: 0 0 0 2em;
+		}
+	}
+}
+
+.about-us {
+	.about-us-hero {
+		height: 450px;
+		.about-us-hero-content {
+			text-align: center;
+			padding-top: 123px;
+			img {
+				width: auto;
+				margin: 0 auto;
+			}
+			h1 {
+				@include font-size (36,50);
+				color: $white;
+				@include text-shadow (rgba(0,0,0, 0.75) 2px 2px 2px);
+			}
+		}
+		.breadcrumbs {
+			li {
+				color: $white;
+				a, span {
+					color: $white;
+				}
+			}
+		}
+	}
+	.summary-generic {
+		padding: 75px 100px;
+		p {
+			text-align: center;
+		}
+	}
+	.facts-stats {
+		.map-bg {
+			background: url("/sites/all/themes/liv/images/map-blue.png");
+			background-position: center center;
+			background-size: cover;
+			position: absolute;
+			width: 100%;
+			width: 961px;
+			height: 588px;
+			left: 50%;
+			margin-left: -480px;
+			top: 65px;
+			z-index: 1;
+		}
+		.infograph {
+			position: relative;
+			z-index: 2;
+			max-width: 1210px;
+			margin: 0 auto;
+			background: $white;
+			.one-q {
+
+			}
+			.one-q:last-child {
+				border-bottom: none;
+			}
+			li {
+				margin-top: 5px;
+				margin-bottom: 0px;
+				padding: 20px;
+			}
+		}
+	}
+	.leadership {
+		.leaders {
+			li {
+				text-align: center;
+				.circle {
+					width: 255px;
+					height: 255px;
+					margin: 10px auto 20px;
+				}
+				.name {
+					display: block;
+					font-weight: bold;
+					@include font-size (16,24);
+				}
+				.title {
+					@include font-size (13,18);
+					color: $greyLight;
+				}
+			}
+		}
+	}
+	.partners {
+		ul {
+			margin-top: 55px;
+			display: block;
+			/* mobile-check for the values below */
+			width: 60%;
+			margin: 55px 20% 0;
+			li {
+				width: 23%;
+				margin: 0 1% 20px;
+				background: $grey;
+				height: auto;
+				max-height: 100px;
+				float: left;
+			}
+		}
+	}
+	.about {
+		.logos {
+			max-width: 960px;
+			margin: 0 auto;
+			img {
+				max-width: 253px;
+				margin: 40px auto 0;
+			}
+		}
+		p {
+			text-align: center;
+		}
+	}
+}
+.bg-diag {
+	background: url("/sites/all/themes/liv/images/diagonal.png");
+	display: block;
+}
+.section {
+	padding: 60px 30px;
+	h2 {
+		@include font-size (38,45);
+		text-align: center;
+		font-weight: bold;
+		margin-bottom: 20px;
+	}
+}
+span {
+	&.ad {
+		display: block;
+		padding: 20px 0 0 0;
+		text-align: center;
+		clear: both;
+		ins {
+			background-color: $white;
+		}
+	}
+}
+.ad-middle span.ad {
+	padding-bottom: 30px;
+}
+
+.top-100-sponsored-by {
+	position: absolute;
+  right: 3em;
+  overflow: hidden;
+  width: 14em;
+  display: none;
+	.sponsored-by-txt {
+		display: block;
+	  float: left;
+	  margin-right: 1em;
+	  color: #999;
+	  font-style: italic;
+	  margin-top: .4em;
+	}
+	.ad {
+  	width: 100px;
+	  clear: none !important;
+	  display: inline;
+  }
+}
+
+[class^="addthis_"] {
+	float: right;
+}
+
+.page-topics, .page-moving {
+	[class^="addthis_"] {
+		margin-bottom: 5px;
+		margin-top: -40px;
+	}
+}
+
+.top-10-nav [class^="addthis_"] {
+	float: left;
+}
+
+html {
+	height: 100%;
+}
+
+body.page-404, body.page-404-page-not-found {
+	height: 100%;
+	.container {
+		height: 100%;
+	}
+	.slide {
+		height: 100%;
+		text-align: center;
+		&:before {
+			content: "";
+			display: inline-block;
+			height: 100%;
+			vertical-align: middle;
+		}
+		section {
+			display: inline-block;
+			vertical-align: middle;
+			max-width: 600px;
+			text-align: left;
+			padding: 20px 40px;
+		}
+	}
+	p {
+		max-width:90%;
+	}
+	p.summary {
+		@include font-size (24,28);
+		strong {
+			color: $green;
+		}
+	}
+}
+
+span.taboola-title {
+	color: $greyDarkest;
+	padding: 15px 0 0;
+	display: block;
+	@include font-size (24,28);
+}
+
+table.webform-grid {
+	min-width: 60%;
+	tr.even, tr.odd {
+		background-color: $white;
+		line-height: 4em;
+	}
+}
+
+.livability-partners {
+	.additional-info {
+		@include font-size (10,13);
+	}
+}
+
+.block-best-places-block {
+	.seal-orange {
+		margin-right: 10px;
+		float: left;
+		i {
+			@include font-size (36, 72);
+		}
+	}
+	ul {
+		margin: 0 20px;
+		li {
+			line-height: 62px;
+			padding: 6px 0;
+			border-bottom: none;
+			span.circle {
+				background-size: cover;
+				height: 62px;
+				width: 62px;
+				float: left;
+				margin-right: 10px;
+			}
+		}
+	}
+}
+
+.schools {
+	.infograph {
+		.fill-bar-label {
+			@include font-size (14, 3);
+		}
+	}
+}
+.schools-index {
+	.infograph {
+		h4 {
+			padding-bottom: 30px;
+		}
+	}
+}
+
+.school-list-circle {
+	background: #999999;
+	color: #FFFFFF;
+	border: 1px solid #999999;
+	border-radius: 50%;
+	padding: 10px;
+	width: 10px;
+	height: 10px;
+	text-align: center;
+	float: left;
+	line-height: 3px;
+	margin-right: 3px;
+
+}
+
+.top-cities {
+  h1 {
+	padding: 0;
+  }
+}

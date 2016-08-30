@@ -1,0 +1,5 @@
+name = Liv Metatags
+description = Inserts meta tags
+package = Livability
+core = 7.x
+

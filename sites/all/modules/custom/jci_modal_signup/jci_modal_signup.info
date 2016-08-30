@@ -1,0 +1,4 @@
+name = "JCI Livability Modal Email Signup"
+description = "Provides a modal signup window. This is a block checks/sets a cookie and only displays on a vistors first visit"
+core = 7.x
+package = JCI

@@ -1,0 +1,6 @@
+name = Footer About Block
+description = A block with customizable text for the footer.
+package = Livability
+core = 7.x
+dependencies[] = block
+

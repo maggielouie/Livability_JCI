@@ -1,0 +1,372 @@
+<?php
+/**
+ * @file
+ * Code for the Top 100 feature.
+ */
+
+include_once 'top_100.features.inc';
+
+function top_100_form_top_100_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['title']['#title'] = 'Title (Web Headline)';
+  $form['title']['#description'] = '65  Maximum recommended characters - including spaces';
+  $form['title']['#size'] = 120;
+
+  $form['field_short_description']['und'][0]['value']['#type'] = 'textarea';
+
+  foreach ($form['field_top_100_item']['und'] as $i => $item) {
+    if (is_int($i)) {
+      $form['field_top_100_item']['und'][$i]['field_rank']['und'][0]['value']['#default_value'] = $i + 1;
+    }
+  }
+  /*
+  $form['extra_save']['submit'] = $form['actions']['submit'];
+  $form['extra_save']['submit']['#attributes']['style'] = 'position:fixed; z-index: 1000; top: 1em; right: 0';
+*/
+}
+
+function top_100_preprocess_node(&$vars) {
+  if ($vars['type'] == 'top_100') {
+  }
+}
+
+function top_100_preprocess_page(&$vars, $hook) {
+  $crumbs = array();
+  $crumbs[] = l(t('Livability.com'), '<front>');
+  $crumbs[] = l(t('Best Places to Live'), 'best-places');
+  if (isset($vars['node']) && (is_object($vars['node']))) {
+    if ($vars['node']->type == 'top_100') {
+      $crumbs[] = '<span>'.date('Y', strtotime($vars['node']->field_year['und'][0]['value'])).'</span>';
+      drupal_set_breadcrumb($crumbs);
+      if (!empty($vars['node']->field_page_title)) {
+        $page_title = $vars['node']->field_page_title['und'][0]['value'];
+        drupal_set_title($page_title);
+      }
+    }
+  }
+  if (arg(0) == 'best-places' && arg(1) == 'top-100-best-places-to-live') {
+    $year = arg(2);
+    $page = arg(3);
+    $crumbs[] = l($year, 'best-places/top-100-best-places-to-live/' . $year);
+    $crumbs[] = '<span>'.ucwords(str_replace('-', ' ', $page)) . '</span>';
+    drupal_set_breadcrumb($crumbs);
+  }
+  if (isset($page)) {
+    drupal_set_title($year . ' Top 100 Best Places to Live ' . ucwords(str_replace('-', ' ', $page)));
+    if ($page == 'ranking-criteria') {
+      drupal_add_js(drupal_get_path('module', 'top_100') . '/js/ranking.js');
+    }
+  }
+
+  $url_pieces = explode('/', $_GET['q']);
+  if ($url_pieces[0] == 'best-places') {
+    drupal_add_js(drupal_get_path('module', 'top_100') . '/js/powered_by.js');
+  }
+}
+
+function top_100_views_pre_render(&$view) {
+  if ($view->name == 'top_100') { //&& in_array($view->current_display, array('page', 'page_1'))
+      if (isset($view->result[0])) {
+      foreach($view->result as $i => $row) {
+
+        if (isset($row->field_field_bp_body[0]['rendered'])) {
+          $row->field_field_bp_body[0]['rendered']['#markup'] = str_replace('<p>', '<p class="description">', $row->field_field_bp_body[0]['rendered']['#markup']);
+        }
+      }
+    }
+    if ($view->query->pager->current_page == 0) {
+      if (isset($view->result[0]->field_top_100_item_field_collection_item_nid)) { // page, page_1
+        $top100node = node_load($view->result[0]->field_top_100_item_field_collection_item_nid);
+      }
+      elseif (isset($view->result[0]->field_top_100_ranking_page_field_collection_item_nid)) { // page_2
+        $top100node = node_load($view->result[0]->field_top_100_ranking_page_field_collection_item_nid);
+        $title = 'Ranking Criteria';
+      }
+      elseif (isset($view->result[0]->field_top_100_advisory_board_pag_field_collection_item_nid)) { // page_3
+        $top100node = node_load($view->result[0]->field_top_100_advisory_board_pag_field_collection_item_nid);
+        $title = 'Advisory Board';
+      }
+      elseif (isset($view->result[0]->field_ranking_methodology_page_field_collection_item_nid)) { // page_4
+        $top100node = node_load($view->result[0]->field_ranking_methodology_page_field_collection_item_nid);
+        $title = 'Methodology';
+      }
+    }
+    if ($view->current_display == 'block_1') {
+      $top100node = node_load($view->result[0]->field_top_100_item_field_collection_item_nid);
+    }
+    if (isset($top100node)) {
+        $top100nodeview = node_view($top100node);
+        $view->attachment_before = '';
+        if (isset($title)) {
+          $view->build_info['title'] .= ' - ' . $title;
+        }
+        $t1year = date('Y', strtotime($top100node->field_year['und'][0]['value']));
+        $urlstuff = 'best-places/top-100-best-places-to-live/' . $t1year;
+
+        if (arg(0) != 'node') {
+          $view->attachment_before .= render($top100nodeview);
+        }
+        $top100nav = '<ul class="top-100-tabs">';
+        $top100nav .= '<li';
+        $top100nav .= !arg(3) ? ' class="active">' : '>';
+        $top100nav .= '<a href="/'.$urlstuff.'">Rankings</a></li>';
+        $top100nav .= '<li';
+        $top100nav .= (arg(3) == 'ranking-data') ? ' class="active">' : '>';
+        $top100nav .= '<a href="/'.$urlstuff.'/ranking-data">Ranking Data</a></li></ul>';
+        $top100nav .= '<ul class="top-100-links">';
+        $top100nav .= '<li';
+        $top100nav .= (arg(3) == 'ranking-criteria') ? ' class="active"><span>Ranking Criteria</span>' : '><a href="/'.$urlstuff.'/ranking-criteria">Ranking Criteria</a>';
+        $top100nav .= '</li>';
+        $top100nav .= '<li';
+        $top100nav .= (arg(3) == 'methodology') ? ' class="active"><span>Methodology</span>' : '><a href="/'.$urlstuff.'/methodology">Methodology</a>';
+        $top100nav .= '</li>';
+        $top100nav .= '<li';
+        $top100nav .= (arg(3) == 'advisory-board') ? ' class="active"><span>Advisory Board</span>' : '><a href="/'.$urlstuff.'/advisory-board">Advisory Board</a>';
+        $top100nav .= '</li>';
+        $top100nav .= '</ul>';
+        $view->attachment_before .= $top100nav;
+
+    }
+  }
+}
+
+function top_100_preprocess_views_view_table(&$vars) {
+    $view = $vars['view'];
+    if ($view->name == 'top_100') {
+        $top100ranking = FALSE;
+        if ($view->name == 'top_100' && $view->current_display == 'page_1') {
+            $top100ranking = TRUE;
+
+        }
+        // We need the raw data for this grouping, which is passed in as $vars['rows'].
+        // However, the template also needs to use for the rendered fields.  We
+        // therefore swap the raw data out to a new variable and reset $vars['rows']
+        // so that it can get rebuilt.
+        // Store rows so that they may be used by further preprocess functions.
+        $result = $vars['result'] = $vars['rows'];
+        $vars['rows'] = array();
+        $vars['field_classes'] = array();
+        $vars['header'] = array();
+
+        $options = $view->style_plugin->options;
+        $handler = $view->style_plugin;
+
+        $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
+        $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
+
+        $fields = &$view->field;
+        $columns = $handler->sanitize_columns($options['columns'], $fields);
+
+        $active = !empty($handler->active) ? $handler->active : '';
+        $order = !empty($handler->order) ? $handler->order : 'asc';
+
+        $query = tablesort_get_query_parameters();
+        if (isset($view->exposed_raw_input)) {
+            $query += $view->exposed_raw_input;
+        }
+
+        // Fields must be rendered in order as of Views 2.3, so we will pre-render
+        // everything.
+        $renders = $handler->render_fields($result);
+
+        foreach ($columns as $field => $column) {
+            // Create a second variable so we can easily find what fields we have and what the
+            // CSS classes should be.
+            $vars['fields'][$field] = drupal_clean_css_identifier($field);
+            if ($active == $field) {
+                $vars['fields'][$field] .= ' active';
+            }
+
+            // render the header labels
+            if ($field == $column && empty($fields[$field]->options['exclude'])) {
+
+                if ($top100ranking) {
+                    $label = !empty($fields[$field]) ? $fields[$field]->label() : '';
+                } else {
+                    $label = check_plain(!empty($fields[$field]) ? $fields[$field]->label() : '');
+                }
+                if (empty($options['info'][$field]['sortable']) || !$fields[$field]->click_sortable()) {
+                    $vars['header'][$field] = $label;
+                } else {
+                    $initial = !empty($options['info'][$field]['default_sort_order']) ? $options['info'][$field]['default_sort_order'] : 'asc';
+
+                    if ($active == $field) {
+                        $initial = ($order == 'asc') ? 'desc' : 'asc';
+                    }
+
+                    $title = t('sort by @s', array('@s' => $label));
+                    if ($active == $field) {
+                        $label .= theme('tablesort_indicator', array('style' => $initial));
+                    }
+
+                    $query['order'] = $field;
+                    $query['sort'] = $initial;
+                    $link_options = array(
+                        'html' => TRUE,
+                        'attributes' => array('title' => $title),
+                        'query' => $query,
+                    );
+                    $vars['header'][$field] = l($label, $_GET['q'], $link_options);
+
+                }
+
+                $perfieldclass = str_replace('field_', '', $field);
+                $perfieldclass = str_replace('_score', '', $perfieldclass);
+                if ($top100ranking) {
+                    $vars['header_classes'][$field] = $perfieldclass; //'';
+                } else {
+                    $vars['header_classes'][$field] = '';
+                }
+                // Set up the header label class.
+                if ($fields[$field]->options['element_default_classes']) {
+                    $vars['header_classes'][$field] .= "views-field views-field-" . $vars['fields'][$field];
+                }
+                $class = $fields[$field]->element_label_classes(0);
+                if ($class) {
+                    if ($vars['header_classes'][$field]) {
+                        $vars['header_classes'][$field] .= ' ';
+                    }
+                    $vars['header_classes'][$field] .= $class;
+                }
+                // Add a CSS align class to each field if one was set
+                if (!empty($options['info'][$field]['align'])) {
+                    $vars['header_classes'][$field] .= ' ' . drupal_clean_css_identifier($options['info'][$field]['align']);
+                }
+
+                // Add a header label wrapper if one was selected.
+                if ($vars['header'][$field]) {
+                    $element_label_type = $fields[$field]->element_label_type(TRUE, TRUE);
+                    if ($element_label_type) {
+                        $vars['header'][$field] = '<' . $element_label_type . '>' . $vars['header'][$field] . '</' . $element_label_type . '>';
+                    }
+                }
+
+            }
+
+            // Add a CSS align class to each field if one was set
+            if (!empty($options['info'][$field]['align'])) {
+                $vars['fields'][$field] .= ' ' . drupal_clean_css_identifier($options['info'][$field]['align']);
+            }
+
+            // Render each field into its appropriate column.
+            foreach ($result as $num => $row) {
+                // Add field classes
+                $vars['field_classes'][$field][$num] = '';
+                if ($fields[$field]->options['element_default_classes']) {
+                    $vars['field_classes'][$field][$num] = "views-field views-field-" . $vars['fields'][$field];
+                }
+                if ($classes = $fields[$field]->element_classes($num)) {
+                    if ($vars['field_classes'][$field][$num]) {
+                        $vars['field_classes'][$field][$num] .= ' ';
+                    }
+
+                    $vars['field_classes'][$field][$num] .= $classes;
+                }
+                $vars['field_attributes'][$field][$num] = array();
+
+                if (!empty($fields[$field]) && empty($fields[$field]->options['exclude']) && isset($renders[$num])) {
+                    $field_output = $renders[$num][$field];
+                    $element_type = $fields[$field]->element_type(TRUE, TRUE);
+                    if ($element_type) {
+                        $field_output = '<' . $element_type . '>' . $field_output . '</' . $element_type . '>';
+                    }
+
+                    // Don't bother with separators and stuff if the field does not show up.
+                    if (empty($field_output) && !empty($vars['rows'][$num][$column])) {
+                        continue;
+                    }
+
+                    // Place the field into the column, along with an optional separator.
+                    if (!empty($vars['rows'][$num][$column])) {
+                        if (!empty($options['info'][$column]['separator'])) {
+                            $vars['rows'][$num][$column] .= filter_xss_admin($options['info'][$column]['separator']);
+                        }
+                    } else {
+                        $vars['rows'][$num][$column] = '';
+                    }
+
+                    $vars['rows'][$num][$column] .= $field_output;
+                }
+            }
+
+            // Remove columns if the option is hide empty column is checked and the field is not empty.
+            if (!empty($options['info'][$field]['empty_column'])) {
+                $empty = TRUE;
+                foreach ($vars['rows'] as $num => $columns) {
+                    $empty &= empty($columns[$column]);
+                }
+                if ($empty) {
+                    foreach ($vars['rows'] as $num => &$column_items) {
+                        unset($column_items[$column]);
+                        unset($vars['header'][$column]);
+                    }
+                }
+            }
+        }
+
+        // Hide table header if all labels are empty.
+        if (!array_filter($vars['header'])) {
+            $vars['header'] = array();
+        }
+
+        $count = 0;
+        foreach ($vars['rows'] as $num => $row) {
+            $vars['row_classes'][$num] = array();
+            if ($row_class_special) {
+                $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
+            }
+            if ($row_class = $handler->get_row_class($num)) {
+                $vars['row_classes'][$num][] = $row_class;
+            }
+        }
+
+        if ($row_class_special) {
+            $vars['row_classes'][0][] = 'views-row-first';
+            $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
+        }
+
+        $vars['classes_array'] = array('views-table');
+        if (empty($vars['rows']) && !empty($options['empty_table'])) {
+            $vars['rows'][0][0] = $view->display_handler->render_area('empty');
+            // Calculate the amounts of rows with output.
+            $vars['field_attributes'][0][0]['colspan'] = count($vars['header']);
+            $vars['field_classes'][0][0] = 'views-empty';
+        }
+
+        if (!empty($options['sticky'])) {
+            drupal_add_js('misc/tableheader.js');
+            $vars['classes_array'][] = "sticky-enabled";
+        }
+        $vars['classes_array'][] = 'cols-' . count($vars['header']);
+
+        // Add the summary to the list if set.
+        if (!empty($handler->options['summary'])) {
+            $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+        }
+
+        // Add the caption to the list if set.
+        if (!empty($handler->options['caption'])) {
+            $vars['caption'] = filter_xss_admin($handler->options['caption']);
+        } else {
+            $vars['caption'] = '';
+        }
+    }
+}
+
+// If 5 or more characters are entered, get every available Place
+function top_100_views_query_alter(&$view, &$query) {
+  if ($view->name == 'place_reference') {
+    if (strlen(arg(7)) >= 5 ) {
+      $view->items_per_page = 0;
+    }
+  }
+}
+
+function top_100_preprocess_views_view(&$vars) {
+//dpm($vars);
+	if($vars['view']->name == 'top_100') {
+		if(isset($vars['rows'])) {
+			$vars['rows'] = preg_replace('/\.\d\d/', '', $vars['rows']);
+		}
+	}
+}
+

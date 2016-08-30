@@ -1,0 +1,11 @@
+name = Article Category JumpMenu
+description = stub for jumpmenu
+core = 7.x
+package = Livability
+version = 7.x-0.01
+project = article_category_jumpmenu
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = article_category_jumpmenu
+features_exclude[dependencies][ctools] = ctools

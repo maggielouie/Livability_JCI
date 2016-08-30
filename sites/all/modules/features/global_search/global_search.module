@@ -1,0 +1,65 @@
+<?php
+/**
+ * @file
+ * Code for the Global Search feature.
+ */
+
+include_once 'global_search.features.inc';
+/**
+ * @file
+ * Code for the Global Search feature.
+ */
+
+include_once 'global_search.views_default.inc';
+
+/**
+ * This function is called from /admin/structure/ds/fields/manage_custom/suggested_entity
+ */
+function global_search_suggested_entity($entity = NULL) {
+	$name = 'search_result_suggestion';
+	$city = 'block';
+	$county = 'block_1';
+	$metro = 'block_2';
+
+	$view_city = views_get_view($name, $city);
+	$view_county = views_get_view($name, $county);
+	$view_metro = views_get_view($name, $metro);
+
+	$view_city_content = $view_city->preview($city);
+	$view_county_content = $view_county->preview($county);
+	$view_metro_content = $view_metro->preview($metro);
+
+	if ($view_city->result) {
+		return $view_city_content;
+	} else if ($view_county->result) {
+		return $view_county_content;
+	} else if ($view_metro->result) {
+		return $view_metro_content;
+	} else {
+		return;
+	}
+	
+}
+
+/**
+ * Implements hook_date_formats().
+ */
+function global_search_date_formats() {
+  return array(
+    // Creates a new format for a new, custom format type.
+    array(
+      'type' => 'm_d_y_notime',
+      'format' => 'M d, Y',
+      'locales' => array(),
+    ),
+  );
+}
+
+/**
+ * Implements hook_date_format_types().
+ */
+function global_search_date_format_types() {
+  return array(
+    'm_d_y_notime' => t('M d, Y -- without time.'),
+  );
+}

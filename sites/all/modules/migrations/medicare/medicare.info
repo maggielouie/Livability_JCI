@@ -1,0 +1,13 @@
+name = "Medicare Data Migration"
+description = "Using medicare data to get hospitals."
+package = "Livability"
+core = 7.x
+dependencies[] = taxonomy
+dependencies[] = migrate
+dependencies[] = list
+dependencies[] = number
+dependencies[] = migrate
+
+files[] = medicare.module
+files[] = medicareJSON.inc
+files[] = hospitals.inc

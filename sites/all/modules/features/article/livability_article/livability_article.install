@@ -1,0 +1,76 @@
+<?php
+/**
+ * Install file for livability_article.
+ */
+
+/**
+ * Add additional Relocate terms.
+ */
+function livability_article_update_7000() {
+  $terms = array(
+    'Moving Tips' => -2,
+  );
+
+  foreach ($terms as $name => $weight) {
+    $term = (object) array(
+      'vid' => 2,
+      'name' => $name,
+      'format' => 'filtered_html',
+      'weight' => $weight,
+      'parent' => 105,
+    );
+
+    taxonomy_term_save($term);
+  }
+
+  // Add 's' to Moving Checklists.
+  db_query('UPDATE {taxonomy_term_data} SET name = :name WHERE tid = 106', array(':name' => 'Moving Checklists'));
+  // Enable moving module
+  module_enable(array('moving'));
+  // Update terms
+  db_query('UPDATE {taxonomy_term_data} SET name = :name WHERE tid = 105', array(':name' => 'Moving'));
+  db_query('UPDATE {taxonomy_term_data} SET weight = -1 WHERE tid = 286');
+  db_query('UPDATE {taxonomy_term_data} SET name = :name WHERE tid = 107', array(':name' => 'Moving How To Guides'));
+
+  // Clear caches for moving page handle to appear.
+  drupal_flush_all_caches();
+}
+
+/**
+ * Rename How To Guides term
+ */
+function livability_article_update_7001() {
+  db_query('UPDATE {taxonomy_term_data} SET name = :name WHERE tid = 107', array(':name' => 'How To Guides'));
+}
+
+/**
+ * Update article paths with /topics/ prefix.
+ */
+function livability_article_update_7002() {
+  // Get all articles.
+  $result = db_query('SELECT nid FROM {node} WHERE type = :type',
+    array(':type' => 'article')
+  );
+
+  // Go through each node and update their alias.
+  while ($nid = $result->fetchColumn()) {
+    $alias = db_query('SELECT alias FROM {url_alias} WHERE source = :source', array(':source' => 'node/' . $nid))->fetchColumn();
+
+    if (!empty($alias) && !preg_match('/^moving/', $alias) && !preg_match('/^topics/', $alias)) {
+      $alias = 'topics/' . $alias;
+      db_query('UPDATE {url_alias} SET alias = :alias WHERE source = :source',
+        array(
+          ':source' => 'node/' . $nid,
+          ':alias' => $alias,
+        )
+      );
+    }
+  }
+}
+
+/**
+ * Add redirects for all topic paths that changed.
+ */
+function livability_article_update_7003() {
+    //removed due to failure it induced
+}
