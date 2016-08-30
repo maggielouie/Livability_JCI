@@ -566,7 +566,7 @@ function jci_dfp_header_script () {
     $ad_units[$i] = variable_get('jci-dfp-SLOT-'.$i, '');
     $string = substr($ad_units[$i], strrpos($ad_units[$i], '_') + 1); 
     $size = str_ireplace("x", ", ", $string);
-    $googletag .= "googletag.defineSlot('/17972781/".$ad_units[$i]."', [".$size."], 'div-gpt-ad-1445012326705-".$i."').addService(googletag.pubads());".PHP_EOL;
+    $googletag .= "googletag.defineSlot('/17972781/".$ad_units[$i]."', [".$size."], 'div-gpt-ad-1472496328541-".$i."').addService(googletag.pubads());".PHP_EOL;
   }
   //drupal_add_js('//www.googletagservices.com/tag/js/gpt.js', 'external');
   //drupal_add_js("GS_googleEnableAllServices(); ".PHP_EOL ,array('type' => 'inline', 'scope' => 'header', 'defer' => FALSE, 'cache' => TRUE, 'preprocess' => TRUE));
@@ -1027,9 +1027,9 @@ function jci_dfp_block_view($delta) {
 function jci_dfp_block_content($i) {
   $name = variable_get('jci-dfp-SLOT-'.$i);
   $unit = "<!-- /17972781/".$name." -->
-<div id='div-gpt-ad-1445012326705-".$i."'>
+<div id='div-gpt-ad-1472496328541-".$i."'>
   <script type='text/javascript'>
-    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1445012326705-".$i."'); });
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1472496328541-".$i."'); });
   </script>
 </div>";
   $output = PHP_EOL.'<span class="ad">'.PHP_EOL.$unit.PHP_EOL.'</span>';
