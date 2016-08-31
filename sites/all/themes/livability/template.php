@@ -128,7 +128,6 @@ function livability_preprocess_page(&$vars, $hook) {
   $randomImage = $images[array_rand($images)];
   $vars['hero_img'] = $randomImage;
 
-  /*
   $project_code = theme_get_setting('project_code');
   $path = drupal_get_path_alias($_GET['q']);
   $target = '';
@@ -207,7 +206,7 @@ googletag.cmd.push(function() {
   googletag.defineSlot('/17972781/liv_lb_bottom_728x90', [728, 90], 'div-gpt-ad-1472496328541-12').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_lb_dm_728x90', [728, 90], 'div-gpt-ad-1472496328541-13').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_lb_middle_728x90', [728, 90], 'div-gpt-ad-1472496328541-14').addService(googletag.pubads());
-  googletag.defineSlot('/17972781/liv_lb_top_728x90', [728, 90], 'div-gpt-ad-1472496328541-15').addService(googletag.pubads());
+  googletag.defineSlot('/17972781/liv_lb_top_728x90', [728, 90], 'div-gpt-ad-1472496328541-20').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_business_88x31', [88, 31], 'div-gpt-ad-1472496328541-16').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_government_88x31', [88, 31], 'div-gpt-ad-1472496328541-17').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_health_88x31', [88, 31], 'div-gpt-ad-1472496328541-18').addService(googletag.pubads());
@@ -261,7 +260,6 @@ EOT;
 	  unlink($file);
 	  }
   }
-  */
 
   if ($vars['is_front'] == 'true') {
     drupal_add_js(drupal_get_path('module', 'find_city') . '/find_city.js');
