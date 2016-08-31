@@ -207,7 +207,7 @@ googletag.cmd.push(function() {
   googletag.defineSlot('/17972781/liv_lb_bottom_728x90', [728, 90], 'div-gpt-ad-1472496328541-12').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_lb_dm_728x90', [728, 90], 'div-gpt-ad-1472496328541-13').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_lb_middle_728x90', [728, 90], 'div-gpt-ad-1472496328541-14').addService(googletag.pubads());
-  googletag.defineSlot('/17972781/liv_lb_top_728x90', [728, 90], 'div-gpt-ad-1472496328541-15').addService(googletag.pubads());
+  googletag.defineSlot('/17972781/liv_lb_top_728x90', [728, 90], 'div-gpt-ad-1472496328541-6').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_business_88x31', [88, 31], 'div-gpt-ad-1472496328541-16').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_government_88x31', [88, 31], 'div-gpt-ad-1472496328541-17').addService(googletag.pubads());
   googletag.defineSlot('/17972781/liv_logo_health_88x31', [88, 31], 'div-gpt-ad-1472496328541-18').addService(googletag.pubads());
