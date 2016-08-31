@@ -698,9 +698,9 @@ function state_context_views_default_views() {
   $handler->display->display_options['header']['php']['empty'] = TRUE;
   $handler->display->display_options['header']['php']['php_output'] = '<div class="ad">
   <!-- /17972781/liv_logo_health_88x31 -->
-  <div id=\'div-gpt-ad-1472496328541-17\'>
+  <div id=\'div-gpt-ad-1472496328541-9\'>
     <script type=\'text/javascript\'>
-    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-17\'); });
+    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-9\'); });
   </script>
   </div>
 </div>';
@@ -888,9 +888,9 @@ function state_context_views_default_views() {
   $handler->display->display_options['header']['php']['empty'] = TRUE;
   $handler->display->display_options['header']['php']['php_output'] = '<div class="ad">
   <!-- /17972781/liv_logo_business_88x31 -->
-  <div id=\'div-gpt-ad-1472496328541-16\'>
+  <div id=\'div-gpt-ad-1472496328541-7\'>
     <script type=\'text/javascript\'>
-    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-16\'); });
+    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-7\'); });
   </script>
   </div>
 </div>';
@@ -987,9 +987,9 @@ function state_context_views_default_views() {
   $handler->display->display_options['header']['php']['empty'] = TRUE;
   $handler->display->display_options['header']['php']['php_output'] = '<div class="ad">
   <!-- /17972781/liv_logo_schools_88x31 -->
-  <div id=\'div-gpt-ad-1472496328541-18\'>
+  <div id=\'div-gpt-ad-1472496328541-11\'>
     <script type=\'text/javascript\'>
-    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-18\'); });
+    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-11\'); });
   </script>
   </div>
 </div>';
@@ -1086,9 +1086,9 @@ function state_context_views_default_views() {
   $handler->display->display_options['header']['php']['empty'] = TRUE;
   $handler->display->display_options['header']['php']['php_output'] = '<div class="ad">
   <!-- /17972781/liv_logo_real_estate_88x31 -->
-  <div id=\'div-gpt-ad-1472496328541-19\'>
+  <div id=\'div-gpt-ad-1472496328541-10\'>
     <script type=\'text/javascript\'>
-    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-19\'); });
+    googletag.cmd.push(function() { googletag.display(\'div-gpt-ad-1472496328541-10\'); });
   </script>
   </div>
 </div>';
